@@ -173,6 +173,10 @@ function buildRunnerConfig(siteId) {
       engine: cfg.browser?.engine || 'chromium',
       device: cfg.browser?.device,
       clientCert: buildClientCert(dir, cfg.browser?.clientCert, env),
+      storageStatePath: (() => {
+        const p = require('./scenario/authSession').storageStatePath(siteId);
+        return fs.existsSync(p) ? p : undefined;
+      })(),
       headful: toBool(crawl.headful, false),
       dryRun: toBool(crawl.dryRun, false),
       maxCasesPerForm: crawl.maxCasesPerForm ?? 25,

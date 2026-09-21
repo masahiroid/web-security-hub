@@ -10,6 +10,7 @@ const ENGINES = { chromium, firefox, webkit };
  * @property {'chromium'|'firefox'|'webkit'} [engine]
  * @property {string} [device] Playwright device descriptor name (e.g. "iPhone 14") for viewport/UA emulation.
  * @property {{origin?:string, certPath:string, keyPath:string, passphrase?:string}} [clientCert]
+ * @property {string} [storageStatePath] Path to a Playwright storageState JSON (cookies + localStorage) to start already signed in — see core/scenario/authSession.js.
  * @property {string} [recordVideoDir]
  * @property {{username:string,password:string}} [httpCredentials]
  * @property {(line:string)=>void} [onDialog]
@@ -34,6 +35,7 @@ class BrowserSession {
       ...(this.opts.recordVideoDir ? { recordVideo: { dir: this.opts.recordVideoDir } } : {}),
       ...(this.opts.httpCredentials ? { httpCredentials: this.opts.httpCredentials } : {}),
       ...(this.opts.clientCert ? { clientCertificates: [buildClientCertificate(this.opts.clientCert)] } : {}),
+      ...(this.opts.storageStatePath && fs.existsSync(this.opts.storageStatePath) ? { storageState: this.opts.storageStatePath } : {}),
     });
     const page = await this.context.newPage();
     this.attachPageGuards(page);

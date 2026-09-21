@@ -19,6 +19,7 @@ async function runFormGeneration(cfg, store, log) {
     engine: cfg.engine,
     device: cfg.device,
     clientCert: cfg.clientCert,
+    storageStatePath: cfg.storageStatePath,
     httpCredentials: cfg.httpCredentials,
     dialogAction: 'accept',
     onDialog: log,

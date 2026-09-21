@@ -14,6 +14,8 @@ const reportRoutes = require('./routes/report');
 const aiReviewRoutes = require('./routes/aiReview');
 const staticReportsRoutes = require('./routes/staticReports');
 const scenarioRecorderRoutes = require('./routes/scenarioRecorder');
+const authSessionRoutes = require('./routes/authSession');
+const exploreRoutes = require('./routes/explore');
 
 const app = express();
 app.use(express.json({ limit: '5mb' }));
@@ -28,6 +30,8 @@ app.use('/api', reportRoutes);
 app.use('/api', aiReviewRoutes);
 app.use('/api', staticReportsRoutes);
 app.use('/api', scenarioRecorderRoutes);
+app.use('/api', authSessionRoutes);
+app.use('/api', exploreRoutes);
 app.use('/api', systemInfoRoutes);
 app.use('/api', controlRoutes);
 
