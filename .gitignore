@@ -11,6 +11,7 @@ sites/*/explore-sessions/
 sites/*/fixtures/
 sites/*/downloads/
 sites/*/auth/
+sites/*/mobile-sessions/
 !sites/_template/
 !sites/_template/**
 

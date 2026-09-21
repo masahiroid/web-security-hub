@@ -17,8 +17,25 @@
     },
     "baseUrl": {
       "type": "string",
-      "description": "Seed URL the crawler starts from.",
+      "description": "Seed URL the crawler starts from. Unused when `platform` is \"ios\" or \"android\" (kept required for schema-documentation purposes only — this file isn't validated against the schema at runtime).",
       "format": "uri"
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["web", "ios", "android"],
+      "default": "web",
+      "description": "\"web\" uses the Playwright-based crawler/runner pipeline (core/crawler, core/runner). \"ios\"/\"android\" use the Appium-based mobile pipeline (core/mobile) instead — see the `mobile` block."
+    },
+    "mobile": {
+      "type": "object",
+      "description": "Appium session target, used only when `platform` is \"ios\" or \"android\". core/mobile/appiumServer.js starts a local Appium server (this project's own node_modules/.bin/appium — no separate global install needed) with the matching platform driver (XCUITest for iOS, UiAutomator2 for Android), which itself needs Xcode (iOS) or Android SDK + a running emulator/device (Android) already set up on the host.",
+      "properties": {
+        "deviceName": { "type": "string", "description": "Simulator/emulator name, e.g. \"iPhone 17\" or \"Pixel_7_API_34\"." },
+        "platformVersion": { "type": "string", "description": "e.g. \"27.0\"." },
+        "app": { "type": "string", "description": "Path (relative to this site's directory) to a .app/.ipa (iOS) or .apk (Android) to install and launch." },
+        "bundleId": { "type": "string", "description": "Bundle id (iOS) or package name (Android) of an already-installed app to launch instead of `app`." }
+      },
+      "additionalProperties": false
     },
     "folder": {
       "type": "string",
