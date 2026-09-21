@@ -5,19 +5,26 @@ const { expandSharedSteps } = require('./sharedSteps');
 const { resolveVariables, interpolateDeep } = require('./variables');
 const { buildVariableOverridesPerRow } = require('./dataDriven');
 
-const ACTIONS = new Set(['goto', 'click', 'fill', 'check', 'select', 'wait', 'useSharedStep']);
+const ACTIONS = new Set([
+  'goto', 'click', 'fill', 'check', 'uncheck', 'select', 'wait',
+  'back', 'forward', 'reload', 'setFile', 'download',
+  'branch', 'loop', 'useSharedStep',
+]);
 const MAX_STEPS = 50;
+const MAX_LOOP_TIMES = 200;
+const MAX_NESTING_DEPTH = 5;
 
-function normalizeSteps(steps) {
+function normalizeSteps(steps, depth = 0) {
   if (steps === undefined) return [];
   if (!Array.isArray(steps)) throw new Error('scenario.steps must be an array');
   if (steps.length > MAX_STEPS) throw new Error(`scenario can contain at most ${MAX_STEPS} steps`);
-  return steps.map((step, index) => normalizeStep(step, index));
+  return steps.map((step, index) => normalizeStep(step, index, depth));
 }
 
-function normalizeStep(step, index) {
+function normalizeStep(step, index, depth = 0) {
   if (!step || typeof step !== 'object' || Array.isArray(step)) throw new Error(`scenario step ${index + 1} must be an object`);
   if (!ACTIONS.has(step.action)) throw new Error(`scenario step ${index + 1} has an unsupported action`);
+
   if (step.action === 'useSharedStep') {
     if (typeof step.name !== 'string' || !step.name.trim()) throw new Error(`scenario step ${index + 1} requires a shared step name`);
     return { action: 'useSharedStep', name: step.name.trim() };
@@ -30,9 +37,48 @@ function normalizeStep(step, index) {
     const milliseconds = Math.min(Math.max(Number(step.value) || 500, 0), 10_000);
     return { action: 'wait', value: milliseconds };
   }
+  if (step.action === 'back' || step.action === 'forward' || step.action === 'reload') {
+    return { action: step.action };
+  }
+  if (step.action === 'setFile') {
+    if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
+    if (typeof step.path !== 'string' || !step.path.trim()) throw new Error(`scenario step ${index + 1} requires path (relative to sites/<id>/fixtures)`);
+    return { action: 'setFile', selector: step.selector.trim(), path: step.path.trim() };
+  }
+  if (step.action === 'download') {
+    if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
+    const normalized = { action: 'download', selector: step.selector.trim() };
+    if (typeof step.saveAs === 'string' && step.saveAs.trim()) normalized.saveAs = step.saveAs.trim();
+    return normalized;
+  }
+  if (step.action === 'branch') {
+    if (depth >= MAX_NESTING_DEPTH) throw new Error(`scenario step ${index + 1}: branch/loop nesting exceeded max depth`);
+    if (!step.condition || typeof step.condition !== 'object') throw new Error(`scenario step ${index + 1} requires a condition object`);
+    return {
+      action: 'branch',
+      condition: normalizeCondition(step.condition, index),
+      then: normalizeSteps(step.then, depth + 1),
+      else: normalizeSteps(step.else, depth + 1),
+    };
+  }
+  if (step.action === 'loop') {
+    if (depth >= MAX_NESTING_DEPTH) throw new Error(`scenario step ${index + 1}: branch/loop nesting exceeded max depth`);
+    const times = Math.min(Math.max(Number(step.times) || 0, 0), MAX_LOOP_TIMES);
+    return { action: 'loop', times, steps: normalizeSteps(step.steps, depth + 1) };
+  }
   if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
   const normalized = { action: step.action, selector: step.selector.trim() };
   if (step.action === 'fill' || step.action === 'select') normalized.value = String(step.value ?? '');
+  return normalized;
+}
+
+function normalizeCondition(condition, index) {
+  if (typeof condition.selector !== 'string' || !condition.selector.trim()) throw new Error(`scenario step ${index + 1} condition requires selector`);
+  const normalized = { selector: condition.selector.trim() };
+  if (condition.exists !== undefined) normalized.exists = Boolean(condition.exists);
+  else if (condition.visible !== undefined) normalized.visible = Boolean(condition.visible);
+  else if (condition.equals !== undefined) normalized.equals = String(condition.equals);
+  else throw new Error(`scenario step ${index + 1} condition requires exists, visible, or equals`);
   return normalized;
 }
 

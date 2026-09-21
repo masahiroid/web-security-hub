@@ -14,7 +14,15 @@ const ruleBasedProvider = { name: 'rule-based', inferFieldSemantics: async () =>
 async function runFormGeneration(cfg, store, log) {
   const screenshots = path.join(cfg.outputDir, 'screenshots');
   fs.mkdirSync(screenshots, { recursive: true });
-  const session = new BrowserSession({ headful: cfg.headful, httpCredentials: cfg.httpCredentials, dialogAction: 'accept', onDialog: log });
+  const session = new BrowserSession({
+    headful: cfg.headful,
+    engine: cfg.engine,
+    device: cfg.device,
+    clientCert: cfg.clientCert,
+    httpCredentials: cfg.httpCredentials,
+    dialogAction: 'accept',
+    onDialog: log,
+  });
   const page = await session.start();
   try {
     const loaded = cfg.ruleSpecDir ? loadRuleSpecs(cfg.ruleSpecDir) : { specs: [], warnings: [] };
@@ -22,7 +30,7 @@ async function runFormGeneration(cfg, store, log) {
     log(`巡回開始: depth=${cfg.maxDepth}, pages=${cfg.maxPages}`);
     let seedUrl = cfg.url;
     if (cfg.scenario?.login?.url || cfg.scenario?.steps?.length) {
-      await runScenario(page, cfg.url, cfg.scenario, log);
+      await runScenario(page, cfg.url, cfg.scenario, log, cfg.siteId);
       seedUrl = page.url();
       log(`シナリオ完了: ${seedUrl}`);
     }

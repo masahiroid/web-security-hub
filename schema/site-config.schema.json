@@ -72,6 +72,32 @@
       },
       "additionalProperties": false
     },
+    "browser": {
+      "type": "object",
+      "description": "Browser engine, device emulation, and client-certificate settings for crawling/test execution.",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "enum": ["chromium", "firefox", "webkit"],
+          "default": "chromium"
+        },
+        "device": {
+          "type": "string",
+          "description": "Playwright device descriptor name for viewport/UA emulation (e.g. \"iPhone 14\", \"Pixel 7\"). See Playwright's `devices` registry for valid names."
+        },
+        "clientCert": {
+          "type": "object",
+          "description": "Non-secret client-certificate paths (relative to this site's directory). The passphrase, if any, goes in .env as SECRET_CLIENT_CERT_PASSPHRASE.",
+          "properties": {
+            "origin": { "type": "string", "description": "Origin the certificate applies to, e.g. \"https://example.com\"." },
+            "certPath": { "type": "string" },
+            "keyPath": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "basicAuth": {
       "type": "object",
       "description": "Flags that Basic-Auth is used. Credentials go in .env as BASIC_USER / BASIC_PASS.",

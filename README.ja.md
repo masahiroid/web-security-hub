@@ -29,6 +29,8 @@ npm start
 - **静的解析 (SAST)** — 指定したローカルソースツリーを解析し、動的コード実行、コマンド実行 API、SQL 文字列連結、秘密情報、TLS 検証無効化の兆候を検出します。`node_modules`、`.git`、ビルド成果物は除外します。
 - **フォーム・回帰テストケース作成** — 同じ巡回・ログインシナリオからフォームを発見し、HTML 制約に基づく正常・境界・異常値をペアワイズで組み合わせます。Playwright spec、YAML、HTML レポートを出力します。
 - **テストケース管理の基盤** — `site.config.json` の標準変数と `.env`（`SECRET_<NAME>`）のシークレット変数をシナリオステップ内で `{{NAME}}` トークンとして利用できます。`sites/<id>/shared-steps.json` に保存する共有ステップ群は `useSharedStep` ステップから参照でき、`sites/<id>/data/<name>.csv` のデータセットを指定するとシナリオを行ごとに繰り返すデータ駆動テストが行えます。サイトの整理用に `folder` / `labels` メタデータも追加しました。`core/scenario/*` と `/api/sites/:id/{variables,shared-steps,data-sets}` から利用できますが、UI 側の組み込みは未着手です。
+- **シナリオステップの拡張** — `back`/`forward`/`reload` によるナビゲーション、`uncheck`、`setFile`（`sites/<id>/fixtures/` 配下に限定したアップロード）、`download`（`sites/<id>/downloads/` へ保存）に加え、`branch`（要素の有無・表示・テキストによるif/else分岐）と `loop`（指定回数の繰り返し）に対応しました。`core/scenario/siteScenario.js` で検証し、DAST シナリオ再生とテストケース生成の両方が共通の `core/scenario/stepExecutor.js` を通じて実行するため挙動が一致します。生成される `generated.spec.ts` にも同じロジックをインライン化しています。
+- **クロスブラウザ・端末エミュレーション** — `site.config.json` の `browser.engine` で Chromium/Firefox/WebKit を切り替え（`npm install` で3エンジンとも導入）、`browser.device` で Playwright のデバイス定義（例: `"iPhone 14"`）によるビューポート/UA エミュレーションを適用できます。`browser.clientCert` でクライアント証明書も設定可能（パスフレーズは `.env` の `SECRET_CLIENT_CERT_PASSPHRASE`）。
 
 各検出結果には重要度、OWASP 分類、根拠、修正案を表示します。自動検出はレビューの補助であり、脆弱性の確定や安全性の保証ではありません。
 

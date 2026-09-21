@@ -10,6 +10,7 @@ const { writeMarkdownReport } = require('../report/markdownReport');
 const { writeTestCasesYaml } = require('../codegen/testCaseYaml');
 const { processForm } = require('../runner/formProcessor');
 const { dedupeForms, buildUrlCatalog } = require('../runner/formDiscovery');
+const { runSteps } = require('../scenario/stepExecutor');
 
 const OUTPUT_ROOT = path.join(__dirname, '..', '..', 'artifacts', 'test-sessions');
 const ruleBasedSemantics = { name: 'rule-based', inferFieldSemantics: async () => [] };
@@ -59,12 +60,10 @@ async function runScenarioPrelude(page, scenario, log) {
     if (login.submitSelector) await page.locator(login.submitSelector).click();
     await page.waitForLoadState('domcontentloaded', { timeout: 10_000 }).catch(() => {});
   }
-  for (const step of scenario?.steps || []) {
-    if (step.action === 'goto' && step.url) await page.goto(step.url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
-    else if (step.action === 'click' && step.selector) await page.locator(step.selector).click();
-    else if (step.action === 'fill' && step.selector) await page.locator(step.selector).fill(String(step.value ?? ''));
-    else if (step.action === 'check' && step.selector) await page.locator(step.selector).check();
-  }
+  // No siteId here: this ad-hoc URL-driven path isn't bound to a saved site, so
+  // setFile/download steps (which resolve paths under sites/<id>/fixtures) will
+  // fail clearly rather than silently reading from the wrong place.
+  await runSteps(page, scenario?.steps, { onProgress: log });
 }
 function clamp(value, min, max, fallback) { const n = Number(value); return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback; }
 module.exports = { generateTestCases, OUTPUT_ROOT };

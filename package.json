@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node server/index.js",
     "test": "node --test",
-    "postinstall": "playwright install chromium || true",
+    "postinstall": "playwright install chromium firefox webkit || true",
     "dynamic-scan": "node core/cli/securityScan.js",
     "autoflow": "node core/cli/autoflow.js",
     "replay": "node core/cli/replay.js"

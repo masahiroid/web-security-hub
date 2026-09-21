@@ -102,6 +102,22 @@ function toBool(v, fallback) {
 }
 
 /**
+ * Resolves non-secret client-certificate paths (site.config.json) plus the
+ * secret passphrase (.env SECRET_CLIENT_CERT_PASSPHRASE, via the same
+ * SECRET_ convention as core/scenario/variables.js) into the shape Playwright's
+ * `browserContext.clientCertificates` expects.
+ */
+function buildClientCert(dir, clientCert, env) {
+  if (!clientCert?.certPath || !clientCert?.keyPath) return undefined;
+  return {
+    origin: clientCert.origin,
+    certPath: path.resolve(dir, clientCert.certPath),
+    keyPath: path.resolve(dir, clientCert.keyPath),
+    passphrase: env.SECRET_CLIENT_CERT_PASSPHRASE || undefined,
+  };
+}
+
+/**
  * Builds a RunnerConfig (see core/runner/formRunner.js) from a site's
  * site.config.json + .env, resolving all relative paths to absolute ones.
  */
@@ -152,7 +168,11 @@ function buildRunnerConfig(siteId) {
 
   return {
     runnerConfig: {
+      siteId,
       url: cfg.baseUrl,
+      engine: cfg.browser?.engine || 'chromium',
+      device: cfg.browser?.device,
+      clientCert: buildClientCert(dir, cfg.browser?.clientCert, env),
       headful: toBool(crawl.headful, false),
       dryRun: toBool(crawl.dryRun, false),
       maxCasesPerForm: crawl.maxCasesPerForm ?? 25,
