@@ -2,6 +2,7 @@
 const path = require('path');
 const { siteDir } = require('../siteConfig');
 const { resolveWithHealing } = require('./locatorStrategy');
+const { assertWithClaudeCode } = require('../ai/assertionAdapter');
 
 const LOCATOR_ACTIONS = new Set(['click', 'fill', 'check', 'uncheck', 'select', 'setFile', 'download']);
 
@@ -50,10 +51,12 @@ async function evaluateCondition(page, condition) {
  *
  * @param {import('playwright').Page} page
  * @param {Array<object>} steps
- * @param {{siteId?: string, onProgress?: (line:string)=>void, depth?: number, healEvents?: Array}} [ctx]
+ * @param {{siteId?: string, onProgress?: (line:string)=>void, depth?: number, healEvents?: Array, ai?: {enabled: boolean, locale?: string}, aiAssertions?: Array}} [ctx]
  *   `healEvents`, if passed as an array, gets one entry pushed per step whose
  *   primary selector failed and had to be healed (see locatorStrategy.js) —
  *   pass one in from the caller to collect them across the whole run.
+ *   `ai.enabled` gates the `aiAssert` step (see core/ai/assertionAdapter.js);
+ *   `aiAssertions`, if passed as an array, collects one entry per assertion run.
  */
 async function runSteps(page, steps, ctx = {}) {
   const onProgress = ctx.onProgress || (() => {});
@@ -116,6 +119,18 @@ async function runSteps(page, steps, ctx = {}) {
           const downloadsDir = path.join(siteDir(ctx.siteId), 'downloads');
           await download.saveAs(path.join(downloadsDir, step.saveAs));
         }
+        break;
+      }
+      case 'aiAssert': {
+        if (!ctx.ai?.enabled) {
+          throw new Error(
+            `aiAssert step requires AI assertions to be enabled (site.config.json "ai.assertionsEnabled": true) — this step shells out to the local Claude Code CLI per assertion, so it's opt-in, not automatic like every other step type`,
+          );
+        }
+        const verdict = await assertWithClaudeCode({ description: step.description, page, locale: ctx.ai.locale });
+        onProgress(`シナリオ: 🤖 AIアサーション${verdict.pass ? '成功' : '失敗'} — ${step.description}（${verdict.reason}）`);
+        ctx.aiAssertions?.push({ description: step.description, ...verdict });
+        if (!verdict.pass) throw new Error(`AI assertion failed: "${step.description}" — ${verdict.reason}`);
         break;
       }
       case 'branch': {

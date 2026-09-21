@@ -98,6 +98,15 @@
       },
       "additionalProperties": false
     },
+    "ai": {
+      "type": "object",
+      "description": "Opt-in AI-assisted scenario assertions (the aiAssert step). Off by default — unlike every other step type, aiAssert shells out to the local Claude Code CLI per assertion, so it must be explicitly enabled here.",
+      "properties": {
+        "assertionsEnabled": { "type": "boolean", "default": false },
+        "locale": { "type": "string", "enum": ["ja", "en", "fr"], "default": "ja" }
+      },
+      "additionalProperties": false
+    },
     "basicAuth": {
       "type": "object",
       "description": "Flags that Basic-Auth is used. Credentials go in .env as BASIC_USER / BASIC_PASS.",

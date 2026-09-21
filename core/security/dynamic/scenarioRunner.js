@@ -6,7 +6,7 @@ const { runSteps } = require('../../scenario/stepExecutor');
  * shared step executor (core/scenario/stepExecutor.js) so DAST crawling and
  * form-test generation stay behaviorally identical for every step type.
  */
-async function runScenario(page, targetUrl, scenario, onProgress = () => {}, siteId) {
+async function runScenario(page, targetUrl, scenario, onProgress = () => {}, siteId, ai) {
   const login = scenario?.login;
   if (login?.url) {
     onProgress('シナリオ: ログイン画面へ移動');
@@ -21,8 +21,9 @@ async function runScenario(page, targetUrl, scenario, onProgress = () => {}, sit
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   }
   const healEvents = [];
-  await runSteps(page, scenario?.steps, { siteId, onProgress, healEvents });
-  return { healEvents };
+  const aiAssertions = [];
+  await runSteps(page, scenario?.steps, { siteId, onProgress, healEvents, ai, aiAssertions });
+  return { healEvents, aiAssertions };
 }
 
 module.exports = { runScenario };

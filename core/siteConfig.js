@@ -177,6 +177,7 @@ function buildRunnerConfig(siteId) {
         const p = require('./scenario/authSession').storageStatePath(siteId);
         return fs.existsSync(p) ? p : undefined;
       })(),
+      ai: { enabled: toBool(cfg.ai?.assertionsEnabled, false), locale: cfg.ai?.locale || 'ja' },
       headful: toBool(crawl.headful, false),
       dryRun: toBool(crawl.dryRun, false),
       maxCasesPerForm: crawl.maxCasesPerForm ?? 25,

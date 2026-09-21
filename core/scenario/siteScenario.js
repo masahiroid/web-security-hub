@@ -8,8 +8,9 @@ const { buildVariableOverridesPerRow } = require('./dataDriven');
 const ACTIONS = new Set([
   'goto', 'click', 'fill', 'check', 'uncheck', 'select', 'wait',
   'back', 'forward', 'reload', 'setFile', 'download',
-  'branch', 'loop', 'useSharedStep',
+  'branch', 'loop', 'useSharedStep', 'aiAssert',
 ]);
+const MAX_AI_ASSERT_DESCRIPTION = 300;
 const MAX_STEPS = 50;
 const MAX_LOOP_TIMES = 200;
 const MAX_NESTING_DEPTH = 5;
@@ -39,6 +40,10 @@ function normalizeStep(step, index, depth = 0) {
   }
   if (step.action === 'back' || step.action === 'forward' || step.action === 'reload') {
     return { action: step.action };
+  }
+  if (step.action === 'aiAssert') {
+    if (typeof step.description !== 'string' || !step.description.trim()) throw new Error(`scenario step ${index + 1} requires a description`);
+    return { action: 'aiAssert', description: step.description.trim().slice(0, MAX_AI_ASSERT_DESCRIPTION) };
   }
   if (step.action === 'setFile') {
     if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
