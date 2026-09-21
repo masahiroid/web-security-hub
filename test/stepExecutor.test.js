@@ -85,7 +85,7 @@ test('runSteps executes branch.then only when the condition matches, against a f
   const fakePage = {
     locator: (selector) => ({
       count: async () => (selector === '#modal' ? 1 : 0),
-      first: () => ({ isVisible: async () => true, textContent: async () => '' }),
+      first: () => ({ isVisible: async () => true, textContent: async () => '', waitFor: async () => {} }),
       click: async () => calls.push(`click:${selector}`),
     }),
     waitForLoadState: async () => {},
@@ -99,7 +99,7 @@ test('runSteps executes branch.then only when the condition matches, against a f
 test('runSteps repeats loop.steps loop.times times', async () => {
   let clicks = 0;
   const fakePage = {
-    locator: () => ({ click: async () => { clicks++; } }),
+    locator: () => ({ first: () => ({ waitFor: async () => {} }), click: async () => { clicks++; } }),
     waitForLoadState: async () => {},
   };
   await runSteps(fakePage, [{ action: 'loop', times: 3, steps: [{ action: 'click', selector: '#next' }] }]);

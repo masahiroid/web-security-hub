@@ -20,7 +20,9 @@ async function runScenario(page, targetUrl, scenario, onProgress = () => {}, sit
   } else {
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   }
-  await runSteps(page, scenario?.steps, { siteId, onProgress });
+  const healEvents = [];
+  await runSteps(page, scenario?.steps, { siteId, onProgress, healEvents });
+  return { healEvents };
 }
 
 module.exports = { runScenario };

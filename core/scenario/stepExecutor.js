@@ -1,6 +1,9 @@
 'use strict';
 const path = require('path');
 const { siteDir } = require('../siteConfig');
+const { resolveWithHealing } = require('./locatorStrategy');
+
+const LOCATOR_ACTIONS = new Set(['click', 'fill', 'check', 'uncheck', 'select', 'setFile', 'download']);
 
 const DEFAULT_TIMEOUT = 30_000;
 const MAX_LOOP_ITERATIONS = 200;
@@ -47,7 +50,10 @@ async function evaluateCondition(page, condition) {
  *
  * @param {import('playwright').Page} page
  * @param {Array<object>} steps
- * @param {{siteId?: string, onProgress?: (line:string)=>void, depth?: number}} [ctx]
+ * @param {{siteId?: string, onProgress?: (line:string)=>void, depth?: number, healEvents?: Array}} [ctx]
+ *   `healEvents`, if passed as an array, gets one entry pushed per step whose
+ *   primary selector failed and had to be healed (see locatorStrategy.js) —
+ *   pass one in from the caller to collect them across the whole run.
  */
 async function runSteps(page, steps, ctx = {}) {
   const onProgress = ctx.onProgress || (() => {});
@@ -58,24 +64,33 @@ async function runSteps(page, steps, ctx = {}) {
     if (!step || !step.action) continue;
     onProgress(`シナリオ: ${step.action}`);
 
+    let resolved;
+    if (LOCATOR_ACTIONS.has(step.action)) {
+      resolved = await resolveWithHealing(page, step);
+      if (resolved.healed) {
+        onProgress(`シナリオ: 🩹 セレクタ自動修復 "${step.selector}" -> ${resolved.usedSelector}（${resolved.strategy}）`);
+        ctx.healEvents?.push({ action: step.action, originalSelector: step.selector, usedSelector: resolved.usedSelector, strategy: resolved.strategy });
+      }
+    }
+
     switch (step.action) {
       case 'goto':
         if (step.url) await page.goto(step.url, { waitUntil: 'domcontentloaded', timeout: DEFAULT_TIMEOUT });
         break;
       case 'click':
-        await page.locator(step.selector).click();
+        await resolved.locator.click();
         break;
       case 'fill':
-        await page.locator(step.selector).fill(String(step.value ?? ''));
+        await resolved.locator.fill(String(step.value ?? ''));
         break;
       case 'check':
-        await page.locator(step.selector).check();
+        await resolved.locator.check();
         break;
       case 'uncheck':
-        await page.locator(step.selector).uncheck();
+        await resolved.locator.uncheck();
         break;
       case 'select':
-        await page.locator(step.selector).selectOption(String(step.value ?? ''));
+        await resolved.locator.selectOption(String(step.value ?? ''));
         break;
       case 'wait':
         await page.waitForTimeout(Math.min(Math.max(Number(step.value) || 500, 0), 10_000));
@@ -92,11 +107,11 @@ async function runSteps(page, steps, ctx = {}) {
       case 'setFile': {
         if (!ctx.siteId) throw new Error('setFile requires a siteId in scenario execution context');
         const filePath = resolveFixturePath(ctx.siteId, step.path);
-        await page.locator(step.selector).setInputFiles(filePath);
+        await resolved.locator.setInputFiles(filePath);
         break;
       }
       case 'download': {
-        const [download] = await Promise.all([page.waitForEvent('download', { timeout: DEFAULT_TIMEOUT }), page.locator(step.selector).click()]);
+        const [download] = await Promise.all([page.waitForEvent('download', { timeout: DEFAULT_TIMEOUT }), resolved.locator.click()]);
         if (step.saveAs && ctx.siteId) {
           const downloadsDir = path.join(siteDir(ctx.siteId), 'downloads');
           await download.saveAs(path.join(downloadsDir, step.saveAs));

@@ -43,12 +43,17 @@ function normalizeStep(step, index, depth = 0) {
   if (step.action === 'setFile') {
     if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
     if (typeof step.path !== 'string' || !step.path.trim()) throw new Error(`scenario step ${index + 1} requires path (relative to sites/<id>/fixtures)`);
-    return { action: 'setFile', selector: step.selector.trim(), path: step.path.trim() };
+    const normalized = { action: 'setFile', selector: step.selector.trim(), path: step.path.trim() };
+    const healHint = normalizeHealHint(step, index);
+    if (healHint) normalized.healHint = healHint;
+    return normalized;
   }
   if (step.action === 'download') {
     if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
     const normalized = { action: 'download', selector: step.selector.trim() };
     if (typeof step.saveAs === 'string' && step.saveAs.trim()) normalized.saveAs = step.saveAs.trim();
+    const healHint = normalizeHealHint(step, index);
+    if (healHint) normalized.healHint = healHint;
     return normalized;
   }
   if (step.action === 'branch') {
@@ -69,7 +74,27 @@ function normalizeStep(step, index, depth = 0) {
   if (typeof step.selector !== 'string' || !step.selector.trim()) throw new Error(`scenario step ${index + 1} requires selector`);
   const normalized = { action: step.action, selector: step.selector.trim() };
   if (step.action === 'fill' || step.action === 'select') normalized.value = String(step.value ?? '');
+  const healHint = normalizeHealHint(step, index);
+  if (healHint) normalized.healHint = healHint;
   return normalized;
+}
+
+const HEAL_HINT_STRING_FIELDS = ['tag', 'id', 'dataTestId', 'name', 'type', 'role', 'ariaLabel', 'placeholder', 'text'];
+
+/**
+ * Diagnostic metadata (no field values) saved alongside a recorded step so
+ * core/scenario/locatorStrategy.js can still find the element if its primary
+ * selector stops matching later — see that module for how it's used.
+ */
+function normalizeHealHint(step, index) {
+  if (step.healHint === undefined || step.healHint === null) return undefined;
+  if (typeof step.healHint !== 'object' || Array.isArray(step.healHint)) throw new Error(`scenario step ${index + 1} healHint must be an object`);
+  const out = {};
+  for (const field of HEAL_HINT_STRING_FIELDS) {
+    if (typeof step.healHint[field] === 'string' && step.healHint[field]) out[field] = step.healHint[field];
+  }
+  if (Array.isArray(step.healHint.classes)) out.classes = step.healHint.classes.filter((c) => typeof c === 'string').slice(0, 3);
+  return Object.keys(out).length ? out : undefined;
 }
 
 function normalizeCondition(condition, index) {

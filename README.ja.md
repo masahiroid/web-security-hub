@@ -33,6 +33,7 @@ npm start
 - **クロスブラウザ・端末エミュレーション** — `site.config.json` の `browser.engine` で Chromium/Firefox/WebKit を切り替え（`npm install` で3エンジンとも導入）、`browser.device` で Playwright のデバイス定義（例: `"iPhone 14"`）によるビューポート/UA エミュレーションを適用できます。`browser.clientCert` でクライアント証明書も設定可能（パスフレーズは `.env` の `SECRET_CLIENT_CERT_PASSPHRASE`）。
 - **認証セッションの保存（SSO・Google認証アプリ向け）** — `core/scenario/authSession.js` が可視ブラウザーを開き、人間が手動でログインします（Google等サードパーティの認証画面自体は意図的に自動操作しません）。ログイン後のCookie/localStorageを`sites/<id>/auth/storageState.json`に保存し、以降のクロール・探索はログイン済み状態から開始できます。ルート: `POST /api/auth-session/{start,stop,cancel}`。
 - **探索的クロール** — `core/crawler/explorer.js` が同一オリジンのリンクを辿りつつ、フォーム外にある「破壊的操作らしくない」コントロール（ボタン・タブ・ドロップダウン等）を1つずつ独立した使い捨てタブでクリックし、状態が積み重ならないようにしながらスクリーンショットで画面遷移を地図化します。`<form>`内の要素、および送信/削除/ログアウト/購入等の日英キーワードにラベルが一致する要素はクリックせず「スキップ」として報告します（フォーム送信は一切行いません）。既存のフォームテスト・セキュリティ診断パイプラインの代替ではなく、網羅的な画面探索の補助です。実行: `GET /api/sites/:id/explore/run`（SSE）。結果: `/api/sites/:id/explore-sessions/:sessionId/explore-report.html`。
+- **セルフヒーリング（ロケータ自動修復）** — `core/scenario/locatorStrategy.js` が、記録された各click/fill/check/selectステップに構造的な「修復ヒント」（tag・id・data-testid・name・role・aria-label・placeholder・text・class。値そのものは含まない）を保存します。実行時（`core/scenario/stepExecutor.js`）、主セレクタが数秒以内に見つからない場合、修復ヒントから導いたセレクタ候補を順に試し、それでも見つからなければ同じタグを持つ現在のページ上の要素を修復ヒントとの一致度でスコアリングして最も近いものを採用します。修復は無言では行わず、修復の都度 `🩹 セレクタ自動修復 <旧> -> <新>` をログ出力し、`healEvents`配列に記録します。どのセレクタが実際に効かなくなったかを実行結果（将来的にはレポート）で可視化し、テストが記録内容から静かにズレていくのを防ぎます。
 
 各検出結果には重要度、OWASP 分類、根拠、修正案を表示します。自動検出はレビューの補助であり、脆弱性の確定や安全性の保証ではありません。
 

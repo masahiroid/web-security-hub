@@ -7,7 +7,10 @@ artifacts/
 !.env.example
 sites/*/.env
 sites/*/.golden-master/
+sites/*/explore-sessions/
 sites/*/fixtures/
+sites/*/downloads/
+sites/*/auth/
 !sites/_template/
 !sites/_template/**
 

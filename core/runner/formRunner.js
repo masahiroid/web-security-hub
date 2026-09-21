@@ -30,10 +30,13 @@ async function runFormGeneration(cfg, store, log) {
     loaded.warnings.forEach((w) => log(`spec warning: ${w}`));
     log(`巡回開始: depth=${cfg.maxDepth}, pages=${cfg.maxPages}`);
     let seedUrl = cfg.url;
+    let scenarioHealEvents = [];
     if (cfg.scenario?.login?.url || cfg.scenario?.steps?.length) {
-      await runScenario(page, cfg.url, cfg.scenario, log, cfg.siteId);
+      const scenarioResult = await runScenario(page, cfg.url, cfg.scenario, log, cfg.siteId);
+      scenarioHealEvents = scenarioResult.healEvents;
       seedUrl = page.url();
       log(`シナリオ完了: ${seedUrl}`);
+      if (scenarioHealEvents.length) log(`シナリオ内で${scenarioHealEvents.length}件のセレクタを自動修復しました`);
     }
     const { forms: crawled, visited, pageSnapshots } = await crawlForForms(page, seedUrl, { maxDepth: cfg.maxDepth, maxPages: cfg.maxPages, sameOriginOnly: true, login: cfg.login, screenshotDir: screenshots }, log);
     const forms = dedupeForms(loadManualForms(cfg.manualFormsPath, crawled, log));
@@ -49,7 +52,7 @@ async function runFormGeneration(cfg, store, log) {
     const codePath = path.join(cfg.outputDir, 'generated.spec.ts');
     fs.writeFileSync(codePath, generatePlaywrightCode(items, { login: cfg.login, scenarioSteps: cfg.scenario?.steps, visitedUrls: visited, visitedPages: pageSnapshots }), 'utf8');
     const formCases = items.reduce((n, item) => n + item.cases.length, 0);
-    return { codePath, formCount: items.length, caseCount: formCases + uniquePageCaseCount(pageSnapshots, visited), executedCaseCount, okCaseCount, ngCaseCount, runSummaries };
+    return { codePath, formCount: items.length, caseCount: formCases + uniquePageCaseCount(pageSnapshots, visited), executedCaseCount, okCaseCount, ngCaseCount, runSummaries, scenarioHealEvents };
   } finally { await session.stop(); }
 }
 module.exports = { runFormGeneration };
