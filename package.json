@@ -10,6 +10,7 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
+    "test": "node --test",
     "postinstall": "playwright install chromium || true",
     "dynamic-scan": "node core/cli/securityScan.js",
     "autoflow": "node core/cli/autoflow.js",

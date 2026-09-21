@@ -22,6 +22,17 @@ function listSites() {
     .filter((id) => fs.existsSync(path.join(SITES_DIR, id, 'site.config.json')));
 }
 
+/** Groups site ids by their configured `folder` (unfoldered sites under `''`). */
+function listSitesByFolder() {
+  const groups = {};
+  for (const id of listSites()) {
+    const cfg = readSiteConfig(id);
+    const folder = cfg.folder || '';
+    (groups[folder] ||= []).push({ id, displayName: cfg.displayName, labels: cfg.labels || [] });
+  }
+  return groups;
+}
+
 function readSiteConfig(siteId) {
   const file = path.join(siteDir(siteId), 'site.config.json');
   if (!fs.existsSync(file)) throw new Error(`site not found: ${siteId}`);
@@ -111,6 +122,10 @@ function buildRunnerConfig(siteId) {
       }
     : undefined;
 
+  // Lazily required to avoid a load-order issue: scenario/siteScenario.js itself
+  // requires this module (siteConfig.js) for readSiteConfig/readEnvFile.
+  const { resolveScenarioSteps } = require('./scenario/siteScenario');
+  const rawSteps = Array.isArray(cfg.scenario?.steps) ? cfg.scenario.steps : [];
   const scenario = {
     login: login
       ? {
@@ -122,7 +137,8 @@ function buildRunnerConfig(siteId) {
           submitSelector: login.submitSelector,
         }
       : undefined,
-    steps: Array.isArray(cfg.scenario?.steps) ? cfg.scenario.steps : [],
+    steps: resolveScenarioSteps(siteId, rawSteps),
+    dataSource: cfg.scenario?.dataSource,
   };
 
   const httpCredentials = cfg.basicAuth?.enabled
@@ -161,6 +177,7 @@ module.exports = {
   sitesDir,
   siteDir,
   listSites,
+  listSitesByFolder,
   readSiteConfig,
   writeSiteConfig,
   mergeSiteConfig,

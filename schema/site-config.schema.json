@@ -20,6 +20,16 @@
       "description": "Seed URL the crawler starts from.",
       "format": "uri"
     },
+    "folder": {
+      "type": "string",
+      "description": "Optional group name for organizing sites/test cases in the UI (e.g. \"customer-portal\", \"admin\")."
+    },
+    "labels": {
+      "type": "array",
+      "description": "Free-form tags for filtering sites/test cases in the UI (e.g. [\"smoke\", \"nightly\"]).",
+      "items": { "type": "string" },
+      "default": []
+    },
     "ruleSpecDir": {
       "type": "string",
       "description": "Path (relative to this site's directory) holding Rule Spec YAML/JSON files.",
@@ -67,6 +77,27 @@
       "description": "Flags that Basic-Auth is used. Credentials go in .env as BASIC_USER / BASIC_PASS.",
       "properties": {
         "enabled": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "variables": {
+      "type": "object",
+      "description": "Standard (non-secret) named values usable as {{NAME}} tokens inside scenario step url/selector/value fields. Secret variables are never stored here — set them via .env as SECRET_<NAME>=value instead.",
+      "additionalProperties": { "type": "string" },
+      "default": {}
+    },
+    "scenario": {
+      "type": "object",
+      "description": "Reusable browser steps run before crawling/test execution (see core/scenario/siteScenario.js). `login` credentials live in .env.",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "description": "Steps may reference a shared step group via { action: 'useSharedStep', name }, see sites/<id>/shared-steps.json."
+        },
+        "dataSource": {
+          "type": "string",
+          "description": "Name of a CSV file under sites/<id>/data/<name>.csv; when set, the scenario runs once per row for data-driven testing, with each row's columns available as {{COLUMN}} variables."
+        }
       },
       "additionalProperties": false
     },
