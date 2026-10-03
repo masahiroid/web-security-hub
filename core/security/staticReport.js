@@ -44,7 +44,7 @@ function renderHtml(report) {
 
 function renderSarif(report) {
   const rules = uniqueRules(report.findings).map((item) => ({ id: item.id, name: item.title, shortDescription: { text: item.title }, help: { text: item.remediation }, properties: { owasp: item.owasp?.id || 'UNMAPPED' } }));
-  return { $schema: 'https://json.schemastore.org/sarif-2.1.0.json', version: '2.1.0', runs: [{ tool: { driver: { name: 'Web Security Hub SAST', informationUri: 'https://github.com/masahirocom/web-security-hub', rules } }, results: report.findings.map((item) => ({ ruleId: item.id, level: sarifLevel(item.severity), message: { text: `${item.evidence} Remediation: ${item.remediation}` }, locations: [sarifLocation(item.location)] })) }] };
+  return { $schema: 'https://json.schemastore.org/sarif-2.1.0.json', version: '2.1.0', runs: [{ tool: { driver: { name: 'Web Security Hub SAST', informationUri: 'https://github.com/masahiroid/web-security-hub', rules } }, results: report.findings.map((item) => ({ ruleId: item.id, level: sarifLevel(item.severity), message: { text: `${item.evidence} Remediation: ${item.remediation}` }, locations: [sarifLocation(item.location)] })) }] };
 }
 
 function uniqueRules(findings) {
