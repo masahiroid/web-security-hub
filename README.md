@@ -1,5 +1,7 @@
 # Web Security Hub 
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23122939.svg)](https://doi.org/10.5281/zenodo.23122939)
+
 [日本語の README](README.ja.md)
 
 Web Security Hub is a locally run web-security assessment and form-regression testing tool aligned with OWASP risk categories. Test-case values are generated using deterministic, rule-based logic. An optional local Claude Code adapter can review displayed SAST findings after explicit user authorization; it is not part of test-case generation or scanning.

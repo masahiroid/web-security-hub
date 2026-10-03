@@ -11,6 +11,7 @@ abstract: >-
   risk categories. Test-case values are generated with deterministic, rule-based logic.
 repository-code: "https://github.com/masahiroid/web-security-hub"
 license: Apache-2.0
+doi: 10.5281/zenodo.23122939
 keywords:
   - web-security
   - owasp

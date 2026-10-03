@@ -1,5 +1,7 @@
 # Web Security Hub — 日本語
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23122939.svg)](https://doi.org/10.5281/zenodo.23122939)
+
 [English README](README.md)
 
 OWASP のリスク分類を基準にした、ローカル実行の Web セキュリティ診断・フォーム回帰テストツールです。テストケースの値生成はルールベースで行います。表示中の SAST 結果を明示許可のうえでレビューする任意のローカル Claude Code アダプターを備えますが、テストケース生成やスキャン本体では使用しません。
