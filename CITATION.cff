@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "Web Security Hub"
+type: software
+authors:
+  - family-names: Nakatsugawa
+    given-names: Masahiro
+    orcid: "https://orcid.org/0009-0000-3224-0103"
+abstract: >-
+  A locally run web-security assessment and form-regression testing tool aligned with OWASP
+  risk categories. Test-case values are generated with deterministic, rule-based logic.
+repository-code: "https://github.com/masahiroid/web-security-hub"
+license: Apache-2.0
+keywords:
+  - web-security
+  - owasp
+  - testing
+  - form-regression
+  - local-first

@@ -1,0 +1,26 @@
+{
+  "title": "Web Security Hub",
+  "upload_type": "software",
+  "description": "A locally run web-security assessment and form-regression testing tool aligned with OWASP risk categories. Test-case values are generated with deterministic, rule-based logic.",
+  "creators": [
+    {
+      "name": "Nakatsugawa, Masahiro",
+      "orcid": "0009-0000-3224-0103"
+    }
+  ],
+  "license": "apache-2.0",
+  "keywords": [
+    "web-security",
+    "owasp",
+    "testing",
+    "form-regression",
+    "local-first"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/masahiroid/web-security-hub",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
