@@ -1,0 +1,66 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>講師用ガイド</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>講師用ガイド</h1>
+<p><a href="INSTRUCTOR.html">English</a> · <a href="README.ja.html">受講者用</a></p>
+<h2>開始前</h2>
+<p>Node.js 22 以上、npm、Chromium が使用できることを確認します。全員が別々のローカル環境を使います。サンプルの状態切替はサーバー単位です。会場で一つのサーバーを共有すると、誰かの変更操作が他の受講者へ影響します。</p>
+<p>講師は事前に <code>npm test</code>、<code>npm run training:verify</code>、<code>npm run training:capture</code> を通します。後二つは自分でサーバーを起動するため、手動の Hub / サンプルを終了しておきます。撮影は既存の研修サイトに新しい生成セッションを追加し、そのセッションのケースを編集します。既存セッションは更新しません。ポート競合時は既存プロセスを自動停止しません。</p>
+<p>受講者は <code>training:setup</code> と二つのサーバー起動から開始します。手動で新規登録した場合は、そのサイトを以降の操作で一貫して選びます。英語コースでは URL の <code>/ja/</code> を <code>/en/</code>、サイト ID を <code>training-en</code> にします。</p>
+<h2>進行例</h2>
+<table>
+<thead>
+<tr>
+<th>時間の目安</th>
+<th>手順</th>
+<th>到達確認</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0〜10 分</td>
+<td>T01–T02</td>
+<td>二つのポートの役割を説明でき、デモ申請が完了する</td>
+</tr>
+<tr>
+<td>10〜25 分</td>
+<td>T03–T04</td>
+<td>認証設定と保存シナリオを確認できる</td>
+</tr>
+<tr>
+<td>25〜40 分</td>
+<td>T05–T06</td>
+<td>ケースを生成し、人数 5 の 1 ケースへ編集できる</td>
+</tr>
+<tr>
+<td>40〜60 分</td>
+<td>T07–T08</td>
+<td>無変更 PASS → 変更差分 → 修正 PASS を確認する</td>
+</tr>
+<tr>
+<td>60〜80 分</td>
+<td>T09–T10</td>
+<td>DAST の追加指摘と SAST の修正前後を説明する</td>
+</tr>
+<tr>
+<td>80〜90 分</td>
+<td>T11</td>
+<td>結果共有と片付け</td>
+</tr>
+</tbody>
+</table>
+<p>時間配分は目安です。初回ダウンロード、端末性能、入力ミスの修正時間は別に見積もります。</p>
+<h2>採点・確認の基準</h2>
+<ul>
+<li>T04: パスワードをシナリオに含めず、申請画面へ到達できる。</li>
+<li>T05: フォームが 1 個以上生成され、レポートを開ける。生成時 OK を業務仕様の保証と解釈しない。</li>
+<li>T06: 値は <code>Demo Learner</code> / <code>learner@example.test</code> / <code>5</code>。最初の 1 行を残す。任意項目がないのは正常。</li>
+<li>T07: ベースライン記録と無変更比較の両方がすべて PASS。</li>
+<li>T08: 変更版は差分あり、修正版はすべて PASS。途中でベースラインを更新しない。</li>
+<li>T09: 変更版だけに <code>DAST-HEADER-CONTENT-SECURITY-POLICY</code> と <code>DAST-HEADER-X-CONTENT-TYPE-OPTIONS</code> が出る（申請画面 1 ページで診断）。</li>
+<li>T10: before は <code>SAST-DANGEROUS-EVAL</code> と <code>SAST-SQL-CONCAT</code>、after は 0 件。</li>
+</ul>
+<p>ローカル HTTP などの指摘が残る理由、パッシブ診断とシナリオ操作によるリクエストの違い、画像差分だけでは判定できない業務要件も説明します。初回と同じ OS / ブラウザー / フォントで比較してください。</p>
+<h2>復旧</h2>
+<p>シナリオに送信操作まで入った場合は T04 の JSON に戻します。誤ってベースラインを変更版で記録したら、基本版に戻して記録し直し、無変更比較からやり直します。</p>
+<p>設定を戻すには <code>npm run training:setup -- --reset</code>、サンプルの状態を戻すには <code>npm run training:mode -- reset</code>。前者は既存セッションを削除しません。やり直す演習では新しくパイプラインを実行し、最新のセッションを選択してください。</p>
+<h2>受講者から集める記録</h2>
+<p>使用バージョン、OS・ブラウザー、言語、セッション ID、つまずいた手順 ID、期待したこと、実際のこと、必要なら画像。実在の認証情報・個人情報を記録させません。この記録から、サンプル再現例 → 不具合修正 → 回帰テスト → 日英教材更新につなげます。</p>
+</main></html>

@@ -14,6 +14,9 @@ const reportRoutes = require('./routes/report');
 const aiReviewRoutes = require('./routes/aiReview');
 const staticReportsRoutes = require('./routes/staticReports');
 const scenarioRecorderRoutes = require('./routes/scenarioRecorder');
+const authSessionRoutes = require('./routes/authSession');
+const exploreRoutes = require('./routes/explore');
+const mobileRoutes = require('./routes/mobile');
 
 const app = express();
 app.use(express.json({ limit: '5mb' }));
@@ -28,10 +31,14 @@ app.use('/api', reportRoutes);
 app.use('/api', aiReviewRoutes);
 app.use('/api', staticReportsRoutes);
 app.use('/api', scenarioRecorderRoutes);
+app.use('/api', authSessionRoutes);
+app.use('/api', exploreRoutes);
+app.use('/api', mobileRoutes);
 app.use('/api', systemInfoRoutes);
 app.use('/api', controlRoutes);
 
 const publicDir = path.join(__dirname, '..', 'public');
+app.use('/training', express.static(path.join(__dirname, '..', 'docs', 'training')));
 app.use(express.static(publicDir));
 app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 

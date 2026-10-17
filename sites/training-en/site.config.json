@@ -1,0 +1,31 @@
+{
+  "displayName": "Training Lab (English)",
+  "baseUrl": "http://127.0.0.1:4180/en/dashboard",
+  "labels": [
+    "training"
+  ],
+  "ruleSpecDir": "rule-spec",
+  "outputDir": ".golden-master",
+  "crawl": {
+    "maxDepth": 1,
+    "maxPages": 3,
+    "maxCasesPerForm": 4,
+    "dryRun": false,
+    "fastFail": false
+  },
+  "login": {
+    "loginUrl": "http://127.0.0.1:4180/en/login",
+    "usernameSelector": "#email",
+    "passwordSelector": "#password",
+    "submitSelector": "#sign-in"
+  },
+  "scenario": {
+    "steps": [
+      {
+        "action": "goto",
+        "url": "http://127.0.0.1:4180/en/apply"
+      }
+    ]
+  },
+  "id": "training-en"
+}

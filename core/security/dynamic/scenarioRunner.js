@@ -1,7 +1,29 @@
 'use strict';
-async function runScenario(page, targetUrl, scenario, onProgress = () => {}) {
+const { runSteps } = require('../../scenario/stepExecutor');
+
+/**
+ * Runs a login (if configured) followed by the scenario's steps, via the
+ * shared step executor (core/scenario/stepExecutor.js) so DAST crawling and
+ * form-test generation stay behaviorally identical for every step type.
+ */
+async function runScenario(page, targetUrl, scenario, onProgress = () => {}, siteId, ai) {
   const login = scenario?.login;
-  if (login?.url) { onProgress('シナリオ: ログイン画面へ移動'); await page.goto(login.url, { waitUntil: 'domcontentloaded', timeout: 30_000 }); if (login.usernameSelector && login.username !== undefined) await page.locator(login.usernameSelector).fill(login.username); if (login.passwordSelector && login.password !== undefined) await page.locator(login.passwordSelector).fill(login.password); if (login.submitSelector) { await page.locator(login.submitSelector).click(); await page.waitForLoadState('domcontentloaded', { timeout: 10_000 }).catch(() => {}); } } else await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
-  for (const step of scenario?.steps || []) { if (!step?.action || (!step.selector && step.action !== 'goto')) continue; onProgress(`シナリオ: ${step.action}`); if (step.action === 'goto' && step.url) await page.goto(step.url, { waitUntil: 'domcontentloaded', timeout: 30_000 }); else if (step.action === 'click') await page.locator(step.selector).click(); else if (step.action === 'fill') await page.locator(step.selector).fill(String(step.value ?? '')); else if (step.action === 'check') await page.locator(step.selector).check(); else if (step.action === 'select') await page.locator(step.selector).selectOption(String(step.value ?? '')); else if (step.action === 'wait') await page.waitForTimeout(Math.min(Math.max(Number(step.value) || 500, 0), 10_000)); await page.waitForLoadState('domcontentloaded', { timeout: 5_000 }).catch(() => {}); }
+  if (login?.url) {
+    onProgress('シナリオ: ログイン画面へ移動');
+    await page.goto(login.url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    if (login.usernameSelector && login.username !== undefined) await page.locator(login.usernameSelector).fill(login.username);
+    if (login.passwordSelector && login.password !== undefined) await page.locator(login.passwordSelector).fill(login.password);
+    if (login.submitSelector) {
+      await page.locator(login.submitSelector).click();
+      await page.waitForLoadState('domcontentloaded', { timeout: 10_000 }).catch(() => {});
+    }
+  } else {
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  }
+  const healEvents = [];
+  const aiAssertions = [];
+  await runSteps(page, scenario?.steps, { siteId, onProgress, healEvents, ai, aiAssertions });
+  return { healEvents, aiAssertions };
 }
+
 module.exports = { runScenario };

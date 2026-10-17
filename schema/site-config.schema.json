@@ -17,8 +17,35 @@
     },
     "baseUrl": {
       "type": "string",
-      "description": "Seed URL the crawler starts from.",
+      "description": "Seed URL the crawler starts from. Unused when `platform` is \"ios\" or \"android\" (kept required for schema-documentation purposes only — this file isn't validated against the schema at runtime).",
       "format": "uri"
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["web", "ios", "android"],
+      "default": "web",
+      "description": "\"web\" uses the Playwright-based crawler/runner pipeline (core/crawler, core/runner). \"ios\"/\"android\" use the Appium-based mobile pipeline (core/mobile) instead — see the `mobile` block."
+    },
+    "mobile": {
+      "type": "object",
+      "description": "Appium session target, used only when `platform` is \"ios\" or \"android\". core/mobile/appiumServer.js starts a local Appium server (this project's own node_modules/.bin/appium — no separate global install needed) with the matching platform driver (XCUITest for iOS, UiAutomator2 for Android), which itself needs Xcode (iOS) or Android SDK + a running emulator/device (Android) already set up on the host.",
+      "properties": {
+        "deviceName": { "type": "string", "description": "Simulator/emulator name, e.g. \"iPhone 17\" or \"Pixel_7_API_34\"." },
+        "platformVersion": { "type": "string", "description": "e.g. \"27.0\"." },
+        "app": { "type": "string", "description": "Path (relative to this site's directory) to a .app/.ipa (iOS) or .apk (Android) to install and launch." },
+        "bundleId": { "type": "string", "description": "Bundle id (iOS) or package name (Android) of an already-installed app to launch instead of `app`." }
+      },
+      "additionalProperties": false
+    },
+    "folder": {
+      "type": "string",
+      "description": "Optional group name for organizing sites/test cases in the UI (e.g. \"customer-portal\", \"admin\")."
+    },
+    "labels": {
+      "type": "array",
+      "description": "Free-form tags for filtering sites/test cases in the UI (e.g. [\"smoke\", \"nightly\"]).",
+      "items": { "type": "string" },
+      "default": []
     },
     "ruleSpecDir": {
       "type": "string",
@@ -62,11 +89,67 @@
       },
       "additionalProperties": false
     },
+    "browser": {
+      "type": "object",
+      "description": "Browser engine, device emulation, and client-certificate settings for crawling/test execution.",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "enum": ["chromium", "firefox", "webkit"],
+          "default": "chromium"
+        },
+        "device": {
+          "type": "string",
+          "description": "Playwright device descriptor name for viewport/UA emulation (e.g. \"iPhone 14\", \"Pixel 7\"). See Playwright's `devices` registry for valid names."
+        },
+        "clientCert": {
+          "type": "object",
+          "description": "Non-secret client-certificate paths (relative to this site's directory). The passphrase, if any, goes in .env as SECRET_CLIENT_CERT_PASSPHRASE.",
+          "properties": {
+            "origin": { "type": "string", "description": "Origin the certificate applies to, e.g. \"https://example.com\"." },
+            "certPath": { "type": "string" },
+            "keyPath": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "ai": {
+      "type": "object",
+      "description": "Opt-in AI-assisted scenario assertions (the aiAssert step). Off by default — unlike every other step type, aiAssert shells out to the local Claude Code CLI per assertion, so it must be explicitly enabled here.",
+      "properties": {
+        "assertionsEnabled": { "type": "boolean", "default": false },
+        "locale": { "type": "string", "enum": ["ja", "en", "fr"], "default": "ja" }
+      },
+      "additionalProperties": false
+    },
     "basicAuth": {
       "type": "object",
       "description": "Flags that Basic-Auth is used. Credentials go in .env as BASIC_USER / BASIC_PASS.",
       "properties": {
         "enabled": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "variables": {
+      "type": "object",
+      "description": "Standard (non-secret) named values usable as {{NAME}} tokens inside scenario step url/selector/value fields. Secret variables are never stored here — set them via .env as SECRET_<NAME>=value instead.",
+      "additionalProperties": { "type": "string" },
+      "default": {}
+    },
+    "scenario": {
+      "type": "object",
+      "description": "Reusable browser steps run before crawling/test execution (see core/scenario/siteScenario.js). `login` credentials live in .env.",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "description": "Steps may reference a shared step group via { action: 'useSharedStep', name }, see sites/<id>/shared-steps.json."
+        },
+        "dataSource": {
+          "type": "string",
+          "description": "Name of a CSV file under sites/<id>/data/<name>.csv; when set, the scenario runs once per row for data-driven testing, with each row's columns available as {{COLUMN}} variables."
+        }
       },
       "additionalProperties": false
     },
