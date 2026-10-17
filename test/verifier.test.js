@@ -92,3 +92,35 @@ test('disabled server instrumentation remains explicitly unavailable', async t =
   assert.equal(evidence.instrumentation, 'unavailable');
   assert.deepEqual(evidence.events, []);
 });
+
+test('active trials receive cancellation and real deadline signals; finished jobs release reservations', async t => {
+  const registry = createRegistry({ roots: { fixture: __dirname }, authProfileIds: ['learner-a'] });
+  const scope = { schemaVersion: 1, sourceRootId: 'fixture', origin: 'http://127.0.0.1:4181', route: '/boundary', method: 'POST', authProfileIds: ['learner-a'], allowedFields: ['participants'], ttlMs: 1000, maxTrials: 2, maxConcurrency: 2 };
+  const request = { url: scope.origin + scope.route, method: 'POST', authProfileId: 'learner-a', seed: seed() };
+  const handle = registry.create(scope);
+  const first = registry.begin(handle, request);
+  const second = registry.begin(handle, request);
+  assert.equal(first.signal.aborted, false);
+  assert.equal(registry.status(handle).running, 2);
+  registry.cancel(handle);
+  assert.equal(first.signal.aborted, true);
+  assert.equal(second.signal.aborted, true);
+  assert.equal(registry.status(handle).state, 'cancelled');
+  registry.finish(handle, first.trialId); registry.finish(handle, second.trialId);
+  assert.equal(registry.status(handle).running, 0);
+  assert.equal(JSON.stringify(registry.status(handle)).includes(handle.capability), false);
+  registry.dispose(handle);
+  assert.throws(() => registry.status(handle));
+  const expiring = registry.create({ ...scope, ttlMs: 40 });
+  t.after(() => registry.dispose(expiring));
+  const trial = registry.begin(expiring, request);
+  await new Promise(resolve => {
+    const timeout = setTimeout(resolve, 1000);
+    trial.signal.addEventListener('abort', () => { clearTimeout(timeout); resolve(); }, { once: true });
+  });
+  assert.equal(trial.signal.aborted, true);
+  assert.equal(registry.status(expiring).state, 'expired');
+  assert.throws(() => registry.begin(expiring, request));
+  registry.finish(expiring, trial.trialId);
+  assert.equal(registry.status(expiring).running, 0);
+});

@@ -11,7 +11,11 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
     const job = jobs.get(handle?.jobId);
     const hash = crypto.createHash('sha256').update(String(handle?.capability || '')).digest();
     if (!job || !crypto.timingSafeEqual(hash, job.hash)) throw Error('Invalid job capability');
-    if (active && (job.cancelled || now() >= job.expiresAt)) throw Error('Job cancelled or expired');
+    if (active && (job.cancelled || job.controller.signal.aborted || now() >= job.expiresAt)) {
+      job.controller.abort();
+      clearTimeout(job.timer);
+      throw Error('Job cancelled or expired');
+    }
     return job;
   }
   return {
@@ -23,7 +27,7 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
       if (new URL(scope.route, scope.origin).pathname !== scope.route || new URL(scope.route, scope.origin).origin !== scope.origin || scope.route.includes('\\') || scope.route.includes('%')) throw Error('Invalid route');
       const capability = crypto.randomBytes(32).toString('hex');
       const jobId = crypto.randomUUID();
-      jobs.set(jobId, { scope, hash: crypto.createHash('sha256').update(capability).digest(), expiresAt: now() + scope.ttlMs, trials: 0, running: new Set(), cancelled: false });
+      jobs.set(jobId, { scope, hash: crypto.createHash('sha256').update(capability).digest(), expiresAt: now() + scope.ttlMs, trials: 0, running: new Set(), cancelled: false, controller: new AbortController(), timer: null });
       return Object.freeze({ jobId, capability });
     },
     begin(handle, { url, method, authProfileId, seed: input }) {
@@ -35,10 +39,29 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
       if (job.trials >= s.maxTrials || job.running.size >= s.maxConcurrency) throw Error('Execution budget exhausted');
       const trialId = crypto.randomUUID();
       job.trials++; job.running.add(trialId);
-      return Object.freeze({ trialId, seed, scope: s });
+      if (!job.timer) {
+        job.timer = setTimeout(() => job.controller.abort(), Math.max(0, job.expiresAt - now()));
+        job.timer.unref();
+      }
+      return Object.freeze({ trialId, seed, scope: s, signal: job.controller.signal, expiresAt: job.expiresAt });
     },
-    finish(handle, trialId) { get(handle, false).running.delete(trialId); },
-    cancel(handle) { get(handle, false).cancelled = true; },
+    finish(handle, trialId) {
+      const job = get(handle, false);
+      job.running.delete(trialId);
+      if (!job.running.size) { clearTimeout(job.timer); job.timer = null; }
+    },
+    cancel(handle) {
+      const job = get(handle, false);
+      job.cancelled = true; job.controller.abort(); clearTimeout(job.timer); job.timer = null;
+    },
+    status(handle) {
+      const job = get(handle, false);
+      return Object.freeze({ jobId: handle.jobId, state: job.cancelled ? 'cancelled' : now() >= job.expiresAt || job.controller.signal.aborted ? 'expired' : 'active', trials: job.trials, running: job.running.size, expiresAt: job.expiresAt });
+    },
+    dispose(handle) {
+      const job = get(handle, false);
+      job.controller.abort(); clearTimeout(job.timer); jobs.delete(handle.jobId);
+    },
     assertRedirect(handle, url) { const s = get(handle).scope; if (url !== s.origin + s.route) throw Error('Redirect outside grant'); },
     sourceFile(handle, relative) {
       const job = get(handle);

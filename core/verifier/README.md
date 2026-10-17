@@ -15,7 +15,10 @@ AST解析、OpenVEX出力は後続段階です。
 - Private output location: `VERIFIER_DATA_DIR` from `core/paths.js`, under
   ignored `artifacts/private/verifier`. No evidence is written automatically.
 
-`begin()` reserves a trial; callers must use `finish()` in `finally`, enforce
+`begin()` reserves a trial and returns a shared job AbortSignal and deadline.
+Cancellation or expiry aborts the signal. `status()` returns counts/state without
+the capability; `dispose()` aborts and removes the job. Callers must use
+`finish()` in `finally`, enforce
 cancellation during I/O, block redirects before following, and isolate each
 profile/context. These helpers do not themselves execute or interrupt requests.
 `sourceFile()` checks a canonical path; a future reader must verify the digest
