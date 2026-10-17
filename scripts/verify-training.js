@@ -52,7 +52,9 @@ async function main() {
       return route.fulfill({ json: { ok: true, version: 'request-contract-test' } });
     });
     await ui.goto('http://127.0.0.1:4173');
-    await ui.click('[data-tab="dynamic"]'); await ui.click('#checkZap');
+    await ui.click('[data-tab="dynamic"]');
+    await ui.locator('#panel-dynamic [role="tablist"]').getByRole('tab', { name: 'ZAP', exact: true }).click();
+    await ui.click('#checkZap');
     await ui.waitForFunction(() => document.querySelector('#zapStatus').textContent.includes('request-contract-test'));
     assert.equal(zapRequest.method, 'POST');
     assert.equal(zapRequest.body.zap.baseUrl, 'http://127.0.0.1:8090');

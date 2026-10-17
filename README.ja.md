@@ -65,7 +65,7 @@ npm run dynamic-scan -- https://staging.example.com/
 
 ## ローカル検証機能の開発版
 
-開発ブランチでは、専用サンプルの一括検証と非公開JSON／HTMLレポートの保存が使えます。ソースの依存関係を導入後、`npm run verifier:run -- --mode changed`で実行できます。正常版・修正版、実行上限・取消については[検証機能ガイド](core/verifier/README.md)を参照してください。公開済み1.3.0のインストーラーには含まれず、アプリ画面への接続は実装中です。
+開発ブランチでは、専用サンプルの一括検証と非公開JSON／HTMLレポートの保存が使えます。ソースの依存関係を導入後、`npm run verifier:run -- --mode changed`で実行できます。正常版・修正版、実行上限・取消については[検証機能ガイド](core/verifier/README.md)を参照してください。アプリの「サンプル検証」画面からも実行・取消・証拠確認・HTMLレポート表示ができます。[画像付きハンズオン](docs/training/VERIFIER.ja.md)を用意しています。公開済み1.3.0のインストーラーには含まれません。
 
 ## ZAP との統合
 

@@ -1,11 +1,12 @@
 # Verifier foundation / 検証基盤
 
-This is a backend foundation, not a connected scanning feature. LLM, MCP,
-browser UI execution, AST slicing and OpenVEX export are not implemented here.
-An isolated Playwright APIRequestContext runner is available for local HTTP trials.
+The desktop Sample verification workspace and CLI run isolated local fixture
+campaigns through Playwright APIRequestContext. LLM, MCP, browser UI execution
+against targets, AST slicing and OpenVEX export are not implemented here.
 
-現在はバックエンド基盤です。独立したPlaywright APIRequestContextによるHTTP試行に対応します。
-既存診断画面への接続、LLM／MCP、ブラウザーUI実行、
+アプリの「サンプル検証」画面とCLIから、専用サンプルを独立した
+Playwright APIRequestContextによるHTTP試行で検証できます。
+LLM／MCP、対象サイトのブラウザーUI実行、
 AST解析、OpenVEX出力は後続段階です。
 
 - `contracts`: versioned schemas and shared strict validation for seeds, scopes,
@@ -71,7 +72,8 @@ or affected verdict.
 
 HTTP試行はseedごとに認証状態を分離します。正常対照の失敗時は候補を実行せず、
 応答コードだけでは脆弱性や安全性を判定しません。取消・期限切れ・timeoutで通信を
-閉じます。専用fixtureのサーバー側計測・独立oracleに対応し、GUIへの接続は後続段階です。
+閉じます。専用fixtureのサーバー側計測・独立oracleに対応します。
+画面操作は[日英のハンズオン教材](../../docs/training/VERIFIER.ja.md)を参照してください。
 
 ## Local fixture / ローカル専用サンプル
 

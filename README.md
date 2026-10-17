@@ -65,7 +65,7 @@ npm run dynamic-scan -- https://staging.example.com/
 
 ## Local verifier development
 
-The development branch includes an isolated fixture campaign with private JSON/HTML reports. Run `npm run verifier:run -- --mode changed` after installing source dependencies. See the [verifier guide](core/verifier/README.md) for baseline/fixed modes, limits and cancellation. This backend/CLI feature is not included in the published 1.3.0 installers; desktop integration is still in progress.
+The development branch includes an isolated fixture campaign with private JSON/HTML reports. Run `npm run verifier:run -- --mode changed` after installing source dependencies. See the [verifier guide](core/verifier/README.md) for baseline/fixed modes, limits and cancellation. The desktop Sample verification workspace also supports execution, cancellation, evidence inspection and HTML reports. See the [illustrated hands-on guide](docs/training/VERIFIER.md). This feature is not included in the published 1.3.0 installers.
 
 ## ZAP integration
 
