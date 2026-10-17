@@ -31,9 +31,12 @@
     "desktop:verify-layout": "node scripts/verify-desktop-layout.js",
     "release:check": "node scripts/check-release-content.js",
     "desktop:release:macos": "node scripts/release-macos.js",
-    "desktop:sign:macos": "node scripts/sign-macos.js"
+    "desktop:sign:macos": "node scripts/sign-macos.js",
+    "verifier:fixture": "node training/verifier-site/server.js",
+    "verifier:test": "node --test test/verifier.test.js"
   },
   "dependencies": {
+    "ajv": "8.20.0",
     "appium": "^3.7.0",
     "express": "^4.19.2",
     "playwright": "^1.46.0",
