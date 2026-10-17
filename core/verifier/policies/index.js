@@ -18,6 +18,16 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
     }
     return job;
   }
+  function check(handle, input) {
+    const job = get(handle);
+    const request = validate('trialRequest', input);
+    const seed = validate('seed', request.seed);
+    const s = job.scope;
+    if (request.url !== s.origin + s.route || request.method !== s.method || !s.authProfileIds.includes(request.authProfileId)) throw Error('Trial outside grant');
+    if ([...Object.keys(seed.values), ...seed.omitFields].some(key => !s.allowedFields.includes(key))) throw Error('Field outside grant');
+    if (job.trials >= s.maxTrials || job.running.size >= s.maxConcurrency) throw Error('Execution budget exhausted');
+    return { job, seed };
+  }
   return {
     create(input) {
       const scope = validate('scope', input);
@@ -30,13 +40,10 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
       jobs.set(jobId, { scope, hash: crypto.createHash('sha256').update(capability).digest(), expiresAt: now() + scope.ttlMs, trials: 0, running: new Set(), cancelled: false, controller: new AbortController(), timer: null });
       return Object.freeze({ jobId, capability });
     },
-    begin(handle, { url, method, authProfileId, seed: input }) {
-      const job = get(handle);
-      const seed = validate('seed', input);
+    check(handle, input) { check(handle, input); },
+    begin(handle, input) {
+      const { job, seed } = check(handle, input);
       const s = job.scope;
-      if (url !== s.origin + s.route || method !== s.method || !s.authProfileIds.includes(authProfileId)) throw Error('Trial outside grant');
-      if ([...Object.keys(seed.values), ...seed.omitFields].some(key => !s.allowedFields.includes(key))) throw Error('Field outside grant');
-      if (job.trials >= s.maxTrials || job.running.size >= s.maxConcurrency) throw Error('Execution budget exhausted');
       const trialId = crypto.randomUUID();
       job.trials++; job.running.add(trialId);
       if (!job.timer) {
@@ -60,7 +67,7 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
     },
     dispose(handle) {
       const job = get(handle, false);
-      job.controller.abort(); clearTimeout(job.timer); jobs.delete(handle.jobId);
+      jobs.delete(handle.jobId); job.controller.abort(); clearTimeout(job.timer);
     },
     assertRedirect(handle, url) { const s = get(handle).scope; if (url !== s.origin + s.route) throw Error('Redirect outside grant'); },
     sourceFile(handle, relative) {
