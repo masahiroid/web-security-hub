@@ -154,6 +154,24 @@
       "lang": "en",
       "step": "13-sast-after",
       "file": "docs/training/images/en/13-sast-after.png"
+    },
+    {
+      "lang": "ja",
+      "step": "verifier-results",
+      "file": "docs/training/images/verifier-results-ja.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
+    },
+    {
+      "lang": "en",
+      "step": "verifier-results",
+      "file": "docs/training/images/verifier-results-en.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
     }
   ],
   "runs": [

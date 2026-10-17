@@ -1,7 +1,7 @@
 name: Windows installer
 on:
   push:
-    branches: [feature/desktop-distribution-training]
+    branches: [feature/desktop-distribution-training, feature/hybrid-verifier-foundation]
     paths-ignore: ['docs/**', '*.md']
   workflow_dispatch:
 permissions:
@@ -22,13 +22,16 @@ jobs:
       - run: npm test
       - run: npm run release:check
       - run: npm run desktop:build -- --bundles nsis -- --locked
+      - name: Verify installed native application
+        run: node scripts/verify-windows-installed.js
       - name: Prepare installer and checksum
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force artifacts/release-public | Out-Null
           $installer = Get-ChildItem src-tauri/target/release/bundle/nsis -Filter *.exe | Select-Object -First 1
           if (!$installer) { throw 'NSIS installer not found' }
-          $destination = "artifacts/release-public/Web-Security-Hub_1.3.0_windows_x64_setup.exe"
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $destination = "artifacts/release-public/Web-Security-Hub_${version}_windows_x64_setup.exe"
           Copy-Item $installer.FullName $destination
           $digest = (Get-FileHash -Algorithm SHA256 $destination).Hash.ToLower()
           "$digest  $(Split-Path -Leaf $destination)" | Set-Content -Encoding ascii "$destination.sha256"

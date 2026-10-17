@@ -20,3 +20,5 @@ export const REPORT_STORAGE = Object.freeze({
 });
 export const CLI_EXIT = Object.freeze({ success: 0, incomplete: 2, usage: 64, interrupted: 130 });
 export const EPHEMERAL_PORT = 0;
+
+export const JOB_LIMITS = Object.freeze({ retained: 8, active: 1 });

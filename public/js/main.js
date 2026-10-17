@@ -15,3 +15,7 @@ initializeI18n().catch(() => {});
 import "./workspace.js";
 
 import "./help.js";
+
+import "/generated/verifier/main.js";
+
+if (new URLSearchParams(location.search).get("workspace") === "verifier") document.querySelector("[data-tab=verifier]").click();

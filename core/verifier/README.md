@@ -15,7 +15,7 @@ AST解析、OpenVEX出力は後続段階です。
   exact loopback origin, route, method, field and profile restrictions; expiry,
   trial and concurrency budgets; cancellation and source-path confinement.
 - Private output location: `VERIFIER_DATA_DIR` from `core/paths.js`, under
-  ignored `artifacts/private/verifier`. No evidence is written automatically.
+  ignored `artifacts/private/verifier`. The single-trial API does not write files; the fixture campaign saves private reports.
 
 `begin()` reserves a trial and returns a shared job AbortSignal and deadline.
 Cancellation or expiry aborts the signal. `status()` returns counts/state without
@@ -163,3 +163,76 @@ JavaScript modules will migrate incrementally with behavior tests.
 
 新しい検証処理はstrictなTypeScriptで追加し、既存JSは互換入口を残して段階的に整理します。
 生成JSはGit対象外ですが、配布時にコンパイルして同梱するため、利用者の環境でコンパイルは不要です。
+
+
+## Run a complete local campaign / 一連の検証を実行する
+
+```sh
+npm run verifier:run -- --mode baseline
+npm run verifier:run -- --mode changed
+npm run verifier:run -- --mode fixed
+```
+
+Each command owns a fresh fixture on an ephemeral numeric loopback port and
+closes it after the run. It does not connect to an existing/public site or
+change the original training site at port 4180. The default plan covers boundary
+and Unicode inputs, ownership (A/B/admin/anonymous), and confirmation workflow.
+Baseline/fixed have no reproduced violations; changed deliberately reproduces
+four known fixture violations. This is an internal finding count, not an OpenVEX
+status. Normal controls run in separate authenticated contexts before candidates.
+
+The JSON summary prints paths to private `report.json` and bilingual `report.html`.
+Open the HTML file locally to inspect results and evidence. Reports are stored at
+`DATA_ROOT/artifacts/private/verifier/<report-id>/`; `DATA_ROOT` follows the existing
+`WEB_SECURITY_HUB_DATA_DIR` setting. No cloud service or model is used.
+
+```sh
+npm run verifier:run -- --scenario ownership --random-seed 42 --max-trials 12
+npm run verifier:run -- --help
+```
+
+`--max-candidates` limits each scenario; `--max-trials` includes the normal control
+and candidate (two reservations per complete pair). A partial pair is not started
+when fewer than two reservations remain. `--ttl-ms` bounds the whole verification
+run. SIGINT/SIGTERM cancel the owned jobs, close the fixture, and save partial
+results. All planned candidates stay in the report, including unexecuted ones.
+A completed execution does not establish the absence of vulnerabilities.
+
+The PRNG seed, algorithm, parent seed, selected candidates, options, application
+version and fixture source fingerprint are recorded. Random capabilities and
+request IDs remain independent of the deterministic ordering. The PRNG is not a
+security mechanism. Reports contain no job capabilities, cookies, session state,
+raw response bodies or arbitrary user-provided targets/credentials.
+
+JSON is schema- and consistency-checked before save/read. JSON and escaped,
+script-free HTML are published together by renaming a private temporary directory.
+Existing report IDs are not overwritten; traversal and symlinked paths are rejected.
+POSIX directories/files use owner-only modes; Windows access follows the parent
+user-data ACL and still requires platform validation before distribution.
+
+Exit status: 0 means execution completed (including an expected reproduced finding),
+2 means incomplete/failed, 64 means invalid options, 130 means cancelled. Inspect
+the result totals for findings instead of interpreting exit 0 as a safe target.
+
+各コマンドは専用サンプルを一時ポートで起動し、検証後に終了します。正常版・修正版は違反の
+再現なし、問題を入れた版では既知の4件を再現します。JSONと日英HTMLを非公開保存し、
+HTMLを直接開いて結果・証拠を参照できます。取消・回数上限・期限切れは実行完了と区別します。
+
+The CLI is usable in this development branch. Desktop controls, in-app results/evidence/HTML and illustrated guides are available
+in development builds. Release installer validation remains within 2.0.0;
+this command does not update the published 1.3.0 installers.
+この開発ブランチではCLIによる実行と保存が利用できます。アプリ画面からの操作・結果表示・日英教材にも対応し、配布確認を同じ2.0.0工程で進めます。公開済み1.3.0のインストーラーは更新しません。
+
+## Application workspace / アプリ画面
+
+Open **Sample verification** in the workspace, or use its browser-install-free
+shortcut on the setup screen. Start/cancel, inspect matching evidence by selecting
+a result row, and view the saved HTML report inside the workspace. The contextual
+manual drawer opens the illustrated verifier guide without discarding inputs.
+The API is protected by numeric loopback/Host/Origin checks, a private HttpOnly
+SameSite session and per-session job ownership. One active job is allowed per
+backend. No job capability or local file path is returned in job status.
+
+`npm run verifier:verify-ui` checks JA/EN baseline/changed/fixed, embedded report,
+input retention and three desktop viewport sizes. This optional integration check
+requires the source edition's Playwright Chromium. Unit tests require no browser.
