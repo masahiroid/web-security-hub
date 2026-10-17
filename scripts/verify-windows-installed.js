@@ -6,15 +6,32 @@ const SETTINGS = Object.freeze({ startupMs: 60000, pollMs: 250, closeMs: 15000, 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function waitUntil(check, timeout, phase) { const end = Date.now()+timeout; while(Date.now()<end){ if(await check())return; await sleep(SETTINGS.pollMs); } throw Error(`Native verification timed out: ${phase}`); }
 async function freePort() { const server=net.createServer(); await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve)); const port=server.address().port; await new Promise(resolve=>server.close(resolve)); return port; }
+// WebView2 150+ ignores environment overrides in elevated hosts. Keep the
+// documented machine-policy workaround inside disposable GitHub runners only.
+// https://github.com/MicrosoftEdge/WebView2Feedback/issues/5645
+function ciDebugPolicy(executable, port) {
+ if(process.env.GITHUB_ACTIONS!=='true')return ()=>{};
+ const registry='HKLM\\Software\\Policies\\Microsoft\\Edge\\WebView2\\AdditionalBrowserArguments';
+ const name=path.basename(executable);
+ const elevated=spawnSync('powershell.exe',['-NoProfile','-Command','([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)'],{encoding:'utf8'});
+ if(elevated.status!==0)throw Error('Could not inspect CI elevation');
+ if(elevated.stdout.trim()!=='True')return ()=>{};
+ if(spawnSync('reg.exe',['query',registry,'/v',name],{stdio:'ignore'}).status===0)throw Error('Existing WebView policy must not be overwritten');
+ const configured=spawnSync('reg.exe',['add',registry,'/v',name,'/t','REG_SZ','/d',`--remote-debugging-port=${port}`,'/f'],{stdio:'ignore'});
+ if(configured.status!==0)throw Error('Could not configure disposable CI debugging policy');
+ console.log('Elevated CI WebView policy configured for installed executable');
+ return ()=>{if(spawnSync('reg.exe',['delete',registry,'/v',name,'/f'],{stdio:'ignore'}).status!==0)throw Error('Could not remove CI debugging policy');};
+}
 (async()=>{
  if(process.platform!=='win32')throw Error('Run this check on Windows');
  const bundle=path.resolve('src-tauri/target/release/bundle/nsis'); const name=fs.readdirSync(bundle).find(file=>file.endsWith('.exe')); if(!name)throw Error('Build NSIS first');
- const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'wsh-native-')); const install=path.join(temporary,'app'); const checks=[]; let application; let browser;
+ const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'wsh-native-')); const install=path.join(temporary,'app'); const checks=[]; let application; let browser; let removePolicy=()=>{};
  try{
   const installer=spawnSync(path.join(bundle,name),['/S',`/D=${install}`],{windowsVerbatimArguments:true,timeout:SETTINGS.startupMs}); if(installer.status!==0)throw Error('Installer failed');
   const executables=fs.readdirSync(install).filter(file=>file.endsWith('.exe')&&!/^uninstall|web-security-node/i.test(file)); if(executables.length!==1)throw Error('Installed application not found');
   checks.push('NSIS installation completed'); console.log(checks.at(-1));
   const executable=path.join(install,executables[0]); const port=await freePort();
+  removePolicy=ciDebugPolicy(executable,port);
   application=spawn(executable,[],{env:{...process.env,WEB_SECURITY_HUB_DATA_DIR:path.join(temporary,'data'),WEBVIEW2_USER_DATA_FOLDER:path.join(temporary,'webview'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`},stdio:'ignore'});
   await waitUntil(async()=>{try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);return r.ok;}catch{if(application.exitCode!==null)throw Error(`Native process exited before WebView startup (${application.exitCode})`);return false;}},SETTINGS.startupMs,'WebView debugging endpoint');
   console.log('Native WebView debugging endpoint ready');
@@ -42,6 +59,7 @@ async function freePort() { const server=net.createServer(); await new Promise(r
  }finally{
   if(application&&application.exitCode===null)spawnSync('taskkill',['/PID',String(application.pid),'/T','/F']);
   if(browser)await browser.close().catch(()=>{});
+  removePolicy();
   fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5,retryDelay:SETTINGS.pollMs});
  }
 })().catch(error=>{console.error(error.message);process.exitCode=1});
