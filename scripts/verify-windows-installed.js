@@ -36,7 +36,14 @@ function ciDebugPolicy(executable, port) {
   await waitUntil(async()=>{try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);return r.ok;}catch{if(application.exitCode!==null)throw Error(`Native process exited before WebView startup (${application.exitCode})`);return false;}},SETTINGS.startupMs,'WebView debugging endpoint');
   console.log('Native WebView debugging endpoint ready');
   browser=await chromium.connectOverCDP(`http://127.0.0.1:${port}`); const context=browser.contexts()[0]; if(!context)throw Error('Native WebView unavailable');
-  let page; await waitUntil(async()=>{page=context.pages().find(value=>/127\.0\.0\.1/.test(value.url()));return Boolean(page);},SETTINGS.startupMs,'local application page');
+  let page; await waitUntil(async()=>{
+   const pages=context.pages(); page=pages.find(value=>/127\.0\.0\.1/.test(value.url()));
+   if(!page)for(const shell of pages){
+    const status=await shell.locator('#status').textContent({timeout:SETTINGS.pollMs}).catch(()=>null);
+    if(status?.includes('Could not start'))throw Error(`Installed app startup failed: ${status}`);
+   }
+   return Boolean(page);
+  },SETTINGS.startupMs,'local application page');
   console.log('Native local application page ready');
   await page.locator('#openVerifier').waitFor(); await page.click('#openVerifier'); await page.waitForFunction(()=>document.getElementById('panel-verifier')?.classList.contains('active'));
   for(const lang of ['ja','en']){
