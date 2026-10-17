@@ -5,7 +5,7 @@ export const LIMITS = Object.freeze({
   defaultTrialTimeoutMs: 5_000, maximumTrialTimeoutMs: 60_000,
   minimumTimeoutMs: 1, jsonPayloadBytes: 65_536, feedbackEvidenceCount: 100, responseInspectionBytes: 65_536,
   evidenceEvents: 10_000, profileSetupSteps: 4, identifierLength: 80,
-  digestHexLength: 64, sourceFileBytes: 1_048_576
+  digestHexLength: 64, routeLength: 500, sourceFileBytes: 1_048_576
 });
 export const HTTP_STATUS = Object.freeze({
   ok: 200, unauthorized: 401, forbidden: 403, notFound: 404, conflict: 409,

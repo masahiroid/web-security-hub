@@ -7,6 +7,7 @@ process.env.PATH = path.join(require('os').homedir(), '.cargo/bin') + path.delim
 const root = path.resolve(__dirname, '..');
 const verifierSourceDirectory = path.join(root, 'core/verifier/typed');
 function publicResource(file) {
+  if (file.endsWith('.d.ts')) return false;
   if (file === verifierSourceDirectory || file.startsWith(verifierSourceDirectory + path.sep)) return false;
   const name=path.basename(file);
   if(/(?:^|[\\/])(?:internal|\.internal)(?:[\\/]|$)/.test(file)||/\.internal\.(?:md|html)$/.test(name))return false;

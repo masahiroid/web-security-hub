@@ -12,11 +12,12 @@ const SOURCE_FILES = Object.freeze([
 ]);
 // Captured at module load: changing disk bytes must not silently relabel an already loaded server.
 const sourceDigest = sourceFingerprintSync(SOURCE_FILES);
-function createFixture({ instrumentation = true, evidenceCapacity } = {}) {
+function createFixture({ instrumentation = true, evidenceCapacity, initialMode = FIXTURE.initialMode } = {}) {
+  if (!FIXTURE.modes.includes(initialMode)) throw Error('Invalid fixture mode');
   const app = express();
   const controlToken = crypto.randomBytes(FIXTURE.controlTokenBytes).toString('hex');
   const sessions = new Map();
-  let mode = FIXTURE.initialMode;
+  let mode = initialMode;
   let events = [];
   let commits = [];
   const ledger = createFixtureLedger({ sourceDigest, instrumentation, ...(evidenceCapacity === undefined ? {} : { capacity: evidenceCapacity }) });
