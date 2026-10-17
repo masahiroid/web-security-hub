@@ -2,6 +2,7 @@
 // Adapt the shared illustrated course for managed startup, keeping source/CLI
 // documentation intact. All inserted actions are fixed, authenticated local APIs.
 function renderDesktopCourse(html, { lang, origin, port }) {
+  html = html.replace(/\r\n?/g, '\n');
   const ja = lang === 'ja';
   const labels = ja ? { baseline:'基本版に切り替える',changed:'変更版に切り替える',fixed:'修正版に切り替える',reset:'サンプルを初期化' } : { baseline:'Switch to baseline',changed:'Switch to changed',fixed:'Switch to fixed',reset:'Reset sample' };
   const button = mode => `<button type="button" data-training-mode="${mode}">${labels[mode]}</button>`;

@@ -4,9 +4,9 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { renderDesktopCourse } = require('../desktop/courseRenderer');
-for (const lang of ['ja','en']) {
-  test(`managed ${lang} course uses GUI actions while preserving scenarios and images`, () => {
-    const original = fs.readFileSync(path.join(__dirname,`../docs/training/README${lang==='ja'?'.ja':''}.html`),'utf8');
+for (const lang of ['ja','en']) for (const [ending,newline] of [['LF','\n'],['CRLF','\r\n']]) {
+  test(`managed ${lang} ${ending} course uses GUI actions while preserving scenarios and images`, () => {
+    const original = fs.readFileSync(path.join(__dirname,`../docs/training/README${lang==='ja'?'.ja':''}.html`),'utf8').replace(/\r\n?/g,'\n').replace(/\n/g,newline);
     const html = renderDesktopCourse(original,{lang,origin:'http://127.0.0.1:45001',port:45001});
     assert(!html.includes('npm install'));
     assert(!html.includes('npm run training:mode'));
