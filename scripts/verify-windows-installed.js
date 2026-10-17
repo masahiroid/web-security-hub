@@ -4,7 +4,7 @@ const fs = require('fs'); const path = require('path'); const os = require('os')
 const { spawn, spawnSync } = require('child_process'); const { chromium } = require('playwright');
 const SETTINGS = Object.freeze({ startupMs: 60000, pollMs: 250, closeMs: 15000, expectedCandidates: 22, expectedViolations: 4 });
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function waitUntil(check, timeout) { const end = Date.now()+timeout; while(Date.now()<end){ if(await check())return; await sleep(SETTINGS.pollMs); } throw Error('Native verification timed out'); }
+async function waitUntil(check, timeout, phase) { const end = Date.now()+timeout; while(Date.now()<end){ if(await check())return; await sleep(SETTINGS.pollMs); } throw Error(`Native verification timed out: ${phase}`); }
 async function freePort() { const server=net.createServer(); await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve)); const port=server.address().port; await new Promise(resolve=>server.close(resolve)); return port; }
 (async()=>{
  if(process.platform!=='win32')throw Error('Run this check on Windows');
@@ -13,11 +13,14 @@ async function freePort() { const server=net.createServer(); await new Promise(r
  try{
   const installer=spawnSync(path.join(bundle,name),['/S',`/D=${install}`],{windowsVerbatimArguments:true,timeout:SETTINGS.startupMs}); if(installer.status!==0)throw Error('Installer failed');
   const executables=fs.readdirSync(install).filter(file=>file.endsWith('.exe')&&!/^uninstall|web-security-node/i.test(file)); if(executables.length!==1)throw Error('Installed application not found');
+  checks.push('NSIS installation completed'); console.log(checks.at(-1));
   const executable=path.join(install,executables[0]); const port=await freePort();
   application=spawn(executable,[],{env:{...process.env,WEB_SECURITY_HUB_DATA_DIR:path.join(temporary,'data'),WEBVIEW2_USER_DATA_FOLDER:path.join(temporary,'webview'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`},stdio:'ignore'});
-  await waitUntil(async()=>{try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);return r.ok;}catch{return false;}},SETTINGS.startupMs);
+  await waitUntil(async()=>{try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);return r.ok;}catch{if(application.exitCode!==null)throw Error(`Native process exited before WebView startup (${application.exitCode})`);return false;}},SETTINGS.startupMs,'WebView debugging endpoint');
+  console.log('Native WebView debugging endpoint ready');
   browser=await chromium.connectOverCDP(`http://127.0.0.1:${port}`); const context=browser.contexts()[0]; if(!context)throw Error('Native WebView unavailable');
-  let page; await waitUntil(async()=>{page=context.pages().find(value=>/127\.0\.0\.1/.test(value.url()));return Boolean(page);},SETTINGS.startupMs);
+  let page; await waitUntil(async()=>{page=context.pages().find(value=>/127\.0\.0\.1/.test(value.url()));return Boolean(page);},SETTINGS.startupMs,'local application page');
+  console.log('Native local application page ready');
   await page.locator('#openVerifier').waitFor(); await page.click('#openVerifier'); await page.waitForFunction(()=>document.getElementById('panel-verifier')?.classList.contains('active'));
   for(const lang of ['ja','en']){
    await page.selectOption('#languageSelect',lang); await page.waitForFunction(language=>document.documentElement.lang===language,lang);
@@ -31,10 +34,10 @@ async function freePort() { const server=net.createServer(); await new Promise(r
    await page.fill('#verifierSeed','43'); await page.click('#helpBtn'); await page.frameLocator('#helpReader').locator('h1').waitFor(); await page.click('#closeHelp'); if(await page.inputValue('#verifierSeed')!=='43')throw Error('Native help lost inputs');
   }
   const close=spawnSync('powershell.exe',['-NoProfile','-Command','(Get-Process -Id $env:WSH_NATIVE_PID).CloseMainWindow()'],{env:{...process.env,WSH_NATIVE_PID:String(application.pid)},encoding:'utf8'}); if(close.status!==0)throw Error('Could not close owned window');
-  await waitUntil(()=>application.exitCode!==null,SETTINGS.closeMs); checks.push('Native app closed cleanly');
+  await waitUntil(()=>application.exitCode!==null,SETTINGS.closeMs,'native application exit'); checks.push('Native app closed cleanly');
   const uninstaller=fs.readdirSync(install).find(file=>/^uninstall.*\.exe$/i.test(file)); if(!uninstaller)throw Error('Uninstaller missing');
   const removed=spawnSync(path.join(install,uninstaller),['/S'],{timeout:SETTINGS.startupMs}); if(removed.status!==0)throw Error('Uninstall failed');
-  await waitUntil(()=>!fs.existsSync(executable),SETTINGS.closeMs); checks.push('NSIS install and uninstall PASS');
+  await waitUntil(()=>!fs.existsSync(executable),SETTINGS.closeMs,'NSIS uninstall'); checks.push('NSIS install and uninstall PASS');
   console.log(JSON.stringify({platform:'Windows x64',checks},null,2));
  }finally{
   if(application&&application.exitCode===null)spawnSync('taskkill',['/PID',String(application.pid),'/T','/F']);
