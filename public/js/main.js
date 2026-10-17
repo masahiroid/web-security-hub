@@ -11,3 +11,7 @@ $('settingsBtn').addEventListener('click', async () => { $('settingsModal').hidd
 $('closeSettingsBtn').addEventListener('click', () => { $('settingsModal').hidden = true; });
 refreshSiteList().catch(() => {});
 initializeI18n().catch(() => {});
+
+import "./workspace.js";
+
+import "./help.js";

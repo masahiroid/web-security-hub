@@ -1,0 +1,51 @@
+name: Desktop preview builds
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            name: macos-arm64
+          - runner: macos-15-intel
+            name: macos-x64
+          - runner: windows-latest
+            name: windows-x64
+          - runner: ubuntu-22.04
+            name: linux-x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux build prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
+      - run: npm ci --ignore-scripts
+      - run: npm audit --omit=dev --prefix desktop/runtime
+      - run: npm test
+      - run: npm run release:check
+      # Preview only. Apple credentials stay on the maintainer's Mac.
+      - run: npm run desktop:build -- -- --locked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.name }}-unsigned-preview
+          retention-days: 3
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error

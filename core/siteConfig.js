@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SITES_DIR = path.join(__dirname, '..', 'sites');
+const { SITES_DIR } = require('./paths');
 
 function sitesDir() {
   return SITES_DIR;
@@ -20,6 +20,17 @@ function listSites() {
     .filter((e) => e.isDirectory() && e.name !== '_template')
     .map((e) => e.name)
     .filter((id) => fs.existsSync(path.join(SITES_DIR, id, 'site.config.json')));
+}
+
+/** Groups site ids by their configured `folder` (unfoldered sites under `''`). */
+function listSitesByFolder() {
+  const groups = {};
+  for (const id of listSites()) {
+    const cfg = readSiteConfig(id);
+    const folder = cfg.folder || '';
+    (groups[folder] ||= []).push({ id, displayName: cfg.displayName, labels: cfg.labels || [] });
+  }
+  return groups;
 }
 
 function readSiteConfig(siteId) {
@@ -91,6 +102,22 @@ function toBool(v, fallback) {
 }
 
 /**
+ * Resolves non-secret client-certificate paths (site.config.json) plus the
+ * secret passphrase (.env SECRET_CLIENT_CERT_PASSPHRASE, via the same
+ * SECRET_ convention as core/scenario/variables.js) into the shape Playwright's
+ * `browserContext.clientCertificates` expects.
+ */
+function buildClientCert(dir, clientCert, env) {
+  if (!clientCert?.certPath || !clientCert?.keyPath) return undefined;
+  return {
+    origin: clientCert.origin,
+    certPath: path.resolve(dir, clientCert.certPath),
+    keyPath: path.resolve(dir, clientCert.keyPath),
+    passphrase: env.SECRET_CLIENT_CERT_PASSPHRASE || undefined,
+  };
+}
+
+/**
  * Builds a RunnerConfig (see core/runner/formRunner.js) from a site's
  * site.config.json + .env, resolving all relative paths to absolute ones.
  */
@@ -111,6 +138,10 @@ function buildRunnerConfig(siteId) {
       }
     : undefined;
 
+  // Lazily required to avoid a load-order issue: scenario/siteScenario.js itself
+  // requires this module (siteConfig.js) for readSiteConfig/readEnvFile.
+  const { resolveScenarioSteps } = require('./scenario/siteScenario');
+  const rawSteps = Array.isArray(cfg.scenario?.steps) ? cfg.scenario.steps : [];
   const scenario = {
     login: login
       ? {
@@ -122,7 +153,8 @@ function buildRunnerConfig(siteId) {
           submitSelector: login.submitSelector,
         }
       : undefined,
-    steps: Array.isArray(cfg.scenario?.steps) ? cfg.scenario.steps : [],
+    steps: resolveScenarioSteps(siteId, rawSteps),
+    dataSource: cfg.scenario?.dataSource,
   };
 
   const httpCredentials = cfg.basicAuth?.enabled
@@ -136,7 +168,16 @@ function buildRunnerConfig(siteId) {
 
   return {
     runnerConfig: {
+      siteId,
       url: cfg.baseUrl,
+      engine: cfg.browser?.engine || 'chromium',
+      device: cfg.browser?.device,
+      clientCert: buildClientCert(dir, cfg.browser?.clientCert, env),
+      storageStatePath: (() => {
+        const p = require('./scenario/authSession').storageStatePath(siteId);
+        return fs.existsSync(p) ? p : undefined;
+      })(),
+      ai: { enabled: toBool(cfg.ai?.assertionsEnabled, false), locale: cfg.ai?.locale || 'ja' },
       headful: toBool(crawl.headful, false),
       dryRun: toBool(crawl.dryRun, false),
       maxCasesPerForm: crawl.maxCasesPerForm ?? 25,
@@ -161,6 +202,7 @@ module.exports = {
   sitesDir,
   siteDir,
   listSites,
+  listSitesByFolder,
   readSiteConfig,
   writeSiteConfig,
   mergeSiteConfig,

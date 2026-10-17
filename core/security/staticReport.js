@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const REPORT_ROOT = path.join(__dirname, '..', '..', 'artifacts', 'static-scans');
+const REPORT_ROOT = path.join(require('../paths').ARTIFACTS_DIR, 'static-scans');
 
 function createRunId(now = new Date()) {
   return `sast-${now.toISOString().replace(/[-:TZ.]/g, '').slice(0, 14)}`;

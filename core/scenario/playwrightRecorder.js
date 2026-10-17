@@ -25,24 +25,41 @@ const RECORDER_SCRIPT = `(() => {
     return tag;
   };
   const sensitive = (element) => element.type === 'password' || /pass(word)?|secret|token|api[_-]?key|authorization|credential/i.test((element.name || '') + ' ' + (element.id || ''));
+  const healHintFor = (element) => {
+    if (!element || element.nodeType !== 1) return undefined;
+    const attr = (name) => element.getAttribute(name) || undefined;
+    const text = (element.innerText || element.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 60) || undefined;
+    return {
+      tag: element.tagName.toLowerCase(),
+      id: element.id || undefined,
+      dataTestId: attr('data-testid') || attr('data-test'),
+      name: attr('name'),
+      type: attr('type'),
+      role: attr('role'),
+      ariaLabel: attr('aria-label'),
+      placeholder: attr('placeholder'),
+      text,
+      classes: element.className && typeof element.className === 'string' ? element.className.trim().split(/\\s+/).slice(0, 3) : undefined,
+    };
+  };
   const send = (payload) => window.__recordScenarioInteraction(payload).catch(() => {});
   document.addEventListener('click', (event) => {
     const element = event.target.closest('a,button,input[type="submit"],input[type="button"],[role="button"]');
     const selector = selectorFor(element);
-    if (selector) send({ action: 'click', selector });
+    if (selector) send({ action: 'click', selector, healHint: healHintFor(element) });
   }, true);
   document.addEventListener('change', (event) => {
     const element = event.target;
     const selector = selectorFor(element);
     if (!selector || sensitive(element)) return;
-    if (element instanceof HTMLSelectElement) send({ action: 'select', selector, value: element.value });
-    else if (element instanceof HTMLInputElement && ['checkbox', 'radio'].includes(element.type)) send({ action: 'check', selector });
+    if (element instanceof HTMLSelectElement) send({ action: 'select', selector, value: element.value, healHint: healHintFor(element) });
+    else if (element instanceof HTMLInputElement && ['checkbox', 'radio'].includes(element.type)) send({ action: 'check', selector, healHint: healHintFor(element) });
   }, true);
   document.addEventListener('blur', (event) => {
     const element = event.target;
     if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) || sensitive(element)) return;
     const selector = selectorFor(element);
-    if (selector && element.value) send({ action: 'fill', selector, value: element.value });
+    if (selector && element.value) send({ action: 'fill', selector, value: element.value, healHint: healHintFor(element) });
   }, true);
 })();`;
 
@@ -54,12 +71,13 @@ function assertUrl(value) {
 
 function sanitizeRecordedStep(step, includeInputValues) {
   if (!step || typeof step !== 'object') return undefined;
+  const healHint = step.healHint && typeof step.healHint === 'object' ? step.healHint : undefined;
   if (step.action === 'fill') {
     if (!includeInputValues || SENSITIVE_NAME.test(step.selector || '')) return undefined;
-    return { action: 'fill', selector: String(step.selector || ''), value: String(step.value || '') };
+    return { action: 'fill', selector: String(step.selector || ''), value: String(step.value || ''), healHint };
   }
-  if (step.action === 'select') return { action: 'select', selector: String(step.selector || ''), value: String(step.value || '') };
-  if (step.action === 'check' || step.action === 'click') return { action: step.action, selector: String(step.selector || '') };
+  if (step.action === 'select') return { action: 'select', selector: String(step.selector || ''), value: String(step.value || ''), healHint };
+  if (step.action === 'check' || step.action === 'click') return { action: step.action, selector: String(step.selector || ''), healHint };
   return undefined;
 }
 

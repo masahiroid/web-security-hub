@@ -1,0 +1,221 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web Security Hub illustrated hands-on guide</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>Web Security Hub illustrated hands-on guide</h1>
+<p><a href="README.ja.html">日本語</a> · <a href="INSTRUCTOR.html">Instructor guide</a> · <a href="COVERAGE.html">Feature coverage</a></p>
+<p>Use a fictional workshop application site to practice the full workflow: register a target, generate tests, edit a case, detect a change, and inspect security findings. <strong>Hub runs on port 4173; the target site runs on port 4180.</strong></p>
+<p>Requirements: Node.js 22 or later and npm. The core course does not require Docker, ZAP, or Claude Code. Allow approximately 60–90 minutes, excluding initial downloads. Run all commands from the repository root.</p>
+<p>Use the left navigation to switch workspaces. Sites has General, Login, Basic auth, Scenario and Recorder tabs. Replay has Run settings and Case editor tabs. Select the saved scenario under Dynamic Scan → Authentication. Results and logs appear on the right; long content scrolls within its own pane.</p>
+<h2>T01 Start and reset</h2>
+<pre><code class="language-sh">npm install
+npx playwright install chromium
+npm run training:setup
+npm run training:start
+</code></pre>
+<p>Keep that terminal open. In another terminal:</p>
+<pre><code class="language-sh">npm start
+</code></pre>
+<ul>
+<li>Hub: <a href="http://127.0.0.1:4173">http://127.0.0.1:4173</a></li>
+<li>English sample: <a href="http://127.0.0.1:4180/en/login">http://127.0.0.1:4180/en/login</a></li>
+<li>Japanese sample: <a href="http://127.0.0.1:4180/ja/login">http://127.0.0.1:4180/ja/login</a></li>
+</ul>
+<p><code>training:setup</code> creates two local site configurations, <code>training-ja</code> and <code>training-en</code>, with fictional credentials. Existing configurations are preserved. To restore the course configuration, use <code>npm run training:setup -- --reset</code>. This overwrites only those two configurations and their demo credentials; previous sessions and baselines remain.</p>
+<p>With the sample server running, reset its mode:</p>
+<pre><code class="language-sh">npm run training:mode -- reset
+</code></pre>
+<p>Applications are never stored. Mode is held in memory and resets to baseline when the sample server restarts. Each learner should run their own environment: changing mode affects every browser connected to that sample server.</p>
+<h2>T02 Explore the sample</h2>
+<p>Open the English sample and sign in:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Email</td>
+<td><code>learner@example.test</code></td>
+</tr>
+<tr>
+<td>Password</td>
+<td><code>training-only</code></td>
+</tr>
+</tbody>
+</table>
+<p><img src="images/en/01-sample-login.png" alt="T02 Sample sign-in screen" /></p>
+<p>On the dashboard, select <strong>Apply for a workshop</strong>. Enter a name, email, and participant count, then submit. The valid range is 1–5 participants. A successful submission displays reference <code>LAB-0001</code>. Also check that an out-of-range count prevents submission.</p>
+<p><img src="images/en/02-sample-form.png" alt="T02 Application form with required fields, email validation and participant limits" /></p>
+<h2>T03 Register or inspect the target in Hub</h2>
+<p>In Hub, set the language to <strong>English (US)</strong> and select <strong>Training Lab (English) / training-en</strong> in the header.</p>
+<p><img src="images/en/03-site-settings.png" alt="T03 Site selection, basic settings and login configuration" /></p>
+<p>To practice registration, select <strong>+ New Site</strong> and enter the following. When using the preconfigured site, simply verify the same settings and continue.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Site ID</td>
+<td><code>training-en-practice</code> for a new site</td>
+</tr>
+<tr>
+<td>Display Name</td>
+<td><code>Training Practice</code></td>
+</tr>
+<tr>
+<td>Base URL</td>
+<td><code>http://127.0.0.1:4180/en/dashboard</code></td>
+</tr>
+<tr>
+<td>Maximum depth / pages / cases</td>
+<td><code>1</code> / <code>3</code> / <code>4</code></td>
+</tr>
+<tr>
+<td>Login URL</td>
+<td><code>http://127.0.0.1:4180/en/login</code></td>
+</tr>
+<tr>
+<td>Username / password / submit selector</td>
+<td><code>#email</code> / <code>#password</code> / <code>#sign-in</code></td>
+</tr>
+<tr>
+<td>Login username / password</td>
+<td><code>learner@example.test</code> / <code>training-only</code></td>
+</tr>
+</tbody>
+</table>
+<p>Credential fields become empty after saving. This is expected: their values are stored in the site's <code>.env</code> file. Signing into the sample yourself and configuring Hub's login credentials are separate operations.</p>
+<h2>T04 Record and save a scenario</h2>
+<p>Open <strong>Sites → Recorder</strong> and confirm authorization. Leave <strong>Record non-password input values</strong> unchecked, then select <strong>Open Recording Browser</strong>.</p>
+<p>In the separate browser window, start from the authenticated dashboard and click <strong>Apply for a workshop</strong>. <strong>Do not fill or submit the application during this recording.</strong> Return to Hub, select <strong>Stop Recording and Copy to Scenario</strong>, review the JSON, and select <strong>Save</strong>.</p>
+<p>If a visible browser cannot be opened in your environment, enter this JSON in <strong>Saved Scenario</strong> instead. It reaches the same application form and is already provided by <code>training:setup</code>.</p>
+<pre><code class="language-json">{
+  &quot;steps&quot;: [
+    { &quot;action&quot;: &quot;goto&quot;, &quot;url&quot;: &quot;http://127.0.0.1:4180/en/apply&quot; }
+  ]
+}
+</code></pre>
+<p><img src="images/en/04-scenario.png" alt="T04 Reproducible saved scenario using direct navigation" /></p>
+<p>Check that no password appears in the JSON and that the final destination is the application form. Recording a click produces <code>click</code>; direct navigation produces <code>goto</code>. The complete JSON need not match the screenshot.</p>
+<p><img src="images/en/04-recording-browser.png" alt="T04 Application form in the actual recording browser" /></p>
+<h2>T05 Generate tests</h2>
+<p>Open <strong>Test Cases</strong>, select <strong>Run Pipeline</strong>, and wait for completion. The pipeline crawls pages, extracts forms, generates values, executes cases, and generates Playwright code. It submits forms, so check that your training target is selected.</p>
+<p><img src="images/en/05-generation.png" alt="T05 Actual pipeline results, logs and report links" /></p>
+<p>Select <strong>Open report</strong> and inspect the discovered form and cases. Look for empty values, invalid email addresses, and minimum/maximum participant values. A limit of four cases does not cover every combination.</p>
+<p>Generation's OK status does not establish that all business requirements are satisfied. In particular, abnormal-case handling is not a strict assertion that the server rejected the input as intended. The next exercise uses explicit input and visual comparison.</p>
+<h2>T06 Edit a case</h2>
+<p>In <strong>Replay</strong>, select the session created in T05 and select <strong>Load</strong> under <strong>Edit Test Cases</strong>. <strong>Keep the first row and remove all remaining rows.</strong> Change that row to:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td><code>Demo Learner</code></td>
+</tr>
+<tr>
+<td>contact</td>
+<td><code>learner@example.test</code></td>
+</tr>
+<tr>
+<td>participants</td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td>course, if present</td>
+<td><code>web</code></td>
+</tr>
+<tr>
+<td>updates, if present</td>
+<td><code>off</code></td>
+</tr>
+</tbody>
+</table>
+<p>Select <strong>Save &amp; Regenerate</strong>. This updates the session's YAML and generated spec. The original generation report is not rebuilt; use the replay report for subsequent results.</p>
+<p><img src="images/en/06-case-editor.png" alt="T06 One edited case with five participants" /></p>
+<h2>T07 Record the baseline</h2>
+<p>Set the sample to its baseline version:</p>
+<pre><code class="language-sh">npm run training:mode -- baseline
+</code></pre>
+<p>Leave <strong>Comparison URL</strong> empty and all ZAP options unchecked. Select <strong>Record Baseline</strong>.</p>
+<p><img src="images/en/07-baseline.png" alt="T07 Successful baseline recording" /></p>
+<p>Next, select <strong>Replay &amp; Compare</strong>. All tests should pass because the site has not changed.</p>
+<p><img src="images/en/08-unchanged.png" alt="T07 Comparison against the unchanged sample" /></p>
+<p>Replay includes crawled-page screenshots as well as the edited form case. The total test count can therefore exceed the number of cases in the table.</p>
+<h2>T08 Detect a change and verify the fix</h2>
+<pre><code class="language-sh">npm run training:mode -- changed
+</code></pre>
+<p>Select <strong>Replay &amp; Compare</strong> on the same session. The maximum count is now three, so an application for five participants no longer reaches the completion screen. The form itself also changes. Confirm that differences are reported. Inspect the expected, actual and diff image paths in the log; Playwright stores them under the location it reports, such as the session's <code>test-results/</code> directory.</p>
+<p><img src="images/en/09-changed.png" alt="T08 Changed version produces comparison failures" /></p>
+<p><strong>Do not select Record Baseline here.</strong> That would accept the changed version as the new reference.</p>
+<pre><code class="language-sh">npm run training:mode -- fixed
+</code></pre>
+<p>Run <strong>Replay &amp; Compare</strong> again. All tests should pass. The fixed version restores the original participant limit and appearance.</p>
+<p><img src="images/en/10-fixed.png" alt="T08 Fixed version passes again" /></p>
+<h2>T09 Run a dynamic scan</h2>
+<p>Open <strong>Dynamic Scan</strong> and verify the target URL points to the sample. Check <strong>Use the saved scenario for the selected site</strong> and the authorization checkbox. Set maximum pages to <code>1</code>. Leave ZAP and active scanning disabled, then select <strong>Start Scan</strong>.</p>
+<p><img src="images/en/11-dast-fixed.png" alt="T09 Passive scan of the fixed version" /></p>
+<p>Run <code>npm run training:mode -- changed</code> and repeat the same scan. Confirm that missing CSP and MIME-sniffing protection findings appear.</p>
+<p><img src="images/en/12-dast-changed.png" alt="T09 Changed version adds missing security header findings" /></p>
+<p>Restore <code>fixed</code> mode and scan again: those two findings should disappear. Local HTTP and other header findings remain. The goal is to connect deliberate changes with the corresponding findings, rather than to reach zero findings.</p>
+<h2>T10 Run static analysis</h2>
+<p>In <strong>Static Analysis</strong>, enter the <strong>absolute path</strong> to <code>training/sast/before</code> and start the scan. On macOS/Linux, run <code>pwd</code> from the repository root and append <code>/training/sast/before</code>. On Windows PowerShell, use <code>(Resolve-Path training/sast/before).Path</code>.</p>
+<p><img src="images/en/13-sast-before.png" alt="T10 Static analysis of the before fixture" /></p>
+<p>Expected rules: <code>SAST-DANGEROUS-EVAL</code> (dynamic code execution) and <code>SAST-SQL-CONCAT</code> (SQL string concatenation). These are inert teaching fixtures; the sample server never executes them.</p>
+<p>Change the directory to the absolute path of <code>training/sast/after</code> and scan again. Expect zero findings from this scanner. This does not prove that an entire application is secure. Open the HTML, JSON, Markdown or SARIF report links to inspect saved evidence.</p>
+<p><img src="images/en/13-sast-after.png" alt="T10 Static analysis of the after fixture" /></p>
+<h2>T11 Finish</h2>
+<p>Restore the sample with <code>npm run training:mode -- reset</code>, then press Ctrl+C in both server terminals. Record your session ID, edited values, reason for visual differences, additional DAST findings and SAST rule IDs.</p>
+<p>Use the <a href="COVERAGE.html">coverage table</a> to choose subsequent exercises involving ZAP, exploration, variables, shared steps or browser configuration.</p>
+<h2>Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Check or recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EADDRINUSE / server will not start</td>
+<td>Check ports 4173 and 4180. Stop manually started servers before running capture or verification automation</td>
+</tr>
+<tr>
+<td>Browser executable missing</td>
+<td>Run <code>npx playwright install chromium</code></td>
+</tr>
+<tr>
+<td>Sign-in fails</td>
+<td>Verify demo credentials and the three selectors. Restore with <code>training:setup -- --reset</code> if needed</td>
+</tr>
+<tr>
+<td>Recording browser will not open</td>
+<td>Requires a desktop session. Use the T04 JSON fallback</td>
+</tr>
+<tr>
+<td>No form discovered</td>
+<td>End the scenario at <code>/en/apply</code>; remove submission/logout steps and save</td>
+</tr>
+<tr>
+<td>First comparison reports differences</td>
+<td>Record the baseline first; select the same session</td>
+</tr>
+<tr>
+<td>Fixed version still differs</td>
+<td>Check saved edits and fixed mode; keep OS, browser, fonts and display scaling consistent</td>
+</tr>
+<tr>
+<td>Counts differ from the screenshot</td>
+<td>Counts vary with recorded route, settings and version; check completion and expected inputs/results</td>
+</tr>
+</tbody>
+</table>
+<p>Images are real application captures. See <a href="images/manifest.json">manifest.json</a> for capture conditions. Some engine logs, generated case names and finding descriptions remain in Japanese even in English UI. Relevant meanings and expected rule IDs are explained above; a complete translation of engine output is separate work.</p>
+</main></html>

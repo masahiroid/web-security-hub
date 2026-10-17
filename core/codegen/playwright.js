@@ -24,7 +24,7 @@ function generatePlaywrightCode(items, options = {}) {
 // visited pages: ${visited.length}
 //
 // BASE_URL can be overridden via the BASE_URL env var (e.g. old vs new server comparison).
-import { test, expect } from 'playwright/test';
+const { test, expect } = require(process.env.WEB_SECURITY_HUB_PLAYWRIGHT_TEST || 'playwright/test');
 
 const BASE_URL = process.env.BASE_URL ?? ${JSON.stringify(originOf(firstUrl))};
 const STRICT_PAGE_ASSERT = /^(1|true|yes)$/i.test(process.env.GOLDEN_MASTER_STRICT_PAGE_ASSERT ?? '');
@@ -269,18 +269,46 @@ function renderVisitedPages(snapshots, fallbackUrls) {
 
 function renderScenarioHelper(steps) {
   const safeSteps = Array.isArray(steps) ? steps : [];
+  // Mirrors core/scenario/stepExecutor.js's semantics, inlined so the generated
+  // spec stays a standalone file with no dependency on the rest of this app.
   return `
+const path = require('path');
 const SAVED_SCENARIO_STEPS = ${JSON.stringify(safeSteps)};
-async function runSavedScenario(page) {
-  for (const step of SAVED_SCENARIO_STEPS) {
+
+function evaluateScenarioCondition(page, condition) {
+  if (!condition || !condition.selector) return Promise.resolve(false);
+  const locator = page.locator(condition.selector);
+  if (condition.exists !== undefined) return locator.count().then((n) => (condition.exists ? n > 0 : n === 0));
+  if (condition.visible !== undefined) return locator.count().then((n) => n > 0 && locator.first().isVisible().catch(() => false)).then((v) => (condition.visible ? v : !v));
+  if (condition.equals !== undefined) return locator.first().textContent().then((t) => (t || '').trim() === String(condition.equals)).catch(() => false);
+  return Promise.resolve(false);
+}
+
+async function runSavedScenarioSteps(page, steps) {
+  for (const step of steps || []) {
     if (step.action === 'goto' && step.url) { const url = new URL(step.url, BASE_URL); await page.goto(BASE_URL + url.pathname + url.search + url.hash, { waitUntil: 'domcontentloaded' }); }
     else if (step.action === 'click' && step.selector) await page.locator(step.selector).click();
     else if (step.action === 'fill' && step.selector) await page.locator(step.selector).fill(String(step.value ?? ''));
     else if (step.action === 'check' && step.selector) await page.locator(step.selector).check();
+    else if (step.action === 'uncheck' && step.selector) await page.locator(step.selector).uncheck();
     else if (step.action === 'select' && step.selector) await page.locator(step.selector).selectOption(String(step.value ?? ''));
     else if (step.action === 'wait') await page.waitForTimeout(Math.min(Math.max(Number(step.value) || 500, 0), 10000));
+    else if (step.action === 'back') await page.goBack({ waitUntil: 'domcontentloaded' }).catch(() => {});
+    else if (step.action === 'forward') await page.goForward({ waitUntil: 'domcontentloaded' }).catch(() => {});
+    else if (step.action === 'reload') await page.reload({ waitUntil: 'domcontentloaded' });
+    else if (step.action === 'setFile' && step.selector) await page.locator(step.selector).setInputFiles(path.join(__dirname, 'fixtures', step.path));
+    else if (step.action === 'download' && step.selector) {
+      const [download] = await Promise.all([page.waitForEvent('download'), page.locator(step.selector).click()]);
+      if (step.saveAs) await download.saveAs(path.join(__dirname, 'downloads', step.saveAs));
+    }
+    else if (step.action === 'branch') { const matched = await evaluateScenarioCondition(page, step.condition); await runSavedScenarioSteps(page, matched ? step.then : step.else); }
+    else if (step.action === 'loop') { const times = Math.min(Math.max(Number(step.times) || 0, 0), 200); for (let i = 0; i < times; i++) await runSavedScenarioSteps(page, step.steps); }
     await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
   }
+}
+
+async function runSavedScenario(page) {
+  await runSavedScenarioSteps(page, SAVED_SCENARIO_STEPS);
 }
 `;
 }

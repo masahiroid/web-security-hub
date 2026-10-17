@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Instructor guide</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>Instructor guide</h1>
+<p><a href="INSTRUCTOR.ja.html">日本語</a> · <a href="README.html">Learner guide</a></p>
+<h2>Preparation</h2>
+<p>Verify Node.js 22+, npm and Chromium. Each learner needs an independent local sample server: mode changes affect all browsers connected to the same server.</p>
+<p>Before delivery, run <code>npm test</code>, <code>npm run training:verify</code> and <code>npm run training:capture</code>. Stop manually started Hub/sample servers first: the latter commands start their own servers. Capture creates a new generation session for each training site and edits only that new session. It preserves previous sessions and does not automatically terminate processes occupying its ports.</p>
+<p>Learners start with <code>training:setup</code> and the two server terminals. If they register a new practice site, keep that site selected throughout. English uses <code>/en/</code> URLs and <code>training-en</code>; Japanese uses <code>/ja/</code> and <code>training-ja</code>.</p>
+<h2>Suggested delivery</h2>
+<table>
+<thead>
+<tr>
+<th>Approximate time</th>
+<th>Steps</th>
+<th>Completion checkpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–10 minutes</td>
+<td>T01–T02</td>
+<td>Explain the two ports; submit a demo application</td>
+</tr>
+<tr>
+<td>10–25 minutes</td>
+<td>T03–T04</td>
+<td>Verify credentials and the saved scenario</td>
+</tr>
+<tr>
+<td>25–40 minutes</td>
+<td>T05–T06</td>
+<td>Generate cases; keep one case with five participants</td>
+</tr>
+<tr>
+<td>40–60 minutes</td>
+<td>T07–T08</td>
+<td>Unchanged PASS → changed differences → fixed PASS</td>
+</tr>
+<tr>
+<td>60–80 minutes</td>
+<td>T09–T10</td>
+<td>Explain DAST changes and before/after SAST findings</td>
+</tr>
+<tr>
+<td>80–90 minutes</td>
+<td>T11</td>
+<td>Share observations and clean up</td>
+</tr>
+</tbody>
+</table>
+<p>These are planning estimates, excluding initial downloads, hardware variation and recovery time.</p>
+<h2>Assessment criteria</h2>
+<ul>
+<li>T04: Reach the application form without storing a password in scenario JSON.</li>
+<li>T05: Generate at least one form and open its report. Understand that generation's OK does not establish business correctness.</li>
+<li>T06: Keep the first row; use <code>Demo Learner</code>, <code>learner@example.test</code>, and <code>5</code>. Optional columns may be absent.</li>
+<li>T07: Baseline recording and unchanged comparison both pass.</li>
+<li>T08: Changed mode reports differences; fixed mode passes. Do not update the baseline in between.</li>
+<li>T09: Only changed mode adds <code>DAST-HEADER-CONTENT-SECURITY-POLICY</code> and <code>DAST-HEADER-X-CONTENT-TYPE-OPTIONS</code> for the single application page.</li>
+<li>T10: Before yields <code>SAST-DANGEROUS-EVAL</code> and <code>SAST-SQL-CONCAT</code>; after yields zero findings.</li>
+</ul>
+<p>Discuss why local HTTP findings remain, how scenario actions differ from passive analysis, and why visual comparison cannot establish every business requirement. Use the same OS, browser and fonts for baseline and comparison.</p>
+<h2>Recovery</h2>
+<p>If recording includes submission, restore the T04 JSON. If a learner accidentally records the changed version as the baseline, restore baseline mode, record again, then repeat the unchanged comparison.</p>
+<p>Use <code>npm run training:setup -- --reset</code> for configuration and <code>npm run training:mode -- reset</code> for sample state. Configuration reset preserves previous sessions. Run the pipeline again and select its new session when restarting an exercise.</p>
+<h2>Feedback to collect</h2>
+<p>Record application version, OS/browser, locale, session ID, step ID, expected behavior, actual behavior and a screenshot if useful. Exclude real credentials and personal data. Turn these reports into sample reproductions, fixes, regression tests and synchronized updates to both guides.</p>
+</main></html>
