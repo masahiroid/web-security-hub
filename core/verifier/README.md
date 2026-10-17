@@ -1,7 +1,7 @@
 # Verifier foundation / 検証基盤
 
 This is a backend foundation, not a connected scanning feature. LLM, MCP,
-Browser UI execution, AST slicing and OpenVEX export are not implemented here.
+browser UI execution, AST slicing and OpenVEX export are not implemented here.
 An isolated Playwright APIRequestContext runner is available for local HTTP trials.
 
 現在はバックエンド基盤です。独立したPlaywright APIRequestContextによるHTTP試行に対応します。
@@ -30,7 +30,7 @@ No model or paid provider calls exist in this phase.
 
 ## HTTP runner / HTTP試行
 
-`createHttpRunner({ registry, profiles, controls, timeoutMs })` in
+`createHttpRunner({ registry, profiles, controls, timeoutMs, evidenceSource })` in
 `runners/httpRunner.js` receives catalogs from the trusted backend.
 Each profile fixes its numeric loopback origin and up to four explicit POST
 setup steps (for example, the fixture's fake session selector). Catalogs are
@@ -59,19 +59,19 @@ and release reservations. Every target dispatch has unique job/trial/request
 IDs and the seed ID in `X-Verifier-*` headers. `dispatched` means the target
 fetch was invoked, not proof that the server received or executed it.
 
-Results contain only validated observation metadata, inconclusive feedback and
+Results contain validated observation metadata, correlated evidence, feedback and
 a draft assessment. Cookies, body values, raw response headers, redirect URLs
 and transport exception messages are excluded. A 64 KiB check limits response
 JSON inspection **after Playwright has buffered the response**; it is not a
 streaming network-size limit. Targets remain controlled local fixtures.
-Server reachability/digest and candidate business-oracle evidence are not yet
-connected, so status 200/403/500 alone never establishes a vulnerability or
-absence of one. The pair's `completed` state describes execution, not a safe
+Optional fixture instrumentation verifies server reachability, build digest and
+independent business-oracle evidence. Status 200/403/500 alone never establishes
+a vulnerability or absence of one. The pair's `completed` state describes execution, not a safe
 or affected verdict.
 
 HTTP試行はseedごとに認証状態を分離します。正常対照の失敗時は候補を実行せず、
 応答コードだけでは脆弱性や安全性を判定しません。取消・期限切れ・timeoutで通信を
-閉じます。サーバー側計測・独立oracle・GUIへの接続は後続段階です。
+閉じます。専用fixtureのサーバー側計測・独立oracleに対応し、GUIへの接続は後続段階です。
 
 ## Local fixture / ローカル専用サンプル
 
@@ -103,3 +103,63 @@ cookies or submitted values. The `/boundary` endpoint accepts integer
 participants 1–5 and a label containing 1–10 Unicode code points after NFC.
 Instrumentation can be disabled explicitly through the factory; absence must
 be represented as `unavailable`, never inferred as an unreached server sink.
+
+
+## Correlated evidence / 相関を確認した証拠
+
+The backend can supply the fixture's private evidence port:
+
+```js
+const evidenceSource = {
+  expectedSourceDigest: fixture.sourceDigest,
+  currentSourceDigest: signal => fixture.currentSourceDigest(signal),
+  read: async correlation => fixture.readEvidence(correlation)
+};
+```
+
+This is a factory-level integration; it adds no HTTP control API to the main
+application. All five identifiers (job/trial/seed/request/profile) must match.
+The loaded build fingerprint covers fixture routes, policy definitions, oracle
+and ledger code. Current disk bytes are checked before and after evidence read.
+A mismatch, missing/disabled/truncated trace, unknown fields, duplicate IDs or
+unavailable collection produces inconclusive feedback. Evidence collection is
+bounded by cancellation and the remaining trial/job time budget.
+
+For ownership checks the server oracle is independent of route guards; a read
+also requires a matching record response before it counts as disclosure.
+For workflow checks the event is recorded after the actual fake commit.
+A trusted control may fix its own `authProfileId` (for example, a confirmed
+owner), while the candidate uses another granted profile in a fresh context.
+With evidence enabled, the normal control must also have verified, passing
+oracle evidence. Only a verified violation plus a passing control can produce
+the internal `reproduced` result. Every assessment remains a draft with VEX
+status `under_investigation`; no OpenVEX exporter is implemented yet.
+
+証拠は5つのIDと実行ソースのdigestを照合します。未計測・欠落・上限到達・digest不一致を
+「Sinkに到達しなかった」とは扱いません。所有権違反は応答内容も確認し、確認手順の違反は
+実際の架空データ更新後に記録します。HTTP200のエラーページだけで再現成功にはしません。
+
+## TypeScript development / 段階的なTypeScript移行
+
+```sh
+npm ci --ignore-scripts
+npm run typecheck
+npm run build:verifier
+npm test
+```
+
+`typed/domain` contains pure policies and oracle rules; `typed/application`
+orchestrates use cases through typed ports; `typed/adapters` owns Playwright,
+source reads and the fixture ledger. Existing CommonJS callers use the small
+`runners/httpRunner.js` facade. Limits/protocol/fixture definitions are named in
+`typed/domain/config.ts`; operational timeout and evidence capacity are bounded
+factory options. TypeScript uses strict mode and emits normal CommonJS JavaScript
+to ignored `generated/`. Do not edit emitted files.
+
+Tests and the fixture command build automatically. Desktop preparation builds
+before staging, includes emitted JavaScript and excludes TypeScript sources and
+the compiler. Installed users need no TypeScript tooling. Remaining legacy
+JavaScript modules will migrate incrementally with behavior tests.
+
+新しい検証処理はstrictなTypeScriptで追加し、既存JSは互換入口を残して段階的に整理します。
+生成JSはGit対象外ですが、配布時にコンパイルして同梱するため、利用者の環境でコンパイルは不要です。

@@ -33,7 +33,12 @@
     "desktop:release:macos": "node scripts/release-macos.js",
     "desktop:sign:macos": "node scripts/sign-macos.js",
     "verifier:fixture": "node training/verifier-site/server.js",
-    "verifier:test": "node --test test/verifier.test.js test/verifierHttpRunner.test.js"
+    "verifier:test": "node --test test/verifier.test.js test/verifierHttpRunner.test.js",
+    "build:verifier": "tsc -p tsconfig.verifier.json",
+    "typecheck": "tsc -p tsconfig.verifier.json --noEmit",
+    "pretest": "npm run build:verifier",
+    "preverifier:test": "npm run build:verifier",
+    "preverifier:fixture": "npm run build:verifier"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -45,6 +50,8 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.12.3",
-    "appium-xcuitest-driver": "^12.13.1"
+    "@types/node": "22.20.5",
+    "appium-xcuitest-driver": "^12.13.1",
+    "typescript": "7.0.2"
   }
 }

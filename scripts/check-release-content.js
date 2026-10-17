@@ -17,7 +17,7 @@ for(const file of files){
 }
 if(process.argv.includes('--history')) {
  const entries=execFileSync('git',['rev-list','--objects','--branches','--tags','--remotes'],{encoding:'utf8'}).trim().split('\n');let blobs=0;
- for(const entry of entries){const space=entry.indexOf(' ');if(space<0)continue;const oid=entry.slice(0,space),file=entry.slice(space+1);if(!/\.(?:js|json|md|html|yml|yaml|sh|rs|toml|plist|txt|env|example)$/.test(file))continue;
+ for(const entry of entries){const space=entry.indexOf(' ');if(space<0)continue;const oid=entry.slice(0,space),file=entry.slice(space+1);if(!/\.(?:js|ts|cts|mts|json|md|html|yml|yaml|sh|rs|toml|plist|txt|env|example)$/.test(file))continue;
   let value;try{value=execFileSync('git',['cat-file','blob',oid],{encoding:'utf8',maxBuffer:16*1024*1024,stdio:['ignore','pipe','ignore']});}catch{continue;}blobs++;
   if(isInternalDoc(file))issues.push({file,reason:'internal documentation in Git history'});
   if(forbidden.test(file)&&!file.endsWith('.env.example'))issues.push({file,reason:'credential file in Git history'});

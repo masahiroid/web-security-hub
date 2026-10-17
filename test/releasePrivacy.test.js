@@ -9,3 +9,29 @@ test('release check rejects force-added internal documents even when Git ignores
   git(['add','-f','docs/internal/review.md']);const result=check();assert.equal(result.status,1);assert.match(result.stderr,/internal documentation must not be published/);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('release history audit checks removed TypeScript files for credential patterns', () => {
+ const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'wsh-ts-history-'));
+ try {
+  const git = args => {
+   const result = spawnSync('git', args, { cwd: directory, encoding: 'utf8' });
+   assert.equal(result.status, 0, result.stderr);
+  };
+  git(['init', '-q']);
+  const sourceFile = path.join(directory, 'removed.ts');
+  const syntheticToken = 'ghp_' + 'A'.repeat(36);
+  fs.writeFileSync(sourceFile, `export const testCredential = '${syntheticToken}';\n`);
+  git(['add', 'removed.ts']);
+  const identity = ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.test'];
+  git([...identity, 'commit', '-qm', 'Fixture source']);
+  fs.unlinkSync(sourceFile);
+  git(['add', '-u']);
+  git([...identity, 'commit', '-qm', 'Remove fixture source']);
+  const checker = path.resolve('scripts/check-release-content.js');
+  assert.equal(spawnSync(process.execPath, [checker], { cwd: directory }).status, 0);
+  const audited = spawnSync(process.execPath, [checker, '--history'], { cwd: directory, encoding: 'utf8' });
+  assert.equal(audited.status, 1);
+  assert.match(audited.stderr, /GitHub token in Git history/);
+  assert.match(audited.stderr, /removed\.ts/);
+ } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});
