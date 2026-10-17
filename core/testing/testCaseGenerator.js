@@ -12,7 +12,7 @@ const { processForm } = require('../runner/formProcessor');
 const { dedupeForms, buildUrlCatalog } = require('../runner/formDiscovery');
 const { runSteps } = require('../scenario/stepExecutor');
 
-const OUTPUT_ROOT = path.join(__dirname, '..', '..', 'artifacts', 'test-sessions');
+const OUTPUT_ROOT = path.join(require('../paths').ARTIFACTS_DIR, 'test-sessions');
 const ruleBasedSemantics = { name: 'rule-based', inferFieldSemantics: async () => [] };
 
 async function generateTestCases({ targetUrl, maxPages = 20, maxDepth = 2, maxCasesPerForm = 25, scenario, execute = false, onProgress = () => {} }) {

@@ -2,9 +2,11 @@
 
 [日本語版](ja/USER_MANUAL.md)
 
+> Start with the [illustrated hands-on course](training/README.md). See [feature coverage](training/COVERAGE.md) for core and advanced workflows.
+
 ## 1. Purpose
 
-Web Security Hub is a local tool that uses one target site, authentication configuration, and test scenario for both form regression tests and web application security assessment. Test-case generation and scanning remain deterministic; Claude Code is available only as an optional post-scan SAST review.
+Web Security Hub is a local tool that uses one target site, authentication configuration, and test scenario for both form regression tests and web application security assessment. Test-value generation and scanning are rule-based. Claude Code SAST review and natural-language assertions are optional features requiring explicit enablement.
 
 Main uses:
 
@@ -46,7 +48,7 @@ Credentials are stored in `sites/<siteId>/.env` and are never displayed again. U
 
 ### Saved scenarios
 
-Use **Saved Scenario** to store a JSON object containing `steps`. Supported actions are `goto`, `click`, `fill`, `check`, `select`, and `wait`; a scenario can contain up to 50 steps. Do not put credentials in this JSON. Login selectors are saved in Site Management and credentials remain in `.env`.
+Use **Saved Scenario** to store a JSON object containing `steps`. Basic actions are `goto`, `click`, `fill`, `check`, `select`, and `wait`; a scenario can contain up to 50 steps. See the [README](../README.md) and [coverage table](training/COVERAGE.md) for navigation, file operations, branches, loops and other extensions. Do not put credentials in this JSON. Login selectors are saved in Site Management and credentials remain in `.env`.
 
 The saved scenario is used by test-case generation and is embedded in generated Playwright replay specs. In **Dynamic Security Scan**, select **Use the saved scenario for the selected site** to run the same authenticated flow without exposing credentials to the browser UI.
 
@@ -118,7 +120,7 @@ Example scenario JSON:
 }
 ```
 
-Available actions are `goto`, `click`, `fill`, `check`, `select`, and `wait`. Credentials and scenario content are neither persisted nor included in assessment results.
+Basic actions are `goto`, `click`, `fill`, `check`, `select`, and `wait`. See the README for extended actions. Credentials and scenario content are neither persisted nor included in assessment results.
 
 ## 8. Static analysis
 

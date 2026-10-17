@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 'use strict';
 import { $ } from './dom.js';
 import { api } from './api.js';
@@ -30,7 +31,7 @@ function renderCaseEditor() {
     const thead = document.createElement('thead');
     thead.innerHTML = `<tr>
       <th style="text-align:left; padding:6px">Case ID</th>
-      <th style="text-align:left; padding:6px">名前</th>
+      <th style="text-align:left; padding:6px">${t('label.caseName')}</th>
       ${selectors.map((s) => `<th style="text-align:left; padding:6px">${shortSelectorLabel(s)}</th>`).join('')}
       <th style="padding:6px"></th>
     </tr>`;
@@ -49,7 +50,7 @@ function renderCaseEditor() {
             return `<td style="padding:4px"><input data-g="${gIdx}" data-c="${cIdx}" data-sel="${encodeURIComponent(s)}" value="${(a.value ?? '').replace(/"/g, '&quot;')}" style="width:100%" /></td>`;
           })
           .join('')}
-        <td style="padding:4px"><button type="button" class="secondary" data-remove-g="${gIdx}" data-remove-c="${cIdx}">削除</button></td>
+        <td style="padding:4px"><button type="button" class="secondary" data-remove-g="${gIdx}" data-remove-c="${cIdx}">${t('remove')}</button></td>
       `;
       tbody.appendChild(tr);
     });
@@ -86,23 +87,23 @@ function collectCaseEditorEdits() {
 $('loadCaseEditorBtn').addEventListener('click', async () => {
   const status = $('caseEditorStatus');
   if (!state.siteId) {
-    status.textContent = 'サイトを選択してください';
+    status.textContent = t('error.selectSite');
     return;
   }
   const sessionId = $('replaySession').value;
   if (!sessionId) {
-    status.textContent = 'セッションを選択してください';
+    status.textContent = t('error.selectSession');
     return;
   }
-  status.textContent = '読み込み中...';
+  status.textContent = t('status.loading');
   try {
     const data = await api(`/sites/${state.siteId}/sessions/${sessionId}/test-cases`);
     editorGroups = data.testCaseGroups ?? [];
     renderCaseEditor();
-    status.textContent = `${editorGroups.reduce((n, g) => n + (g.cases?.length ?? 0), 0)}件のケースを読み込みました`;
+    status.textContent = t('status.casesLoaded', { count: editorGroups.reduce((n, g) => n + (g.cases?.length ?? 0), 0) });
     $('saveCaseEditorBtn').style.display = editorGroups.length ? 'inline-block' : 'none';
   } catch (e) {
-    status.textContent = `エラー: ${e.message}`;
+    status.textContent = t('status.error', { message: e.message });
   }
 });
 
@@ -110,15 +111,15 @@ $('saveCaseEditorBtn').addEventListener('click', async () => {
   const status = $('caseEditorStatus');
   const sessionId = $('replaySession').value;
   if (!state.siteId || !sessionId) return;
-  status.textContent = '保存 → generated.spec.ts を再生成中...';
+  status.textContent = t('status.regenerating');
   try {
     const testCaseGroups = collectCaseEditorEdits();
     await api(`/sites/${state.siteId}/sessions/${sessionId}/test-cases`, {
       method: 'PUT',
       body: JSON.stringify({ testCaseGroups }),
     });
-    status.textContent = '保存・再生成しました。「再実行」で確認できます。';
+    status.textContent = t('status.regenerated');
   } catch (e) {
-    status.textContent = `エラー: ${e.message}`;
+    status.textContent = t('status.error', { message: e.message });
   }
 });

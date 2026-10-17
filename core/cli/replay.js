@@ -38,10 +38,9 @@ function main() {
 
   const sessionDir = path.dirname(specPath);
   const specFileName = path.basename(specPath);
-  const projectRoot = path.resolve(__dirname, '..', '..');
 
   console.log(`[replay] session=${sessionDir}`);
-  console.log(`[replay] running: npx playwright test ./${specFileName} ${passthroughArgs.join(' ')}`.trim());
+  console.log(`[replay] running: node playwright/cli.js test ./${specFileName} ${passthroughArgs.join(' ')}`.trim());
 
   const capturedLines = [];
   const forward = (stream) => (chunk) => {
@@ -50,7 +49,7 @@ function main() {
     capturedLines.push(...text.split(/\r?\n/).filter(Boolean));
   };
 
-  const child = spawn('npx', ['--prefix', projectRoot, 'playwright', 'test', `./${specFileName}`, ...passthroughArgs], {
+  const child = spawn(process.execPath, [path.join(path.dirname(require.resolve('playwright/package.json')), 'cli.js'), 'test', `./${specFileName}`, ...passthroughArgs], {
     cwd: sessionDir,
     shell: false,
     stdio: ['inherit', 'pipe', 'pipe'],

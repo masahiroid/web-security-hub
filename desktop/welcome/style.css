@@ -1,0 +1,42 @@
+:root { font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#203347; background:#f2f5f8; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; overflow:hidden; }
+main { height:100dvh; display:grid; grid-template-columns:210px minmax(0,1fr); grid-template-rows:100px minmax(0,1fr) 42px; }
+header { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:20px 30px; background:white; border-bottom:1px solid #dce3ea; }
+small { font-size:10px; letter-spacing:2px; color:#176c70; font-weight:700; }
+h1 { margin:2px 0 0; font-size:24px; letter-spacing:-.6px; }
+h2 { font-size:17px; margin:0 0 16px; }
+p { margin:0 0 14px; }
+.home-nav { grid-column:1; grid-row:2/4; border-right:1px solid #dce3ea; background:#f8fafc; padding:26px 14px; display:flex; flex-direction:column; gap:8px; }
+.home-nav::before { content:'WORKSPACE'; color:#8190a0; font-size:10px; letter-spacing:1.5px; padding:0 14px 16px; }
+.home-nav button { text-align:left; background:transparent; border:0; padding:13px 14px; color:#627387; }
+.home-nav button[aria-current=true] { color:#176c70; background:#e5f2f0; box-shadow:inset 3px 0 #176c70; font-weight:600; }
+.home-stage { min-height:0; overflow:hidden; padding:24px 30px; }
+.home-page { height:100%; overflow:auto; scrollbar-gutter:stable; }
+.setup-page { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto minmax(0,1fr); gap:18px; }
+.setup-page > p { color:#627387; margin:0; }
+section { background:#fff; border:1px solid #dce3ea; border-radius:12px; padding:22px; min-width:0; }
+.setup-page section:last-child { overflow:auto; }
+.setup-page section:first-of-type { display:grid; grid-template-columns:1fr auto; gap:6px 18px; align-items:center; }
+.setup-page section:first-of-type h2 { margin:0; }
+#storage { grid-column:1/-1; margin:0; overflow-wrap:anywhere; }
+.actions { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
+button,.button,select { font:inherit; font-size:13px; border:1px solid #d5dfe6; border-radius:7px; padding:9px 14px; background:white; color:#203347; text-decoration:none; display:inline-block; cursor:pointer; }
+button:hover,.button:hover { background:#f2f7f7; }
+.primary,#install,#training { background:#176c70; border-color:#176c70; color:white; }
+button:disabled,a[aria-disabled=true] { opacity:.45; cursor:not-allowed; pointer-events:none; }
+:focus-visible { outline:3px solid #64b5bc; outline-offset:3px; }
+.hint,footer { font-size:12px; color:#627387; }
+.check { display:grid; grid-template-columns:130px 115px minmax(0,1fr); gap:12px; padding:13px 0; border-bottom:1px solid #edf0f3; align-items:start; font-size:13px; }
+.check > span:last-child { overflow-wrap:anywhere; color:#627387; }
+.ok { color:#17745c; } .missing { color:#ac6e18; }
+#error { color:#b43030; font-size:13px; margin:8px 0; }
+#error:empty { display:none; }
+pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#142b3a; color:#dce9ef; padding:14px; border-radius:8px; max-height:150px; overflow:auto; font-size:11px; }
+a { color:#176c70; }
+#trainingControls { border-top:1px solid #dce3ea; padding-top:16px; }
+#trainingStatus { color:#17745c; }
+#trainingControls > label { display:block; color:#627387; font-size:12px; margin:16px 0 10px; }
+footer { grid-column:2; grid-row:3; padding:10px 30px; border-top:1px solid #dce3ea; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+[hidden] { display:none!important; }
+@media(max-width:1100px) { main { grid-template-columns:172px minmax(0,1fr); grid-template-rows:86px minmax(0,1fr) 38px; } header { padding:14px 22px; } .home-stage { padding:18px 22px; } section { padding:18px; } .check { grid-template-columns:110px 100px minmax(0,1fr); } footer { padding:8px 22px; font-size:11px; } }

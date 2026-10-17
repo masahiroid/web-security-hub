@@ -24,7 +24,7 @@ function generatePlaywrightCode(items, options = {}) {
 // visited pages: ${visited.length}
 //
 // BASE_URL can be overridden via the BASE_URL env var (e.g. old vs new server comparison).
-import { test, expect } from 'playwright/test';
+const { test, expect } = require(process.env.WEB_SECURITY_HUB_PLAYWRIGHT_TEST || 'playwright/test');
 
 const BASE_URL = process.env.BASE_URL ?? ${JSON.stringify(originOf(firstUrl))};
 const STRICT_PAGE_ASSERT = /^(1|true|yes)$/i.test(process.env.GOLDEN_MASTER_STRICT_PAGE_ASSERT ?? '');

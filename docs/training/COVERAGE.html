@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>機能対応 / Feature coverage</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>機能対応 / Feature coverage</h1>
+<p>対象 / Target: Web Security Hub 1.3.0. 「実装済み」はソースに存在する機能であり、すべての実行環境で検証済みという意味ではありません。Implemented does not mean verified on every platform.</p>
+<table>
+<thead>
+<tr>
+<th>機能 / Feature</th>
+<th>操作経路 / Entry point</th>
+<th>教材 / Course coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>サイト・認証 / Site and credentials</td>
+<td>サイト管理 / Sites</td>
+<td>T03、日英実画面 / bilingual screenshots</td>
+</tr>
+<tr>
+<td>操作記録 / Interaction recording</td>
+<td>サイト管理 / Sites</td>
+<td>T04、記録手順と JSON 代替 / recording instructions and JSON fallback</td>
+</tr>
+<tr>
+<td>フォーム生成 / Form generation</td>
+<td>テストケース作成 / Test Cases</td>
+<td>T05、実行済み / executed</td>
+</tr>
+<tr>
+<td>編集・再実行・画像比較 / Edit, replay, visual diff</td>
+<td>再実行 / Replay</td>
+<td>T06–T08、基本・無変更・変更・修正 / baseline, unchanged, changed, fixed</td>
+</tr>
+<tr>
+<td>DAST</td>
+<td>動的脆弱性診断 / Dynamic Scan</td>
+<td>T09、ZAP 無しで実行 / executed without ZAP</td>
+</tr>
+<tr>
+<td>SAST と成果物 / SAST and artifacts</td>
+<td>静的解析 / Static Analysis</td>
+<td>T10、before/after 例 / fixtures</td>
+</tr>
+<tr>
+<td>ZAP Passive / Active</td>
+<td>Dynamic Scan / Replay</td>
+<td>既存マニュアル参照、今回の自動検証外 / existing manual; not validated in this course</td>
+</tr>
+<tr>
+<td>画面探索 / Exploration</td>
+<td><code>GET /api/sites/:id/explore/run</code> (SSE)</td>
+<td>API 機能。UI タブなし / API only, no UI tab</td>
+</tr>
+<tr>
+<td>手動認証セッション / Manual auth session</td>
+<td><code>/api/auth-session/{start,stop,cancel}</code></td>
+<td>API、デスクトップ環境が必要 / API, desktop required</td>
+</tr>
+<tr>
+<td>変数・共有ステップ・CSV / Variables, shared steps, CSV</td>
+<td><code>site.config.json</code> and <code>/api/sites/:id/{variables,shared-steps,data-sets}</code></td>
+<td>API / configuration; UI integration pending</td>
+</tr>
+<tr>
+<td>ブラウザー・端末 / Browser and device</td>
+<td><code>browser.engine</code>, <code>browser.device</code></td>
+<td>Configuration; Chromium core course only</td>
+</tr>
+<tr>
+<td>自動修復 / Locator healing</td>
+<td>scenario <code>healHint</code> and execution logs</td>
+<td>応用教材候補 / extension candidate</td>
+</tr>
+<tr>
+<td>AI assertion / SAST AI review</td>
+<td>opt-in configuration / Static Analysis</td>
+<td>optional external CLI; not called by course automation</td>
+</tr>
+<tr>
+<td>iOS / Android</td>
+<td>configuration and <code>/api/sites/:id/mobile/run</code></td>
+<td>環境準備を伴う別コース / separate course with platform prerequisites</td>
+</tr>
+</tbody>
+</table>
+</main></html>

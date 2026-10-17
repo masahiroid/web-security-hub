@@ -1,0 +1,40 @@
+name: Windows installer
+on:
+  push:
+    branches: [feature/desktop-distribution-training]
+    paths-ignore: ['docs/**', '*.md']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci --ignore-scripts
+      - run: npm audit --omit=dev --prefix desktop/runtime
+      - run: npm test
+      - run: npm run release:check
+      - run: npm run desktop:build -- --bundles nsis -- --locked
+      - name: Prepare installer and checksum
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts/release-public | Out-Null
+          $installer = Get-ChildItem src-tauri/target/release/bundle/nsis -Filter *.exe | Select-Object -First 1
+          if (!$installer) { throw 'NSIS installer not found' }
+          $destination = "artifacts/release-public/Web-Security-Hub_1.3.0_windows_x64_setup.exe"
+          Copy-Item $installer.FullName $destination
+          $digest = (Get-FileHash -Algorithm SHA256 $destination).Hash.ToLower()
+          "$digest  $(Split-Path -Leaf $destination)" | Set-Content -Encoding ascii "$destination.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-installer
+          path: artifacts/release-public/*
+          retention-days: 3
+          if-no-files-found: error

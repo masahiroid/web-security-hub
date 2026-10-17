@@ -33,6 +33,7 @@ function spawnFreshServer() {
 // from inside the (now-dead) process — the user re-launches via
 // start.command/start.bat or `npm start`.
 router.post('/control/stop', (req, res) => {
+  if (process.env.WEB_SECURITY_HUB_MANAGED === '1') return res.status(409).json({ error: 'Close the application window to stop the managed runtime.' });
   res.json({ ok: true, message: 'stopping' });
   // Wait for `finish` so the response bytes are actually handed to the
   // socket before closeAllConnections() below forcibly destroys it.
@@ -46,6 +47,7 @@ router.post('/control/stop', (req, res) => {
 // Spawns a fresh detached server process bound to the same PORT, then closes
 // this one — the new process takes over as soon as the port is free.
 router.post('/control/restart', (req, res) => {
+  if (process.env.WEB_SECURITY_HUB_MANAGED === '1') return res.status(409).json({ error: 'Close and reopen the application to restart the managed runtime.' });
   res.json({ ok: true, message: 'restarting' });
   res.on('finish', async () => {
     const httpServer = req.app.get('httpServer');

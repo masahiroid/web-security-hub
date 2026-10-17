@@ -1,0 +1,13 @@
+html,body.desktop-reader { height:100%; overflow:hidden; margin:0; }
+body.desktop-reader { display:block; background:#f2f5f8; color:#203347; font:14px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.desktop-reader main { display:block; box-sizing:border-box; margin:0 0 0 230px; width:calc(100% - 230px); height:100dvh; overflow:auto; padding:30px clamp(24px,5vw,80px) 70px; max-width:none; background:#fff; }
+.reader-nav { position:fixed; inset:0 auto 0 0; width:230px; box-sizing:border-box; padding:24px 16px; overflow:auto; border-right:1px solid #dce3ea; }
+.reader-nav a { display:block; padding:9px 12px; margin-bottom:5px; font-size:12px; line-height:1.6; border-radius:7px; color:#627387; text-decoration:none; }
+.reader-nav a:first-child { color:#176c70; margin-bottom:24px; font-weight:600; }
+.reader-nav a:hover,.reader-nav a.selected { background:#e5f2f0; color:#176c70; }
+.desktop-reader main h1 { font-size:27px; }
+.desktop-reader main h2 { scroll-margin-top:24px; margin-top:36px; }
+.desktop-reader main section { margin:20px 0; }
+.desktop-reader img { max-width:100%; height:auto; }
+.desktop-reader pre { max-height:none; }
+.desktop-reader figure { margin:20px 0; }

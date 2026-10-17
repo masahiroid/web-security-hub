@@ -1,0 +1,31 @@
+{
+  "displayName": "研修ラボ（日本語）",
+  "baseUrl": "http://127.0.0.1:4180/ja/dashboard",
+  "labels": [
+    "training"
+  ],
+  "ruleSpecDir": "rule-spec",
+  "outputDir": ".golden-master",
+  "crawl": {
+    "maxDepth": 1,
+    "maxPages": 3,
+    "maxCasesPerForm": 4,
+    "dryRun": false,
+    "fastFail": false
+  },
+  "login": {
+    "loginUrl": "http://127.0.0.1:4180/ja/login",
+    "usernameSelector": "#email",
+    "passwordSelector": "#password",
+    "submitSelector": "#sign-in"
+  },
+  "scenario": {
+    "steps": [
+      {
+        "action": "goto",
+        "url": "http://127.0.0.1:4180/ja/apply"
+      }
+    ]
+  },
+  "id": "training-ja"
+}

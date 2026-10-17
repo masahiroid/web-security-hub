@@ -4,6 +4,24 @@
 
 Web Security Hub is a locally run web-security assessment and form-regression testing tool aligned with OWASP risk categories. Test-case values are generated using deterministic, rule-based logic. An optional local Claude Code adapter can review displayed SAST findings after explicit user authorization; it is not part of test-case generation or scanning.
 
+
+## Download the application
+
+| Platform | Installer | Status |
+|---|---|---|
+| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
+| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_windows_x64_setup.exe) | Unsigned preview |
+
+[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v1.3.0). Use the source edition on Intel Macs or Linux. Windows interactive smoke testing is still pending.
+
+## Desktop and double-click startup
+
+See [desktop usage and setup](docs/desktop/README.md). Source launchers prepare the environment and open the setup screen; existing CLI commands remain available. Tauri source builds and native build workflows are also available.
+
+## Illustrated training and hands-on course
+
+Start with the [illustrated bilingual course](docs/training/README.md). Includes a local sample site, changed/fixed comparisons, instructor guides, and repeatable capture/verification commands. The About tab links to the browser edition.
+
 ## Documentation
 
 - [User manual](docs/USER_MANUAL.md)

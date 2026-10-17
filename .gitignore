@@ -17,3 +17,43 @@ sites/*/mobile-sessions/
 
 # ローカルで検討する将来計画（公開しない）
 ROADMAP.md
+
+# Playwright local replay artifacts
+test-results/
+playwright-report/
+
+# Private runtime downloads, staged desktop dependencies and native build output
+.runtime/
+.desktop/
+src-tauri/target/
+src-tauri/binaries/
+src-tauri/gen/
+
+# Local signing material and release-only overrides (never publish)
+*.p12
+*.pfx
+*.p8
+*.key
+*.mobileprovision
+*.provisionprofile
+certificate-base64.txt
+src-tauri/tauri.local.conf.json
+src-tauri/tauri.local.*.json
+# Keep real env files excluded even inside the template directory.
+.env
+.env.*
+!.env.example
+*.pem
+*.keychain
+*.keychain-db
+
+# Local desktop identity/entitlements: publish only *.example.* templates.
+/src-tauri/tauri.conf.json
+/src-tauri/entitlements.plist
+/src-tauri/node-entitlements.plist
+
+# Internal documentation, review records and maintainer notes are local only.
+/docs/internal/
+/.internal/
+*.internal.md
+*.internal.html

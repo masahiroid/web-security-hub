@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SITES_DIR = path.join(__dirname, '..', 'sites');
+const { SITES_DIR } = require('./paths');
 
 function sitesDir() {
   return SITES_DIR;

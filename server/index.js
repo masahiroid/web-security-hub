@@ -38,6 +38,7 @@ app.use('/api', systemInfoRoutes);
 app.use('/api', controlRoutes);
 
 const publicDir = path.join(__dirname, '..', 'public');
+app.use('/training', express.static(path.join(__dirname, '..', 'docs', 'training')));
 app.use(express.static(publicDir));
 app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 

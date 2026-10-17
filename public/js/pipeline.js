@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 'use strict';
 import { $ } from './dom.js';
 import { state } from './state.js';
@@ -11,10 +12,10 @@ $('runPipelineBtn').addEventListener('click', () => {
   logEl.textContent = '';
   resultEl.innerHTML = '';
   if (!state.siteId) {
-    status.textContent = 'サイトを選択してください';
+    status.textContent = t('error.selectSite');
     return;
   }
-  status.textContent = '実行中...';
+  status.textContent = t('status.running');
   $('runPipelineBtn').disabled = true;
 
   const es = new EventSource(`/api/sites/${state.siteId}/pipeline/run`);
@@ -25,22 +26,22 @@ $('runPipelineBtn').addEventListener('click', () => {
   });
   es.addEventListener('done', (ev) => {
     const data = JSON.parse(ev.data);
-    status.textContent = '完了';
+    status.textContent = t('status.complete');
     $('runPipelineBtn').disabled = false;
     resultEl.innerHTML = `
-      <p><span class="result-ok">OK</span> フォーム数=${data.formCount} ケース数=${data.caseCount} 実行=${data.executedCaseCount} OK=${data.okCaseCount} NG=${data.ngCaseCount}</p>
-      <p><a href="${data.reportUrl}" target="_blank">レポートを開く</a> ・ <a href="${data.markdownUrl}" target="_blank">Markdownで開く</a></p>
+      <p><span class="result-ok">OK</span> ${t('pipeline.summary', { forms: data.formCount, cases: data.caseCount, executed: data.executedCaseCount, ok: data.okCaseCount, ng: data.ngCaseCount })}</p>
+      <p><a href="${data.reportUrl}" target="_blank">${t('openReport')}</a> ・ <a href="${data.markdownUrl}" target="_blank">${t('openMarkdown')}</a></p>
     `;
     es.close();
   });
   es.addEventListener('error', (ev) => {
-    let message = '接続エラー';
+    let message = t('error.connection');
     try {
       message = JSON.parse(ev.data).message;
     } catch {
       /* ignore parse errors from a raw network-level EventSource error */
     }
-    status.textContent = `エラー: ${message}`;
+    status.textContent = t('status.error', { message });
     $('runPipelineBtn').disabled = false;
     es.close();
   });

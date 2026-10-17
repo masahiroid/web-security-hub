@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 'use strict';
 import { $ } from './dom.js';
 import { api } from './api.js';
@@ -25,15 +26,15 @@ function runReplay(recordBaseline) {
   logEl.textContent = '';
   resultEl.innerHTML = '';
   if (!state.siteId) {
-    status.textContent = 'サイトを選択してください';
+    status.textContent = t('error.selectSite');
     return;
   }
   const sessionId = $('replaySession').value;
   if (!sessionId) {
-    status.textContent = 'セッションを選択してください';
+    status.textContent = t('error.selectSession');
     return;
   }
-  status.textContent = '実行中...';
+  status.textContent = t('status.running');
   $('replayBaselineBtn').disabled = true;
   $('replayRunBtn').disabled = true;
 
@@ -53,24 +54,24 @@ function runReplay(recordBaseline) {
   });
   es.addEventListener('done', (ev) => {
     const data = JSON.parse(ev.data);
-    status.textContent = data.ok ? '完了 (すべてPASS)' : `完了 (差分あり / exit=${data.exitCode})`;
+    status.textContent = data.ok ? t('status.allPassed') : t('status.differences', { code: data.exitCode });
     $('replayBaselineBtn').disabled = false;
     $('replayRunBtn').disabled = false;
     const links = [];
-    if (data.reportUrl) links.push(`<a href="${data.reportUrl}" target="_blank">レポートを開く</a>`, `<a href="${data.markdownUrl}" target="_blank">Markdownで開く</a>`);
+    if (data.reportUrl) links.push(`<a href="${data.reportUrl}" target="_blank">${t('openReport')}</a>`, `<a href="${data.markdownUrl}" target="_blank">${t('openMarkdown')}</a>`);
     if (data.zap?.alertsUrl) links.push(`<a href="${data.zap.alertsUrl}" target="_blank">ZAP Alert（ケースID付き）</a>`);
     if (data.zap?.error) links.push(`ZAP エラー: ${data.zap.error}`);
     if (links.length) resultEl.innerHTML = `<p>${links.join(' ・ ')}</p>`;
     es.close();
   });
   es.addEventListener('error', (ev) => {
-    let message = '接続エラー';
+    let message = t('error.connection');
     try {
       message = JSON.parse(ev.data).message;
     } catch {
       /* ignore parse errors from a raw network-level EventSource error */
     }
-    status.textContent = `エラー: ${message}`;
+    status.textContent = t('status.error', { message });
     $('replayBaselineBtn').disabled = false;
     $('replayRunBtn').disabled = false;
     es.close();

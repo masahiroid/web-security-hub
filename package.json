@@ -14,7 +14,24 @@
     "postinstall": "playwright install chromium firefox webkit || true",
     "dynamic-scan": "node core/cli/securityScan.js",
     "autoflow": "node core/cli/autoflow.js",
-    "replay": "node core/cli/replay.js"
+    "replay": "node core/cli/replay.js",
+    "training:start": "node training/sample-site/server.js",
+    "training:setup": "node scripts/training.js setup",
+    "training:mode": "node scripts/training.js",
+    "training:verify": "node scripts/verify-training.js",
+    "training:capture": "node scripts/capture-training.js",
+    "launch": "node scripts/launch.js",
+    "doctor": "node desktop/environment.js",
+    "setup": "node desktop/environment.js --install",
+    "desktop:config": "node scripts/desktop-config.js",
+    "desktop:prepare": "node scripts/prepare-desktop.js",
+    "desktop:dev": "node scripts/desktop.js dev",
+    "desktop:build": "node scripts/desktop.js build",
+    "desktop:verify": "node scripts/verify-desktop.js",
+    "desktop:verify-layout": "node scripts/verify-desktop-layout.js",
+    "release:check": "node scripts/check-release-content.js",
+    "desktop:release:macos": "node scripts/release-macos.js",
+    "desktop:sign:macos": "node scripts/sign-macos.js"
   },
   "dependencies": {
     "appium": "^3.7.0",
@@ -24,6 +41,7 @@
     "yaml": "^2.5.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.3",
     "appium-xcuitest-driver": "^12.13.1"
   }
 }

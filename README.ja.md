@@ -4,6 +4,24 @@
 
 OWASP のリスク分類を基準にした、ローカル実行の Web セキュリティ診断・フォーム回帰テストツールです。テストケースの値生成はルールベースで行います。表示中の SAST 結果を明示許可のうえでレビューする任意のローカル Claude Code アダプターを備えますが、テストケース生成やスキャン本体では使用しません。
 
+
+## アプリのダウンロード
+
+| OS | インストーラー | 状態 |
+|---|---|---|
+| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
+| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_windows_x64_setup.exe) | 未署名のプレビュー |
+
+[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v1.3.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版の実機での操作確認は今後行います。
+
+## デスクトップ版・ダブルクリック起動
+
+[アプリ版と起動方法](docs/desktop/README.ja.md)。ソース版は macOS の `start.command`、Windows の `start.bat` から環境確認・必要な導入・開始画面へ進めます。従来の CLI も利用できます。Tauri のソースビルドにも対応しています。
+
+## 画像付き研修・ハンズオン
+
+初めての方は [日英の画像付きハンズオン](docs/training/README.ja.md) を参照してください。ローカルのサンプルサイト、変更・修正版の比較、講師用ガイド、再撮影・検証コマンドを同梱しています。起動後は「診断について」からブラウザー版も開けます。
+
 ## ドキュメント
 
 - [利用マニュアル](docs/ja/USER_MANUAL.md)
