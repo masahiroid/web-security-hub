@@ -9,10 +9,10 @@ OWASP のリスク分類を基準にした、ローカル実行の Web セキュ
 
 | OS | インストーラー | 状態 |
 |---|---|---|
-| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
-| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_windows_x64_setup.exe) | 未署名のプレビュー |
+| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
+| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_windows_x64_setup.exe) | 未署名 |
 
-[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v1.3.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版の実機での操作確認は今後行います。
+[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v2.0.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版は Windows の CI 環境でインストール後の操作を確認しています。
 
 ## デスクトップ版・ダブルクリック起動
 
