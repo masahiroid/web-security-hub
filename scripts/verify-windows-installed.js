@@ -32,7 +32,8 @@ function ciDebugPolicy(executable, port) {
   checks.push('NSIS installation completed'); console.log(checks.at(-1));
   const executable=path.join(install,executables[0]); const port=await freePort();
   removePolicy=ciDebugPolicy(executable,port);
-  application=spawn(executable,[],{env:{...process.env,WEB_SECURITY_HUB_DATA_DIR:path.join(temporary,'data'),WEBVIEW2_USER_DATA_FOLDER:path.join(temporary,'webview'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`},stdio:'ignore'});
+  application=spawn(executable,[],{env:{...process.env,WEB_SECURITY_HUB_DATA_DIR:path.join(temporary,'data'),WEBVIEW2_USER_DATA_FOLDER:path.join(temporary,'webview'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`},stdio:['ignore','ignore','pipe']});
+  let startupError=''; application.stderr.setEncoding('utf8'); application.stderr.on('data',chunk=>{startupError=(startupError+chunk).slice(-65536);});
   await waitUntil(async()=>{try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);return r.ok;}catch{if(application.exitCode!==null)throw Error(`Native process exited before WebView startup (${application.exitCode})`);return false;}},SETTINGS.startupMs,'WebView debugging endpoint');
   console.log('Native WebView debugging endpoint ready');
   browser=await chromium.connectOverCDP(`http://127.0.0.1:${port}`); const context=browser.contexts()[0]; if(!context)throw Error('Native WebView unavailable');
@@ -40,7 +41,7 @@ function ciDebugPolicy(executable, port) {
    const pages=context.pages(); page=pages.find(value=>/127\.0\.0\.1/.test(value.url()));
    if(!page)for(const shell of pages){
     const status=await shell.locator('#status').textContent({timeout:SETTINGS.pollMs}).catch(()=>null);
-    if(status?.includes('Could not start'))throw Error(`Installed app startup failed: ${status}`);
+    if(status?.includes('Could not start'))throw Error(`Installed app startup failed: ${status}\n${startupError}`);
    }
    return Boolean(page);
   },SETTINGS.startupMs,'local application page');

@@ -57,7 +57,7 @@ fn main() {
                                 }
                             }
                         }
-                        status.lock().unwrap().error = Some("The background service exited. Close and reopen the app.".into());
+                        status.lock().unwrap().error.get_or_insert_with(|| "The background service exited. Close and reopen the app.".into());
                     });
                     let status = state.status.clone();
                     std::thread::spawn(move || {
