@@ -74,4 +74,4 @@ npm run verifier:run -- --source-plan /absolute/private/plan.json
 
 source planには `sourceDir`、最新の `finding` metadata（ruleId/findingInstanceId/sourceDigest/relativePath/sourceSpan/routeMapping）、`origin`、`normalValues`、`candidateValues`、`expectedJson`、`expectedStatus`、`authorized: true`、`useZap` を指定します。GUIと同じstrict契約とscope確認を使い、campaign optionと混在できません。CLIはJSONとprivate保存先を表示し、取消はexit 130です。既存baseline/changed/fixed campaignも利用できます。
 
-任意engine：[ZAP](https://www.zaproxy.org/download/)（Apache-2.0）、[Temurin](https://adoptium.net/temurin/)（GPLv2 with Classpath Exception）。デスクトップ配布はソース用のAppium/WebdriverIO追加自動化依存を含めません。その追加依存chainにはextract-zipの既知advisoryが残ります。[セキュリティ情報](../../SECURITY.md)を参照してください。
+任意engine：[ZAP](https://www.zaproxy.org/download/)（Apache-2.0）、[Temurin](https://adoptium.net/temurin/)（GPLv2 with Classpath Exception）。デスクトップ配布はソース用のAppium/WebdriverIO追加自動化依存を含めません。その追加依存chainにはextract-zipの既知advisoryが残ります。[セキュリティ情報](https://github.com/masahiroid/web-security-hub/blob/main/SECURITY.md)を参照してください。

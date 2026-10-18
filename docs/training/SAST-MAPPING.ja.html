@@ -61,5 +61,5 @@ npm run verifier:run -- --sast-sample --zap
 npm run verifier:run -- --source-plan /absolute/private/plan.json
 </code></pre>
 <p>source planには <code>sourceDir</code>、最新の <code>finding</code> metadata（ruleId/findingInstanceId/sourceDigest/relativePath/sourceSpan/routeMapping）、<code>origin</code>、<code>normalValues</code>、<code>candidateValues</code>、<code>expectedJson</code>、<code>expectedStatus</code>、<code>authorized: true</code>、<code>useZap</code> を指定します。GUIと同じstrict契約とscope確認を使い、campaign optionと混在できません。CLIはJSONとprivate保存先を表示し、取消はexit 130です。既存baseline/changed/fixed campaignも利用できます。</p>
-<p>任意engine：<a href="https://www.zaproxy.org/download/">ZAP</a>（Apache-2.0）、<a href="https://adoptium.net/temurin/">Temurin</a>（GPLv2 with Classpath Exception）。デスクトップ配布はソース用のAppium/WebdriverIO追加自動化依存を含めません。その追加依存chainにはextract-zipの既知advisoryが残ります。<a href="../../SECURITY.html">セキュリティ情報</a>を参照してください。</p>
+<p>任意engine：<a href="https://www.zaproxy.org/download/">ZAP</a>（Apache-2.0）、<a href="https://adoptium.net/temurin/">Temurin</a>（GPLv2 with Classpath Exception）。デスクトップ配布はソース用のAppium/WebdriverIO追加自動化依存を含めません。その追加依存chainにはextract-zipの既知advisoryが残ります。<a href="https://github.com/masahiroid/web-security-hub/blob/main/SECURITY.html">セキュリティ情報</a>を参照してください。</p>
 </main></html>

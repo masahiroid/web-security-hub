@@ -1,5 +1,5 @@
 {
-  "appVersion": "2.0.0",
+  "appVersion": "3.0.0",
   "viewport": {
     "width": 1440,
     "height": 1000
@@ -366,25 +366,25 @@
       "lang": "ja",
       "stage": "07-baseline",
       "status": "完了 (すべてPASS)",
-      "sessionId": "session-20261018010427"
+      "sessionId": "session-20261018124058"
     },
     {
       "lang": "ja",
       "stage": "08-unchanged",
       "status": "完了 (すべてPASS)",
-      "sessionId": "session-20261018010427"
+      "sessionId": "session-20261018124058"
     },
     {
       "lang": "ja",
       "stage": "09-changed",
       "status": "完了 (差分あり / exit=1)",
-      "sessionId": "session-20261018010427"
+      "sessionId": "session-20261018124058"
     },
     {
       "lang": "ja",
       "stage": "10-fixed",
       "status": "完了 (すべてPASS)",
-      "sessionId": "session-20261018010427"
+      "sessionId": "session-20261018124058"
     },
     {
       "lang": "en",
@@ -395,27 +395,27 @@
       "lang": "en",
       "stage": "07-baseline",
       "status": "Complete (all PASS)",
-      "sessionId": "session-20261018010531"
+      "sessionId": "session-20261018124202"
     },
     {
       "lang": "en",
       "stage": "08-unchanged",
       "status": "Complete (all PASS)",
-      "sessionId": "session-20261018010531"
+      "sessionId": "session-20261018124202"
     },
     {
       "lang": "en",
       "stage": "09-changed",
       "status": "Complete (differences / exit=1)",
-      "sessionId": "session-20261018010531"
+      "sessionId": "session-20261018124202"
     },
     {
       "lang": "en",
       "stage": "10-fixed",
       "status": "Complete (all PASS)",
-      "sessionId": "session-20261018010531"
+      "sessionId": "session-20261018124202"
     }
   ],
   "browser": "151.0.7922.34",
-  "capturedAt": "2026-10-18T01:06:31.459Z"
+  "capturedAt": "2026-10-18T12:43:02.386Z"
 }
