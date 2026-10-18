@@ -47,3 +47,17 @@ test('verification jobs enforce session ownership, capacity, cancellation and sa
  assert.equal(html.status, 200); assert.match(html.headers.get('content-security-policy'), /default-src 'none'/); assert.match(await html.text(), /検証結果/);
  assert.equal((await request(`/jobs/${job.jobId}/report.html`, { cookie: other })).status, 404);
 });
+
+test('source/scope sample API uses session/origin protection and rejects arbitrary sources or targets', async t => {
+ const { request, cookie } = await server(t);
+ assert.equal((await request('/sast-sample', { body: {} })).status, 401);
+ assert.equal((await request('/sast-sample', { body: {}, cookie, headers: { Origin: 'https://evil.test' } })).status, 403);
+ for (const body of [null, [], { url: 'https://evil.test' }, { sourceDir: '/tmp' }, { findingInstanceId: 'fake' }]) {
+  assert.equal((await request('/sast-sample', { body, cookie })).status, 400);
+ }
+ const response = await request('/sast-sample', { body: {}, cookie }); assert.equal(response.status, 200);
+ const result = await response.json(); assert.equal(result.state, 'completed');
+ assert.equal(result.finding.ruleId, 'SAST-TLS-DISABLED'); assert.equal(result.target.route, '/inspect');
+ assert.equal(result.runtimeSource, 'unverified'); assert.equal(result.pair.candidate.assessment.result, 'under_investigation');
+ assert.equal(JSON.stringify(result).includes('capability'), false);
+});

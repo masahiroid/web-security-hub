@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { sastMetadataHtml, sastMetadataMarkdown, sastSarifMetadata, sastSarifLocation } = require('../verifier/generated/adapters/sastReportMetadata');
 
 const REPORT_ROOT = path.join(require('../paths').ARTIFACTS_DIR, 'static-scans');
 
@@ -31,20 +32,20 @@ function createUniqueRunId(now) {
 
 function renderMarkdown(report) {
   const lines = ['# Web Security Hub — Static Analysis Report', '', `- Run: \`${report.runId}\``, `- Generated: ${report.generatedAt}`, `- Source directory: \`${report.sourceDir}\``, `- Files scanned: ${report.filesScanned}`, `- Findings: ${report.findings.length}`, '', '## Summary', '', '| Severity | Count |', '|---|---:|', ...Object.entries(report.summary).map(([severity, count]) => `| ${severity} | ${count} |`), '', '## Findings', ''];
-  for (const item of report.findings) lines.push(`### ${item.severity.toUpperCase()} — ${item.title}`, '', `- Rule: \`${item.id}\``, `- OWASP: ${item.owasp?.id || 'UNMAPPED'} — ${item.owasp?.name || ''}`, `- Location: \`${item.location}\``, `- Evidence: ${item.evidence}`, `- Remediation: ${item.remediation}`, '');
+  for (const item of report.findings) lines.push(`### ${item.severity.toUpperCase()} — ${item.title}`, '', `- Rule: \`${item.id}\``, `- OWASP: ${item.owasp?.id || 'UNMAPPED'} — ${item.owasp?.name || ''}`, `- Location: \`${item.location}\``, `- Evidence: ${item.evidence}`, `- Remediation: ${item.remediation}`, '', ...sastMetadataMarkdown(item));
   if (!report.findings.length) lines.push('No findings were reported.', '');
   return lines.join('\n');
 }
 
 function renderHtml(report) {
   const summary = Object.entries(report.summary).map(([severity, count]) => `<span class="severity ${escapeHtml(severity)}">${escapeHtml(severity)} ${count}</span>`).join(' ');
-  const rows = report.findings.map((item) => `<tr><td><span class="severity ${escapeHtml(item.severity)}">${escapeHtml(item.severity)}</span></td><td><code>${escapeHtml(item.id)}</code><br>${escapeHtml(item.title)}</td><td>${escapeHtml(item.owasp?.id || 'UNMAPPED')}<br><small>${escapeHtml(item.owasp?.name || '')}</small></td><td><code>${escapeHtml(item.location)}</code></td><td>${escapeHtml(item.evidence)}<hr><strong>Remediation</strong><br>${escapeHtml(item.remediation)}</td></tr>`).join('');
+  const rows = report.findings.map((item) => `<tr><td><span class="severity ${escapeHtml(item.severity)}">${escapeHtml(item.severity)}</span></td><td><code>${escapeHtml(item.id)}</code><br>${escapeHtml(item.title)}</td><td>${escapeHtml(item.owasp?.id || 'UNMAPPED')}<br><small>${escapeHtml(item.owasp?.name || '')}</small></td><td><code>${escapeHtml(item.location)}</code></td><td>${escapeHtml(item.evidence)}<hr><strong>Remediation</strong><br>${escapeHtml(item.remediation)}${sastMetadataHtml(item)}</td></tr>`).join('');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Static Analysis Report ${escapeHtml(report.runId)}</title><style>body{font-family:system-ui,sans-serif;line-height:1.5;color:#1b2a2e;margin:2rem;max-width:1200px}code{font-family:ui-monospace,monospace;word-break:break-all}.meta{color:#57676b}.severity{display:inline-block;background:#68777d;color:#fff;border-radius:99px;padding:.1rem .5rem;font-size:.75rem;font-weight:700;text-transform:uppercase}.severity.critical,.severity.high{background:#b43030}.severity.medium{background:#bd7424}.severity.low{background:#547f9c}table{border-collapse:collapse;width:100%;margin-top:1rem}th,td{border:1px solid #d9d6cb;padding:.65rem;text-align:left;vertical-align:top}th{background:#e1ece8}hr{border:0;border-top:1px solid #d9d6cb;margin:.5rem 0}small{color:#57676b}</style></head><body><h1>Static Analysis Report</h1><p class="meta">Run <code>${escapeHtml(report.runId)}</code> · ${escapeHtml(report.generatedAt)} · ${report.filesScanned} files scanned · ${report.findings.length} findings</p><p class="meta">Source directory: <code>${escapeHtml(report.sourceDir)}</code></p><p>${summary}</p>${report.findings.length ? `<table><thead><tr><th>Severity</th><th>Rule</th><th>OWASP</th><th>Location</th><th>Evidence / remediation</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No findings were reported.</p>'}</body></html>`;
 }
 
 function renderSarif(report) {
   const rules = uniqueRules(report.findings).map((item) => ({ id: item.id, name: item.title, shortDescription: { text: item.title }, help: { text: item.remediation }, properties: { owasp: item.owasp?.id || 'UNMAPPED' } }));
-  return { $schema: 'https://json.schemastore.org/sarif-2.1.0.json', version: '2.1.0', runs: [{ tool: { driver: { name: 'Web Security Hub SAST', informationUri: 'https://github.com/masahiroid/web-security-hub', rules } }, results: report.findings.map((item) => ({ ruleId: item.id, level: sarifLevel(item.severity), message: { text: `${item.evidence} Remediation: ${item.remediation}` }, locations: [sarifLocation(item.location)] })) }] };
+  return { $schema: 'https://json.schemastore.org/sarif-2.1.0.json', version: '2.1.0', runs: [{ columnKind: 'utf16CodeUnits', tool: { driver: { name: 'Web Security Hub SAST', informationUri: 'https://github.com/masahiroid/web-security-hub', rules } }, results: report.findings.map((item) => ({ ruleId: item.id, level: sarifLevel(item.severity), message: { text: `${item.evidence} Remediation: ${item.remediation}` }, locations: [sastSarifLocation(item) || sarifLocation(item.location)], ...sastSarifMetadata(item) })) }] };
 }
 
 function uniqueRules(findings) {

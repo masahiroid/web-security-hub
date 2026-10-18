@@ -103,7 +103,11 @@ async function main() {
       await context.close(); console.log(`${lang} complete`);
     }
     manifest.capturedAt = new Date().toISOString();
-    fs.writeFileSync(path.join(root, 'docs/training/images/manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+    const manifestPath = path.join(root, 'docs/training/images/manifest.json');
+    const previous = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const refreshed = new Set(manifest.images.map(item => item.file));
+    manifest.images.push(...previous.images.filter(item => !refreshed.has(item.file)));
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
     writeEvidence('capture.json', manifest);
   } finally { await browser?.close(); await close(); }
 }

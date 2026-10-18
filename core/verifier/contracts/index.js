@@ -2,7 +2,11 @@
 const Ajv = require('ajv');
 const { CONTRACT_VERSION, LIMITS, ID_PATTERN, DIGEST_PATTERN, POINTS, FIXTURE } = require('../generated/domain/config');
 const { REPORT_STORAGE } = require('../generated/domain/campaignConfig');
-const { campaignSchemas } = require('../generated/adapters/campaignSchemas');
+const { sourceTrialSchemas, assertSourceReport } = require('../generated/adapters/sourceTrialSchemas');
+const { campaignSchemas, campaignResultSchema } = require('../generated/adapters/campaignSchemas');
+const { zapSchema, assertZapEvidence } = require('../generated/adapters/zapSchemas');
+const { sastSchemas } = require('../generated/adapters/sastSchemas');
+const { assertSastMetadata } = require('../generated/domain/sastMapping');
 const { assertReportIntegrity } = require('../generated/domain/reportIntegrity');
 const ajv = new Ajv({ strict: true, ownProperties: true });
 const id = { type: 'string', pattern: ID_PATTERN };
@@ -22,13 +26,16 @@ const scalarValues = schemas.seed.properties.values;
 schemas.trialRequest = object({ url: { type: 'string', maxLength: 700 }, method: { enum: ['GET', 'POST'] }, authProfileId: id, seed: schemas.seed });
 schemas.profile = object({ schemaVersion: version, profileId: id, origin: { type: 'string', maxLength: 200 }, setup: { type: 'array', maxItems: LIMITS.profileSetupSteps, items: object({ route: { type: 'string', maxLength: LIMITS.routeLength }, method: { const: 'POST' }, values: scalarValues, expectedStatus: { type: 'integer', minimum: 200, maximum: 299 } }) } });
 schemas.control = object({ schemaVersion: version, origin: { type: 'string', maxLength: 200 }, route: { type: 'string', maxLength: LIMITS.routeLength }, method: { enum: ['GET', 'POST'] }, seed: schemas.seed, expectedStatus: { type: 'integer', minimum: 200, maximum: 299 }, expectedJson: { ...scalarValues, minProperties: 1 } });
-schemas.httpObservation = object({ schemaVersion: version, jobId: id, trialId: id, requestId: id, seedId: id, authProfileId: id, purpose: { enum: ['control', 'candidate'] }, executionKind: { const: 'direct-http' }, outcome: { enum: ['completed', 'timeout', 'cancelled', 'error'] }, reason: { enum: ['none', 'transport_error', 'setup_failed', 'redirect_outside_scope', 'redirect_not_followed', 'response_too_large', 'cleanup_failed', 'job_cancelled', 'job_disposed', 'job_expired', 'trial_timeout'] }, status: { type: ['integer', 'null'], minimum: 100, maximum: 599 }, durationMs: { type: 'number', minimum: 0 }, dispatched: { type: 'boolean' }, setupRequests: { type: 'integer', minimum: 0, maximum: LIMITS.profileSetupSteps }, redirect: { enum: ['none', 'blocked', 'not_followed'] } });
+schemas.httpObservation = object({ schemaVersion: version, jobId: id, trialId: id, requestId: id, seedId: id, authProfileId: id, purpose: { enum: ['control', 'candidate'] }, executionKind: { const: 'direct-http' }, outcome: { enum: ['completed', 'timeout', 'cancelled', 'error'] }, reason: { enum: ['none', 'transport_error', 'setup_failed', 'redirect_outside_scope', 'redirect_not_followed', 'response_too_large', 'cleanup_failed', 'job_cancelled', 'job_disposed', 'job_expired', 'trial_timeout', 'source_binding_failed'] }, status: { type: ['integer', 'null'], minimum: 100, maximum: 599 }, durationMs: { type: 'number', minimum: 0 }, dispatched: { type: 'boolean' }, setupRequests: { type: 'integer', minimum: 0, maximum: LIMITS.profileSetupSteps }, redirect: { enum: ['none', 'blocked', 'not_followed'] } });
 // Optional trusted control profile permits a valid owner/confirmed control versus another candidate role.
 schemas.control.properties.authProfileId = id;
 const correlation = { jobId: id, trialId: id, seedId: id, requestId: id, authProfileId: id };
 const serverEvent = object({ ...correlation, evidenceId: id, point: { enum: Object.values(POINTS) }, profile: { enum: FIXTURE.roles }, recordId: { type: ['string', 'null'], maxLength: LIMITS.identifierLength }, oracle: { enum: ['passed', 'violated', 'inconclusive'] }, sourceDigest: { type: 'string', pattern: DIGEST_PATTERN }, mode: { enum: FIXTURE.modes } });
 schemas.serverSnapshot = object({ schemaVersion: version, sourceDigest: { type: 'string', pattern: DIGEST_PATTERN }, instrumentation: { enum: ['verified', 'unavailable'] }, complete: { type: 'boolean' }, events: { type: 'array', maxItems: LIMITS.evidenceEvents, items: serverEvent } });
+schemas.zapEvidence = zapSchema;
 Object.assign(schemas, campaignSchemas(schemas, id, serverEvent));
+Object.assign(schemas, sastSchemas);
+Object.assign(schemas, sourceTrialSchemas(schemas, campaignResultSchema(schemas, serverEvent), scalarValues));
 const validators = Object.fromEntries(Object.entries(schemas).map(([name, schema]) => [name, ajv.compile(schema)]));
 function cloneJson(value, depth = 0, seen = new Set()) {
   if (depth > 20) throw Error('JSON nesting limit');
@@ -51,12 +58,15 @@ function cloneJson(value, depth = 0, seen = new Set()) {
 }
 function validate(name, input) {
   if (!Object.hasOwn(validators, name)) throw Error('Unknown contract');
-  const maximumBytes = name === 'report' ? REPORT_STORAGE.maximumBytes : LIMITS.jsonPayloadBytes;
+  const maximumBytes = ['report', 'sourceReport'].includes(name) ? REPORT_STORAGE.maximumBytes : LIMITS.jsonPayloadBytes;
   if (typeof input === 'string' && Buffer.byteLength(input) > maximumBytes) throw Error('JSON size limit');
   const value = cloneJson(typeof input === 'string' ? JSON.parse(input) : input);
   if (Buffer.byteLength(JSON.stringify(value)) > maximumBytes) throw Error('JSON size limit');
   if (!validators[name](value)) throw Error(`Invalid ${name}: ${ajv.errorsText(validators[name].errors)}`);
+  if (name === 'sourceReport') assertSourceReport(value, { validate, assess });
   if (name === 'report') assertReportIntegrity(value, { validate, assess });
+  if (name === 'zapEvidence') assertZapEvidence(value);
+  if (name === 'sastMetadata') assertSastMetadata(value);
   if (name === 'slice' && value.endLine < value.startLine) throw Error('Invalid line range');
   if (name === 'seed' && value.omitFields.some(key => Object.hasOwn(value.values, key))) throw Error('Field cannot be supplied and omitted');
   if (name === 'feedback') {

@@ -4,11 +4,16 @@ import type { ContractsPort, EvidencePort, Handle, Observation, RegistryPort, Re
 import { createCatalog, targetKey } from '../adapters/catalog';
 import { executeHttpTrial } from '../adapters/httpTrial';
 import { collectEvidence } from './collectEvidence';
-export interface RunnerOptions { registry: RegistryPort; contracts: ContractsPort; profiles: readonly unknown[]; controls?: readonly unknown[]; timeoutMs?: number; evidenceSource?: EvidencePort }
+import type { TrialGuard } from '../domain/sourceBinding';
+import { verifyTrialGuard } from '../adapters/trialGuard';
+import { ZAP, zapUnavailable, type ZapPort } from '../domain/zap';
+import { collectZap } from '../adapters/collectZap';
+export interface RunnerOptions { registry: RegistryPort; contracts: ContractsPort; profiles: readonly unknown[]; controls?: readonly unknown[]; timeoutMs?: number; evidenceSource?: EvidencePort; guard?: TrialGuard; zap?: ZapPort; anonymousWire?: boolean }
 // Application service composes policy, transport and evidence through explicit ports.
-export function createHttpRunner({ registry, contracts, profiles, controls = [], timeoutMs = LIMITS.defaultTrialTimeoutMs, evidenceSource }: RunnerOptions) {
+export function createHttpRunner({ registry, contracts, profiles, controls = [], timeoutMs = LIMITS.defaultTrialTimeoutMs, evidenceSource, guard, zap, anonymousWire }: RunnerOptions) {
   if (!Number.isInteger(timeoutMs) || timeoutMs < LIMITS.minimumTimeoutMs || timeoutMs > LIMITS.maximumTrialTimeoutMs) throw Error('Invalid trial timeout');
   const catalog = createCatalog(contracts, profiles, controls);
+  if (zap) { const proxy = new URL(zap.proxy); if (proxy.protocol !== 'http:' || proxy.hostname !== ZAP.host || !proxy.port || proxy.origin !== zap.proxy) throw Error('Owned numeric loopback ZAP proxy required'); }
   const evidencePort = evidenceSource ? Object.freeze({
     expectedSourceDigest: evidenceSource.expectedSourceDigest,
     currentSourceDigest: evidenceSource.currentSourceDigest.bind(evidenceSource),
@@ -24,24 +29,36 @@ export function createHttpRunner({ registry, contracts, profiles, controls = [],
     const { trial, profile } = preflight(handle, input);
     const grant = registry.begin(handle, trial);
     try {
-      const transport = await executeHttpTrial({ registry, contracts, handle, input: trial, profile, purpose, timeoutMs, grant });
+      const transport = await executeHttpTrial({ registry, contracts, handle, input: trial, profile, purpose, timeoutMs, grant, ...(guard ? { guard } : {}), ...(zap ? { proxy: zap.proxy } : {}), ...(anonymousWire ? { anonymousWire } : {}) });
       const remainingMs = Math.min(timeoutMs - transport.observation.durationMs, transport.expiresAt - Date.now());
       const evidenceSignal = AbortSignal.any([transport.signal, AbortSignal.timeout(Math.max(0, Math.ceil(remainingMs)))]);
+      if (transport.observation.outcome === 'completed' && guard) {
+        try { await verifyTrialGuard(guard, grant, trial, evidenceSignal); }
+        catch { transport.observation = contracts.validate('httpObservation', { ...transport.observation, outcome: 'error', reason: 'source_binding_failed' }); }
+      }
       const evidence = await collectEvidence(transport.observation.outcome === 'completed' && remainingMs > 0 ? evidencePort : undefined, transport.observation, contracts, evidenceSignal);
-      if ((evidenceSignal.aborted || remainingMs <= 0) && transport.observation.outcome === 'completed') {
+      let zapEvidence = zap ? await collectZap(zap, transport.observation, trial, evidenceSignal, contracts) : undefined;
+      if (guard && zap && transport.observation.outcome === 'completed') {
+        try { await verifyTrialGuard(guard, grant, trial, evidenceSignal); }
+        catch {
+          transport.observation = contracts.validate('httpObservation', { ...transport.observation, outcome: 'error', reason: 'source_binding_failed' });
+          zapEvidence = zapUnavailable('incomplete', 'unavailable', zapEvidence?.sessionId ?? null);
+        }
+      }
+      if ((evidenceSignal.aborted || remainingMs <= 0) && (transport.observation.outcome === 'completed' || transport.observation.reason === 'source_binding_failed')) {
         let state: string;
         try { state = registry.status(handle).state; } catch { state = 'disposed'; }
         const cancelled = state === 'cancelled' || state === 'disposed';
         transport.observation = contracts.validate('httpObservation', { ...transport.observation, outcome: cancelled ? 'cancelled' : 'timeout', reason: cancelled ? state === 'disposed' ? 'job_disposed' : 'job_cancelled' : state === 'expired' ? 'job_expired' : 'trial_timeout' });
       }
-      const feedback = contracts.validate('feedback', { schemaVersion: CONTRACT_VERSION, seedId: trial.seed.seedId, outcome: transport.observation.outcome, status: transport.observation.status, durationMs: transport.observation.durationMs, instrumentation: evidence.state === 'verified' ? 'verified' : 'unavailable', reachability: evidence.reachability, sourceDigest: evidence.sourceDigest, oracle: transport.observation.outcome === 'completed' ? responseOracle(evidence, transport.body, transport.observation.status) : 'inconclusive', controlPassed: false, evidenceIds: evidence.events.map(event => event.evidenceId), zap: 'disabled' });
-      return { ...transport, evidence, feedback };
+      const feedback = contracts.validate('feedback', { schemaVersion: CONTRACT_VERSION, seedId: trial.seed.seedId, outcome: transport.observation.outcome, status: transport.observation.status, durationMs: transport.observation.durationMs, instrumentation: evidence.state === 'verified' ? 'verified' : 'unavailable', reachability: evidence.reachability, sourceDigest: evidence.sourceDigest, oracle: transport.observation.outcome === 'completed' ? responseOracle(evidence, transport.body, transport.observation.status) : 'inconclusive', controlPassed: false, evidenceIds: evidence.events.map(event => event.evidenceId), zap: zapEvidence?.state ?? 'disabled' });
+      return { ...transport, evidence, feedback, ...(zapEvidence ? { zap: zapEvidence } : {}) };
     } finally {
       try { registry.finish(handle, grant.trialId); } catch { /* dispose already removed the complete job */ }
     }
   }
   function publicResult(result: Awaited<ReturnType<typeof execute>>): Result {
-    return Object.freeze({ observation: result.observation, feedback: result.feedback, evidence: result.evidence, assessment: contracts.assess(result.feedback) });
+    return Object.freeze({ observation: result.observation, feedback: result.feedback, evidence: result.evidence, assessment: contracts.assess(result.feedback), ...(result.zap ? { zap: result.zap } : {}) });
   }
   return {
     async run(handle: Handle, input: TrialRequest) { return publicResult(await execute(handle, input, 'candidate')); },
@@ -56,6 +73,7 @@ export function createHttpRunner({ registry, contracts, profiles, controls = [],
       const bodyMatches = normal.body !== null && typeof normal.body === 'object'
         && Object.entries(control.expectedJson).every(([key, value]) => Object.hasOwn(normal.body as object, key) && Reflect.get(normal.body as object, key) === value);
       const passed = normal.observation.outcome === 'completed' && normal.observation.status === control.expectedStatus && bodyMatches
+        && (!zap || normal.feedback.zap === 'completed')
         && (!evidencePort || normal.evidence.state === 'verified' && normal.feedback.oracle === 'passed');
       if (!passed) return Object.freeze({ state: 'control_failed' as const, control: publicResult(normal), candidate: null });
       const candidate = await execute(handle, trial, 'candidate');

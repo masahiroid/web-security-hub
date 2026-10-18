@@ -54,3 +54,5 @@ Windows/Linux build definitions are provided, but those platforms were not teste
 ## Package scope
 
 The initial native package includes web automation, scanning and training. Appium/WebdriverIO are not bundled; mobile remains available in the source/CLI edition. Distribution dependencies are locked independently in `desktop/runtime/package{,-lock}.json`. The full source mobile dependency tree still has audit findings requiring separate remediation.
+
+3.0.0: optional managed ZAP setup is available in the Static Analysis workspace. See the [source verification guide](../training/SAST-MAPPING.md). This is independent of the older dynamic-scan ZAP configuration. Windows installer acceptance runs in a Windows CI host; Linux native installation remains unverified.

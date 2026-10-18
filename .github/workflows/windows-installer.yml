@@ -1,7 +1,7 @@
 name: Windows installer
 on:
   push:
-    branches: [feature/desktop-distribution-training, feature/hybrid-verifier-foundation]
+    branches: [develop, main, 'feature/**']
     paths-ignore: ['docs/**', '*.md']
   workflow_dispatch:
 permissions:
@@ -16,11 +16,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
-      - uses: dtolnay/rust-toolchain@stable
       - run: npm ci --ignore-scripts
       - run: npm audit --omit=dev --prefix desktop/runtime
       - run: npm test
+      - name: Verify real owned ZAP runtime
+        run: npm run verifier:verify-zap -- --install
       - run: npm run release:check
+      - uses: dtolnay/rust-toolchain@stable
       - run: npm run desktop:build -- --bundles nsis -- --locked
       - name: Verify installed native application
         run: node scripts/verify-windows-installed.js

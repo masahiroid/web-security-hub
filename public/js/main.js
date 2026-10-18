@@ -19,3 +19,7 @@ import "./help.js";
 import "/generated/verifier/main.js";
 
 if (new URLSearchParams(location.search).get("workspace") === "verifier") document.querySelector("[data-tab=verifier]").click();
+
+import "/generated/security/sourceBindingDemo.js";
+
+import "/generated/security/sourceTargetControls.js";

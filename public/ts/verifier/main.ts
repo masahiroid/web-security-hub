@@ -1,5 +1,5 @@
 import { API, text, campaignState } from './config.js';
-import { jobUrl, object, request, type JsonObject } from './client.js';
+import { jobUrl, object, request, ensureSession, type JsonObject } from './client.js';
 import { field, get, renderReport, translate } from './view.js';
 const panel = get('panel-verifier');
 let defaults: JsonObject | null = null; let activeId: string | null = null; let busy = false; let timer: ReturnType<typeof setTimeout> | undefined; let lastReport: unknown = null;
@@ -40,7 +40,7 @@ get('verifierRun').addEventListener('click', async () => {
   get('verifierRows').replaceChildren(); get('verifierEvidence').textContent = ''; get('verifierSummary').textContent = text('running');
   controls(true); status(text('running')); get('verifierDownload').hidden = true; get('verifierSaved').textContent = '';
   try {
-    const job = await request(API.jobs, values); if (typeof job.jobId !== 'string') throw Error('Missing job');
+    await ensureSession(); const job = await request(API.jobs, values); if (typeof job.jobId !== 'string') throw Error('Missing job');
     activeId = job.jobId; sessionStorage.setItem(API.storageKey, activeId); await poll();
   } catch (error: unknown) { controls(false); status(error instanceof Error && error.message === 'busy' ? text('busy') : text('failed')); }
 });
@@ -67,7 +67,7 @@ for (const button of panel.querySelectorAll<HTMLButtonElement>('[data-vpage]')) 
 }
 function language() { translate(panel); get('verifierNav').textContent = text('nav'); if (lastReport) { renderReport(lastReport); status(campaignState(object(lastReport).state)); get('verifierSaved').textContent = text('saved'); } if (!busy && !lastReport) status(text('idle')); }
 new MutationObserver(language).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] }); language(); controls(false);
-void request(API.session).then(session => {
+void ensureSession().then(session => {
   defaults = object(session.defaults);
   field('verifierMode').value = String(defaults.mode); field('verifierScenario').value = String(defaults.scenario);
   const limits = object(session.limits);
