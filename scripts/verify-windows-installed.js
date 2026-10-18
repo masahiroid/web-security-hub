@@ -2,7 +2,7 @@
 // Optional native integration check; no Apple credentials or personal settings.
 const fs = require('fs'); const path = require('path'); const os = require('os'); const net = require('net');
 const { spawn, spawnSync } = require('child_process'); const { chromium } = require('playwright');
-const SETTINGS = Object.freeze({ startupMs: 60000, pollMs: 250, closeMs: 15000, expectedCandidates: 22, expectedViolations: 4 });
+const SETTINGS = Object.freeze({ startupMs: 60000, pollMs: 250, closeMs: 15000, expectedCandidates: 22, expectedViolations: 4, diagnosticChars: 64 * 1024 });
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function waitUntil(check, timeout, phase) { const end = Date.now()+timeout; while(Date.now()<end){ if(await check())return; await sleep(SETTINGS.pollMs); } throw Error(`Native verification timed out: ${phase}`); }
 async function freePort() { const server=net.createServer(); await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve)); const port=server.address().port; await new Promise(resolve=>server.close(resolve)); return port; }
@@ -33,7 +33,7 @@ function ciDebugPolicy(executable, port) {
   const executable=path.join(install,executables[0]); const port=await freePort();
   removePolicy=ciDebugPolicy(executable,port);
   application=spawn(executable,[],{env:{...process.env,WEB_SECURITY_HUB_DATA_DIR:path.join(temporary,'data'),WEBVIEW2_USER_DATA_FOLDER:path.join(temporary,'webview'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`},stdio:['ignore','ignore','pipe']});
-  let startupError=''; application.stderr.setEncoding('utf8'); application.stderr.on('data',chunk=>{startupError=(startupError+chunk).slice(-65536);});
+  let startupError=''; application.stderr.setEncoding('utf8'); application.stderr.on('data',chunk=>{startupError=(startupError+chunk).slice(-SETTINGS.diagnosticChars);});
   await waitUntil(async()=>{try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);return r.ok;}catch{if(application.exitCode!==null)throw Error(`Native process exited before WebView startup (${application.exitCode})`);return false;}},SETTINGS.startupMs,'WebView debugging endpoint');
   console.log('Native WebView debugging endpoint ready');
   browser=await chromium.connectOverCDP(`http://127.0.0.1:${port}`); const context=browser.contexts()[0]; if(!context)throw Error('Native WebView unavailable');
