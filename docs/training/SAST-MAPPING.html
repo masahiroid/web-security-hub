@@ -35,14 +35,24 @@ Expand <strong>Route mapping</strong> to inspect source SHA-256, line/column spa
 </tr>
 </tbody>
 </table>
-<p>One candidate means one supported registration in the same file. It does not establish runtime reachability, reproduce a vulnerability or grant permission to test a target. This feature does not send HTTP requests.</p>
+<p>One candidate means one supported registration in the same file. It does not establish runtime reachability, reproduce a vulnerability or grant permission to test a target. Static analysis itself does not send HTTP requests.</p>
 <h2>3. Track findings in reports</h2>
 <p><img src="images/sast-mapping-detail-en.png" alt="Instance identity, source hash and route details" /></p>
 <p>JSON, HTML, Markdown and SARIF reports retain the instance ID, source hash and mapping metadata. SARIF preserves the original <code>ruleId</code>; instance IDs are added as <code>partialFingerprints</code>.
 Identical file bytes, relative path and match position produce the same ID. Editing the source changes the ID. Do not reuse an old result as evidence for modified source.
 Lines/columns are one-based; offsets and columns use UTF-16; the end of a span is exclusive.</p>
+<h2>4. Check source and scope with a dedicated executable sample</h2>
+<p>In <strong>Static Analysis</strong>, click <strong>Run source/scope sample</strong>. No source path or terminal is needed for this operation. It starts only the shipped sample on a temporary numeric loopback port; it never runs the source entered in the field above. <strong>Cancel</strong> stops the owned run. Your input and previous SAST results stay intact.</p>
+<p>The sample's compiled JavaScript contains an unused <code>rejectUnauthorized: false</code> object. SAST detects the pattern, but the flag is never applied to a TLS connection. This is a source-binding exercise, not an intentional TLS vulnerability.</p>
+<p><img src="images/sast-binding-en.png" alt="Source binding and correlated normal/candidate requests" /></p>
+<p>Expected results: normal control <strong>HTTP 200</strong>, candidate <strong>HTTP 422</strong>, both assessments <strong>under investigation</strong>. Expand Route mapping and each trial's IDs. They belong to one finding and job, with separate trial, seed and request IDs. The anonymous profile is explicit.</p>
+<p>Before each setup/target send and after each successful response, the runner rereads the bounded source and checks its rule, span, hash, instance ID and route against a separately authorized scope. Changed or unavailable source blocks further sends and invalidates the result. Ambiguous, unsupported and parameterized candidates cannot create a bound runner. These checks do not prove that the running process loaded the same bytes or reached the flagged code.</p>
+<p>Results stay on this screen and are not automatically saved. In the source edition, the equivalent command emits JSON to stdout:</p>
+<pre><code class="language-sh">npm run verifier:run -- --sast-sample
+</code></pre>
+<p>This dedicated option cannot be combined with campaign options or arbitrary URL/source arguments. Existing baseline/changed/fixed campaign commands and their private JSON/HTML reports are unchanged.</p>
 <h2>Coverage and remaining work</h2>
 <p>Supported inputs are <code>.js</code>, <code>.cjs</code> and <code>.mjs</code> with top-level Express creation, literal route/mount paths, and local handlers, middleware and directly called helper functions. Parameterized paths are displayed as templates.
 Imported routers/handlers, factories, dynamic/conditional/computed/chained registrations and analysis limits do not yield a unique conclusion. Existing SAST findings in TypeScript and other languages remain visible, with route mapping marked unsupported.</p>
-<p>Connecting findings to an authorized execution scope, correlating per-trial ZAP evidence and validating the 3.0.0 installers remain within this phase.</p>
+<p>The dedicated sample and backend adapter now bind a finding to an authorized exact route. Selecting arbitrary applications in the GUI, attesting loaded source, correlating per-trial ZAP evidence and validating the 3.0.0 installers remain incomplete.</p>
 </main></html>

@@ -101,4 +101,4 @@ Copyright 2024–2026 Masahiro NAKATSUGAWA.
 
 Web Security Hub is distributed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for copyright and attribution information.
 
-Development branch: [SAST finding IDs and static route candidates](docs/training/SAST-MAPPING.md) are available in the source edition. Execution binding and ZAP integration remain pending; this feature is not included in the published 2.0.0 installers.
+Development branch: [SAST finding IDs and static route candidates](docs/training/SAST-MAPPING.md) are available in the source edition. The GUI and CLI include a dedicated source/scope binding sample; arbitrary-application execution and ZAP integration remain pending; this feature is not included in the published 2.0.0 installers.

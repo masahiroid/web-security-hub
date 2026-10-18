@@ -57,6 +57,16 @@ function ciDebugPolicy(executable, port) {
     checks.push(`${lang}/${mode}: native UI PASS`);
    }
    await page.fill('#verifierSeed','43'); await page.click('#helpBtn'); await page.frameLocator('#helpReader').locator('h1').waitFor(); await page.click('#closeHelp'); if(await page.inputValue('#verifierSeed')!=='43')throw Error('Native help lost inputs');
+   await page.click('[data-tab=static]'); await page.fill('#sourceDir','retained-source-input');
+   const sampleResponse=page.waitForResponse(response=>response.url().endsWith('/api/verifier/sast-sample'));
+   await page.click('#runSastBinding'); const sample=await(await sampleResponse).json();
+   if(sample.state!=='completed'||sample.pair.control.observation.status!==200||sample.pair.candidate.observation.status!==422||sample.pair.candidate.assessment.result!=='under_investigation'||sample.runtimeSource!=='unverified')throw Error('Native source binding mismatch');
+   await page.waitForFunction(()=>!document.getElementById('runSastBinding').disabled);
+   if(await page.inputValue('#sourceDir')!=='retained-source-input')throw Error('Native source binding lost inputs');
+   await page.click('#helpBtn'); const guide=await page.frameLocator('#helpReader').locator('h1').innerText(); if(!guide.includes('SAST'))throw Error('Native SAST guide mismatch'); await page.click('#closeHelp');
+   if(!(await page.locator('#sastBindingResult').innerText()).includes('POST /inspect'))throw Error('Native source binding result lost');
+   checks.push(`${lang}/source-scope: native UI 200/422, guide and retained inputs PASS`);
+   await page.click('[data-tab=verifier]');
   }
   const close=spawnSync('powershell.exe',['-NoProfile','-Command','(Get-Process -Id $env:WSH_NATIVE_PID).CloseMainWindow()'],{env:{...process.env,WSH_NATIVE_PID:String(application.pid)},encoding:'utf8'}); if(close.status!==0)throw Error('Could not close owned window');
   await waitUntil(()=>application.exitCode!==null,SETTINGS.closeMs,'native application exit'); checks.push('Native app closed cleanly');

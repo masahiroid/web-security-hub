@@ -4,9 +4,11 @@ import type { ContractsPort, EvidencePort, Handle, Observation, RegistryPort, Re
 import { createCatalog, targetKey } from '../adapters/catalog';
 import { executeHttpTrial } from '../adapters/httpTrial';
 import { collectEvidence } from './collectEvidence';
-export interface RunnerOptions { registry: RegistryPort; contracts: ContractsPort; profiles: readonly unknown[]; controls?: readonly unknown[]; timeoutMs?: number; evidenceSource?: EvidencePort }
+import type { TrialGuard } from '../domain/sourceBinding';
+import { verifyTrialGuard } from '../adapters/trialGuard';
+export interface RunnerOptions { registry: RegistryPort; contracts: ContractsPort; profiles: readonly unknown[]; controls?: readonly unknown[]; timeoutMs?: number; evidenceSource?: EvidencePort; guard?: TrialGuard }
 // Application service composes policy, transport and evidence through explicit ports.
-export function createHttpRunner({ registry, contracts, profiles, controls = [], timeoutMs = LIMITS.defaultTrialTimeoutMs, evidenceSource }: RunnerOptions) {
+export function createHttpRunner({ registry, contracts, profiles, controls = [], timeoutMs = LIMITS.defaultTrialTimeoutMs, evidenceSource, guard }: RunnerOptions) {
   if (!Number.isInteger(timeoutMs) || timeoutMs < LIMITS.minimumTimeoutMs || timeoutMs > LIMITS.maximumTrialTimeoutMs) throw Error('Invalid trial timeout');
   const catalog = createCatalog(contracts, profiles, controls);
   const evidencePort = evidenceSource ? Object.freeze({
@@ -24,11 +26,15 @@ export function createHttpRunner({ registry, contracts, profiles, controls = [],
     const { trial, profile } = preflight(handle, input);
     const grant = registry.begin(handle, trial);
     try {
-      const transport = await executeHttpTrial({ registry, contracts, handle, input: trial, profile, purpose, timeoutMs, grant });
+      const transport = await executeHttpTrial({ registry, contracts, handle, input: trial, profile, purpose, timeoutMs, grant, ...(guard ? { guard } : {}) });
       const remainingMs = Math.min(timeoutMs - transport.observation.durationMs, transport.expiresAt - Date.now());
       const evidenceSignal = AbortSignal.any([transport.signal, AbortSignal.timeout(Math.max(0, Math.ceil(remainingMs)))]);
+      if (transport.observation.outcome === 'completed' && guard) {
+        try { await verifyTrialGuard(guard, grant, trial, evidenceSignal); }
+        catch { transport.observation = contracts.validate('httpObservation', { ...transport.observation, outcome: 'error', reason: 'source_binding_failed' }); }
+      }
       const evidence = await collectEvidence(transport.observation.outcome === 'completed' && remainingMs > 0 ? evidencePort : undefined, transport.observation, contracts, evidenceSignal);
-      if ((evidenceSignal.aborted || remainingMs <= 0) && transport.observation.outcome === 'completed') {
+      if ((evidenceSignal.aborted || remainingMs <= 0) && (transport.observation.outcome === 'completed' || transport.observation.reason === 'source_binding_failed')) {
         let state: string;
         try { state = registry.status(handle).state; } catch { state = 'disposed'; }
         const cancelled = state === 'cancelled' || state === 'disposed';

@@ -183,7 +183,8 @@
       "viewport": {
         "width": 1440,
         "height": 1200
-      }
+      },
+      "capturedAt": "2026-10-18T06:13:59.363Z"
     },
     {
       "lang": "ja",
@@ -195,7 +196,8 @@
       "viewport": {
         "width": 1440,
         "height": 1200
-      }
+      },
+      "capturedAt": "2026-10-18T06:13:59.430Z"
     },
     {
       "lang": "en",
@@ -207,7 +209,8 @@
       "viewport": {
         "width": 1440,
         "height": 1200
-      }
+      },
+      "capturedAt": "2026-10-18T06:13:59.813Z"
     },
     {
       "lang": "en",
@@ -219,7 +222,34 @@
       "viewport": {
         "width": 1440,
         "height": 1200
-      }
+      },
+      "capturedAt": "2026-10-18T06:13:59.881Z"
+    },
+    {
+      "lang": "ja",
+      "step": "sast-binding",
+      "file": "docs/training/images/sast-binding-ja.png",
+      "appVersion": "2.0.0",
+      "development": true,
+      "targetVersion": "3.0.0",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      },
+      "capturedAt": "2026-10-18T06:13:59.706Z"
+    },
+    {
+      "lang": "en",
+      "step": "sast-binding",
+      "file": "docs/training/images/sast-binding-en.png",
+      "appVersion": "2.0.0",
+      "development": true,
+      "targetVersion": "3.0.0",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      },
+      "capturedAt": "2026-10-18T06:14:00.098Z"
     }
   ],
   "runs": [

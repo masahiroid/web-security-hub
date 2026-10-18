@@ -244,12 +244,11 @@ The development branch adds individual SAST finding IDs, raw-source SHA-256,
 UTF-16 source spans and bounded file-local Express AST route candidates. Existing
 rule IDs remain compatible. Shared handlers are ambiguous; unsupported or dynamic
 registrations stay unavailable. Static candidates never authorize execution or
-prove runtime reachability. Cross-file execution binding and ZAP integration are
-still pending. This feature is absent from the published 2.0.0 installers.
+prove runtime reachability. The dedicated GUI/CLI source-binding sample checks a separately authorized exact route before sends and after successful responses. Arbitrary-application selection, loaded-code attestation and ZAP integration remain incomplete. This feature is absent from the published 2.0.0 installers.
 See the [illustrated source-edition guide](../../docs/training/SAST-MAPPING.md).
 
 開発ブランチでは、個別検出ID・ソースハッシュ・正確な位置と、同一ファイル内の
 Expressルート候補を追加しています。共有ハンドラーは複数候補、動的・未対応構文は
 解析不能として表示します。実行許可・実行時の到達証拠には使いません。
-実行との接続・ZAPは未実装で、公開済み2.0.0の配布版には含まれません。
+専用サンプルは画面/CLIからソースと許可済みの完全一致ルートを照合して試行できます。任意アプリの選択・起動中コードの同一性確認・ZAPは未完成で、公開済み2.0.0の配布版には含まれません。
 [ソース版の画像付きガイド](../../docs/training/SAST-MAPPING.ja.md)を参照してください。

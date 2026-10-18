@@ -21,7 +21,7 @@ sets.forEach((el,i)=>el.id ||= `site-settings-${i}`);
 for(const id of ['dynamic','replay']) document.querySelectorAll(`#panel-${id} > fieldset`).forEach((el,i)=>el.id ||= `${id}-settings-${i}`);
 subpages(site,sets.map((s,i)=>[[localized('基本設定','General','Général'),localized('ログイン','Login','Connexion'),localized('Basic 認証','Basic auth'),localized('シナリオ','Scenario','Scénario'),localized('操作記録','Recorder','Enregistrement')][i],[s]]));
 const save=document.createElement('div'); save.className='workspace-actionbar'; save.append(document.getElementById('saveSiteBtn'),document.getElementById('saveSiteStatus')); site.append(save);
-for (const [id,resultIds] of [['dynamic',['dynamicResult']],['static',['staticResult']],['testCases',['pipelineLog','pipelineResult']],['replay',['replayLog','replayResult']]]) {
+for (const [id,resultIds] of [['dynamic',['dynamicResult']],['static',['staticResult','sastBindingResult']],['testCases',['pipelineLog','pipelineResult']],['replay',['replayLog','replayResult']]]) {
   const panel=document.getElementById(`panel-${id}`);
   const heading=panel.querySelector(':scope > h2');
   const controls=document.createElement('div'); controls.className='workspace-controls';

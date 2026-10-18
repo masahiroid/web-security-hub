@@ -4,7 +4,7 @@ export type Method = 'GET' | 'POST';
 export type Outcome = 'completed' | 'timeout' | 'cancelled' | 'error';
 export type Oracle = 'passed' | 'violated' | 'inconclusive';
 export type Reachability = 'observed' | 'not_observed' | 'unavailable';
-export type Reason = 'none' | 'transport_error' | 'setup_failed' | 'redirect_outside_scope' | 'redirect_not_followed' | 'response_too_large' | 'cleanup_failed' | 'job_cancelled' | 'job_disposed' | 'job_expired' | 'trial_timeout';
+export type Reason = 'none' | 'transport_error' | 'setup_failed' | 'redirect_outside_scope' | 'redirect_not_followed' | 'response_too_large' | 'cleanup_failed' | 'job_cancelled' | 'job_disposed' | 'job_expired' | 'trial_timeout' | 'source_binding_failed';
 export interface Seed { readonly schemaVersion: number; readonly seedId: string; readonly values: Values; readonly omitFields: readonly string[]; readonly rationale: string }
 export interface TrialRequest { readonly url: string; readonly method: Method; readonly authProfileId: string; readonly seed: Seed }
 export interface Scope { readonly schemaVersion: number; readonly sourceRootId: string; readonly origin: string; readonly route: string; readonly method: Method; readonly authProfileIds: readonly string[]; readonly allowedFields: readonly string[]; readonly ttlMs: number; readonly maxTrials: number; readonly maxConcurrency: number }

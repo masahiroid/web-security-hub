@@ -3,6 +3,7 @@ const LABELS = {
   ja: { mapped: 'ルート対応：一意', ambiguous: 'ルート対応：複数候補', unavailable: 'ルート対応：解析できません', rule: 'ルールID', source: 'ソース', instance: '個別finding ID', digest: 'ソースSHA-256', span: '位置', line: '登録行', more: 'すべての候補はJSONレポートを参照してください。', notice: '同一ファイル内の静的な対応です。自動実行されず、実行時の到達を示す証拠ではありません。' },
   en: { mapped: 'Route mapping: one candidate', ambiguous: 'Route mapping: ambiguous', unavailable: 'Route mapping: unavailable', rule: 'Rule ID', source: 'Source', instance: 'Finding instance ID', digest: 'Source SHA-256', span: 'Span', line: 'Registration line', more: 'See the JSON report for all candidate routes.', notice: 'File-local static attribution only. This does not execute a request or establish runtime reachability.' }
 };
+const BINDING_NOTICE = { ja: '静的な対応は、許可済み試行の制約として照合します。実行時の到達を示す証拠ではありません。', en: 'Static attribution constrains separately authorized trials. It is not evidence of runtime reachability.' };
 const REASONS: Record<string, readonly [string, string]> = {
   unique_static_route: ['静的な登録先が1件あります。', 'One static registration candidate.'],
   multiple_static_routes: ['同じコードに複数の登録先があり、1件に絞れません。', 'Shared code has multiple registration candidates.'],
@@ -23,7 +24,7 @@ export function sastFindingText(item: unknown, field: 'title' | 'evidence' | 're
   const key = `sast.${item.ruleId}.${field}`; const text = translate(key); return text === key ? fallback : text;
 }
 /** Build metadata with DOM text nodes; scanned paths never become HTML or links. */
-export function renderSastMetadata(item: unknown, language: string): string {
+export function renderSastMetadata(item: unknown, language: string, context: 'analysis' | 'binding' = 'analysis'): string {
   if (!record(item) || typeof item.findingInstanceId !== 'string' || !/^sast-[a-f0-9]{64}$/.test(item.findingInstanceId) || typeof item.sourceDigest !== 'string' || !/^[a-f0-9]{64}$/.test(item.sourceDigest) || !record(item.routeMapping)) return '';
   const mapping = item.routeMapping; const status = mapping.status;
   if (status !== 'mapped' && status !== 'ambiguous' && status !== 'unavailable') return '';
@@ -50,5 +51,5 @@ export function renderSastMetadata(item: unknown, language: string): string {
     }
     details.append(list); if (mapping.routes.length > VIEW.maximumDisplayedRoutes) paragraph(details, labels.more);
   }
-  paragraph(details, labels.notice); const container = document.createElement('div'); container.append(details); return container.innerHTML;
+  paragraph(details, context === 'binding' ? BINDING_NOTICE[ja ? 'ja' : 'en'] : labels.notice); const container = document.createElement('div'); container.append(details); return container.innerHTML;
 }
