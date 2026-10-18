@@ -35,7 +35,7 @@ async function launchOwnedZap(home: string, runtime: ZapInstallation, signal: Ab
   const config = join(home, 'private.properties');
   await writeFile(config, `api.key=${key}\napi.disablekey=false\napi.nokeyforsafeops=false\napi.autofillkey=false\napi.addrs.addr.name=${ZAP.host}\napi.addrs.addr.regex=false\n`, { mode: ZAP.fileMode, flag: 'wx' });
   const child = spawn(process.execPath, [join(__dirname, 'zapGuardian.js'), runtime.java, runtime.jar, home, config, String(port)],
-    { windowsHide: true, detached: process.platform !== 'win32', stdio: ['pipe', 'ignore', 'ignore'] });
+    { windowsHide: true, detached: true, stdio: ['pipe', 'ignore', 'ignore'] });
   let exited = false; let spawnFailed = false;
   const exit = new Promise<void>(resolve => { child.once('exit', () => { exited = true; resolve(); }); child.once('error', () => { spawnFailed = true; exited = true; resolve(); }); });
   let closing: Promise<void> | undefined;

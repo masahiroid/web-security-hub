@@ -11,19 +11,24 @@ export function superviseZap(argv: readonly string[]): void {
   const child = spawn(java, [`-Xmx${ZAP.heapMb}m`, '-Djava.awt.headless=true', '-jar', jar, '-daemon', '-silent',
     '-host', ZAP.host, '-port', port, '-dir', home, '-newsession', home + '/owned-session', '-configfile', config,
     '-config', 'database.recoverylog=false'], { cwd: dirname(jar), windowsHide: true, stdio: 'ignore' });
+  const parentPid = process.ppid;
   let timer: ReturnType<typeof setTimeout> | undefined; let exited = false;
+  // A killed Windows parent's anonymous pipe does not always emit EOF promptly.
+  // Check only our recorded parent; this probe never signals another process.
+  const parentWatch = setInterval(() => { try { process.kill(parentPid, 0); } catch { stop(); } }, ZAP.pollMs);
+  parentWatch.unref();
   const stop = () => {
     if (exited || timer) return;
     child.kill('SIGTERM'); timer = setTimeout(() => { if (!exited) child.kill('SIGKILL'); }, ZAP.shutdownMs); timer.unref();
   };
   const done = () => {
     if (exited) return;
-    exited = true; if (timer) clearTimeout(timer); process.stdin.destroy();
+    exited = true; clearInterval(parentWatch); if (timer) clearTimeout(timer); process.stdin.destroy();
     void rm(home, { recursive: true, force: true, maxRetries: ZAP.cleanupRetries, retryDelay: ZAP.pollMs })
       .then(() => { process.exitCode = 0; }, () => { process.exitCode = 1; });
   };
   child.once('exit', done); child.once('error', done);
-  process.stdin.on('end', stop); process.stdin.on('error', stop); process.stdin.resume();
+  process.stdin.on('close', stop); process.stdin.on('end', stop); process.stdin.on('error', stop); process.stdin.resume();
   process.once('SIGTERM', stop); process.once('SIGINT', stop);
 }
 if (require.main === module) {
