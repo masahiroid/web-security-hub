@@ -236,3 +236,10 @@ a { color:var(--accent); }
 .help-head h2 { font-size:17px; margin:0; }
 #helpReader { border:0; width:100%; flex:1; min-height:0; }
 @media(max-width:1100px) { header { flex-wrap:wrap; align-content:center; gap:6px 10px; } header h1 { font-size:16px; } header .title-block { margin-right:auto; } .site-picker { margin-left:0; } header button { padding:7px 10px; } .language-picker label { display:none; } #helpBtn { font-size:12px; } }
+
+.sast-metadata { margin-top:12px; overflow-wrap:anywhere; }
+.sast-metadata summary { cursor:pointer; color:var(--accent); }
+.sast-metadata p { margin:8px 0; }
+.sast-metadata code { white-space:normal; word-break:break-all; }
+
+.findings .sast-meta-row td { border-top:0; }

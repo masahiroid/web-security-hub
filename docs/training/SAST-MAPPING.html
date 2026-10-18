@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inspect individual SAST findings and route attribution</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>Inspect individual SAST findings and route attribution</h1>
+<p><a href="SAST-MAPPING.ja.html">日本語</a> · <a href="README.html">Basic hands-on</a></p>
+<p>This feature is on the development branch for 3.0.0. It is not included in the published 2.0.0 installers.
+Use the source edition with <code>npm install</code> and <code>npm start</code>.</p>
+<h2>1. Analyze the teaching source</h2>
+<p>Open <strong>Static Analysis</strong>, enter the absolute path to <code>training/sast/routes</code> in this checkout, and run analysis.
+These files are read-only teaching inputs. Do not launch them with Node or deploy them to a server.</p>
+<p>Three <code>SAST-DANGEROUS-EVAL</code> findings appear. They share a rule ID but have separate finding instance IDs.
+Expand <strong>Route mapping</strong> to inspect source SHA-256, line/column span and static candidates.</p>
+<p><img src="images/sast-mapping-en.png" alt="Individual SAST identities and route attribution" /></p>
+<h2>2. Compare unique, ambiguous and unavailable mappings</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Display</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mapped.js</code></td>
+<td>One candidate</td>
+<td>A direct local helper call is attributed to <code>POST /api/calculate</code></td>
+</tr>
+<tr>
+<td><code>ambiguous.js</code></td>
+<td>Ambiguous</td>
+<td>Shared code is registered for <code>POST /first</code> and <code>POST /second</code></td>
+</tr>
+<tr>
+<td><code>dynamic.js</code></td>
+<td>Unavailable</td>
+<td>An environment-dependent path is not guessed</td>
+</tr>
+</tbody>
+</table>
+<p>One candidate means one supported registration in the same file. It does not establish runtime reachability, reproduce a vulnerability or grant permission to test a target. This feature does not send HTTP requests.</p>
+<h2>3. Track findings in reports</h2>
+<p><img src="images/sast-mapping-detail-en.png" alt="Instance identity, source hash and route details" /></p>
+<p>JSON, HTML, Markdown and SARIF reports retain the instance ID, source hash and mapping metadata. SARIF preserves the original <code>ruleId</code>; instance IDs are added as <code>partialFingerprints</code>.
+Identical file bytes, relative path and match position produce the same ID. Editing the source changes the ID. Do not reuse an old result as evidence for modified source.
+Lines/columns are one-based; offsets and columns use UTF-16; the end of a span is exclusive.</p>
+<h2>Coverage and remaining work</h2>
+<p>Supported inputs are <code>.js</code>, <code>.cjs</code> and <code>.mjs</code> with top-level Express creation, literal route/mount paths, and local handlers, middleware and directly called helper functions. Parameterized paths are displayed as templates.
+Imported routers/handlers, factories, dynamic/conditional/computed/chained registrations and analysis limits do not yield a unique conclusion. Existing SAST findings in TypeScript and other languages remain visible, with route mapping marked unsupported.</p>
+<p>Connecting findings to an authorized execution scope, correlating per-trial ZAP evidence and validating the 3.0.0 installers remain within this phase.</p>
+</main></html>

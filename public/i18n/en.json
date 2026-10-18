@@ -32,5 +32,20 @@
   "findings.location": "Location",
   "findings.evidence": "Evidence / remediation",
   "findings.fix": "Remediation",
-  "findings.none": "No findings detected."
+  "findings.none": "No findings detected.",
+  "sast.SAST-DANGEROUS-EVAL.title": "Dynamic code execution",
+  "sast.SAST-DANGEROUS-EVAL.evidence": "A reference to eval / Function may allow input-driven code execution.",
+  "sast.SAST-DANGEROUS-EVAL.remediation": "Remove dynamic evaluation; use an allowlist or a safe parser.",
+  "sast.SAST-COMMAND-EXEC.title": "Command execution API",
+  "sast.SAST-COMMAND-EXEC.evidence": "A reference to an operating-system command execution API was detected.",
+  "sast.SAST-COMMAND-EXEC.remediation": "Use argument arrays and allowlists; do not concatenate external input into commands.",
+  "sast.SAST-SQL-CONCAT.title": "Possible SQL string concatenation",
+  "sast.SAST-SQL-CONCAT.evidence": "SQL string concatenation or template expansion was detected.",
+  "sast.SAST-SQL-CONCAT.remediation": "Use parameterized queries with placeholders.",
+  "sast.SAST-SECRET.title": "Possible embedded secret",
+  "sast.SAST-SECRET.evidence": "A string matching a key or token format was detected.",
+  "sast.SAST-SECRET.remediation": "Rotate the secret and move it to a secret store or an environment variable.",
+  "sast.SAST-TLS-DISABLED.title": "TLS certificate verification disabled",
+  "sast.SAST-TLS-DISABLED.evidence": "A setting that disables TLS certificate verification was detected.",
+  "sast.SAST-TLS-DISABLED.remediation": "Enable certificate verification and configure the correct certificate authority."
 }

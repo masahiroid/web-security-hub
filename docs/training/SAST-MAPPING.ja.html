@@ -1,0 +1,48 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SASTの個別指摘とルート対応を確認する</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>SASTの個別指摘とルート対応を確認する</h1>
+<p><a href="SAST-MAPPING.html">English</a> · <a href="README.ja.html">基本ハンズオン</a></p>
+<p>これは3.0.0に向けた開発ブランチの機能です。公開済み2.0.0インストーラーには含まれません。
+ソース版で <code>npm install</code>、<code>npm start</code> を実行して利用します。</p>
+<h2>1. 教材を静的解析する</h2>
+<p>アプリで <strong>静的解析</strong> を開き、ソースディレクトリーに、この作業コピーの <code>training/sast/routes</code> の絶対パスを指定して解析します。
+教材は読み取るだけです。ファイルをNodeで起動したり、公開サーバーへ配置したりしないでください。</p>
+<p>3件の <code>SAST-DANGEROUS-EVAL</code> が表示されます。ルールIDは共通ですが、各指摘の個別finding IDは異なります。
+「ルート対応」を開くと、ソースのSHA-256、行・列、静的な候補を確認できます。</p>
+<p><img src="images/sast-mapping-ja.png" alt="個別finding IDとルート対応" /></p>
+<h2>2. 一意・複数候補・解析不能を比較する</h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>表示</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mapped.js</code></td>
+<td>一意</td>
+<td>ローカル補助関数から <code>POST /api/calculate</code> の登録へ対応する</td>
+</tr>
+<tr>
+<td><code>ambiguous.js</code></td>
+<td>複数候補</td>
+<td>同じ関数が <code>POST /first</code> と <code>POST /second</code> から参照される</td>
+</tr>
+<tr>
+<td><code>dynamic.js</code></td>
+<td>解析できません</td>
+<td>環境変数のルート名を推測しない</td>
+</tr>
+</tbody>
+</table>
+<p>「一意」は同じファイル内の静的な登録先が1件という意味です。実行時の到達、脆弱性の再現、診断許可を意味しません。この機能からHTTPリクエストは実行されません。</p>
+<h2>3. 個別指摘をレポートで追跡する</h2>
+<p><img src="images/sast-mapping-detail-ja.png" alt="個別ID・ソースhash・対応ルートの詳細" /></p>
+<p>JSON・HTML・Markdown・SARIFの各レポートへ個別ID・ソースhash・対応情報を保存します。SARIFの <code>ruleId</code> は従来どおりで、個別IDは <code>partialFingerprints</code> へ追加されます。
+ファイルの内容・相対パス・指摘位置が同じなら個別IDは同じです。ソースを変更するとIDが変わるため、古い結果を新しいソースの証拠として扱わないでください。
+行・列は1始まり、列とoffsetはUTF-16、範囲の末尾は含みません。</p>
+<h2>対応範囲と未完成の部分</h2>
+<p><code>.js</code>・<code>.cjs</code>・<code>.mjs</code>の、トップレベルのExpress生成、文字列のroute/mount、同一ファイル内のハンドラー・middleware・直接呼び出す補助関数を解析します。パラメーターを含むパスは候補のテンプレートとして表示します。
+別ファイルからのrouter/handler、factory、動的・条件付き・computed・chainの登録、解析上限などでは対応を確定しません。TypeScriptや他言語の既存SAST指摘も表示を継続しますが、ルート解析は未対応です。</p>
+<p>SASTから許可済みの実行scopeへの接続、ZAPの試行別証拠との統合、3.0.0の配布確認は同じフェーズの残作業です。</p>
+</main></html>

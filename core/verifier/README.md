@@ -2,12 +2,12 @@
 
 The desktop Sample verification workspace and CLI run isolated local fixture
 campaigns through Playwright APIRequestContext. LLM, MCP, browser UI execution
-against targets, AST slicing and OpenVEX export are not implemented here.
+against targets, executable AST slicing and OpenVEX export are not implemented here.
 
 アプリの「サンプル検証」画面とCLIから、専用サンプルを独立した
 Playwright APIRequestContextによるHTTP試行で検証できます。
 LLM／MCP、対象サイトのブラウザーUI実行、
-AST解析、OpenVEX出力は後続段階です。
+実行用ASTスライス、OpenVEX出力は後続段階です。
 
 - `contracts`: versioned schemas and shared strict validation for seeds, scopes,
   slice metadata, evidence, feedback and draft assessments. Missing observations
@@ -237,3 +237,19 @@ backend. No job capability or local file path is returned in job status.
 `npm run verifier:verify-ui` checks JA/EN baseline/changed/fixed, embedded report,
 input retention and three desktop viewport sizes. This optional integration check
 requires the source edition's Playwright Chromium. Unit tests require no browser.
+
+## Development: static route attribution / 開発中の静的対応付け
+
+The development branch adds individual SAST finding IDs, raw-source SHA-256,
+UTF-16 source spans and bounded file-local Express AST route candidates. Existing
+rule IDs remain compatible. Shared handlers are ambiguous; unsupported or dynamic
+registrations stay unavailable. Static candidates never authorize execution or
+prove runtime reachability. Cross-file execution binding and ZAP integration are
+still pending. This feature is absent from the published 2.0.0 installers.
+See the [illustrated source-edition guide](../../docs/training/SAST-MAPPING.md).
+
+開発ブランチでは、個別検出ID・ソースハッシュ・正確な位置と、同一ファイル内の
+Expressルート候補を追加しています。共有ハンドラーは複数候補、動的・未対応構文は
+解析不能として表示します。実行許可・実行時の到達証拠には使いません。
+実行との接続・ZAPは未実装で、公開済み2.0.0の配布版には含まれません。
+[ソース版の画像付きガイド](../../docs/training/SAST-MAPPING.ja.md)を参照してください。

@@ -172,6 +172,54 @@
         "width": 1280,
         "height": 768
       }
+    },
+    {
+      "lang": "ja",
+      "step": "sast-mapping",
+      "file": "docs/training/images/sast-mapping-ja.png",
+      "appVersion": "2.0.0",
+      "development": true,
+      "targetVersion": "3.0.0",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "ja",
+      "step": "sast-mapping-detail",
+      "file": "docs/training/images/sast-mapping-detail-ja.png",
+      "appVersion": "2.0.0",
+      "development": true,
+      "targetVersion": "3.0.0",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "en",
+      "step": "sast-mapping",
+      "file": "docs/training/images/sast-mapping-en.png",
+      "appVersion": "2.0.0",
+      "development": true,
+      "targetVersion": "3.0.0",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "en",
+      "step": "sast-mapping-detail",
+      "file": "docs/training/images/sast-mapping-detail-en.png",
+      "appVersion": "2.0.0",
+      "development": true,
+      "targetVersion": "3.0.0",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
     }
   ],
   "runs": [

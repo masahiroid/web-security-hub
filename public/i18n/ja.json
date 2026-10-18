@@ -34,5 +34,20 @@
   "findings.location": "場所",
   "findings.evidence": "根拠 / 修正",
   "findings.fix": "修正",
-  "findings.none": "検出はありませんでした。"
+  "findings.none": "検出はありませんでした。",
+  "sast.SAST-DANGEROUS-EVAL.title": "動的コード実行",
+  "sast.SAST-DANGEROUS-EVAL.evidence": "eval / Function は入力由来のコード実行につながります。",
+  "sast.SAST-DANGEROUS-EVAL.remediation": "動的実行を除去し、許可リストまたは安全なパーサーを使用してください。",
+  "sast.SAST-COMMAND-EXEC.title": "コマンド実行 API",
+  "sast.SAST-COMMAND-EXEC.evidence": "OS コマンド実行 API の参照を検出しました。",
+  "sast.SAST-COMMAND-EXEC.remediation": "外部入力をコマンド文字列へ連結せず、引数配列・許可リストを使用してください。",
+  "sast.SAST-SQL-CONCAT.title": "SQL 文字列連結の疑い",
+  "sast.SAST-SQL-CONCAT.evidence": "SQL 文の文字列連結・テンプレート展開を検出しました。",
+  "sast.SAST-SQL-CONCAT.remediation": "プレースホルダー付きのパラメータ化クエリを使用してください。",
+  "sast.SAST-SECRET.title": "ハードコードされた秘密情報の疑い",
+  "sast.SAST-SECRET.evidence": "鍵・トークン形式の文字列を検出しました。",
+  "sast.SAST-SECRET.remediation": "秘密情報を即時ローテーションし、秘密情報ストアまたは環境変数へ移してください。",
+  "sast.SAST-TLS-DISABLED.title": "TLS 証明書検証の無効化",
+  "sast.SAST-TLS-DISABLED.evidence": "TLS 証明書検証を無効にする設定を検出しました。",
+  "sast.SAST-TLS-DISABLED.remediation": "証明書検証を有効にし、正しい CA を設定してください。"
 }

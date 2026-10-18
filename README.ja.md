@@ -96,3 +96,5 @@ docker compose -f docker-compose.zap.yml up -d
 Copyright 2024–2026 Masahiro NAKATSUGAWA.
 
 Web Security Hub は [Apache License 2.0](LICENSE) の下で配布します。著作権および帰属情報は [NOTICE](NOTICE) を参照してください。
+
+開発ブランチでは、ソース版で[個別SAST検出IDと静的ルート候補](docs/training/SAST-MAPPING.ja.md)を確認できます。実行との接続・ZAP連携は未実装で、公開済み2.0.0の配布版には含まれません。

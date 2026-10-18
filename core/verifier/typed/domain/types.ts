@@ -31,7 +31,7 @@ export interface RegistryPort {
 }
 export interface Slice { readonly schemaVersion: number; readonly findingInstanceId: string; readonly sourceRootId: string; readonly relativePath: string; readonly sourceDigest: string; readonly startLine: number; readonly endLine: number; readonly mapping: 'verified' | 'ambiguous' | 'unavailable' }
 export interface EvidenceSummary { readonly schemaVersion: number; readonly evidenceId: string; readonly seedId: string; readonly sourceDigest: string; readonly kind: 'server-event' | 'business-oracle' | 'http-observation'; readonly summary: string }
-export interface ContractMap { scope: Scope; slice: Slice; evidence: EvidenceSummary; assessment: Assessment; runOptions: import('./campaignTypes').RunOptions; report: import('./campaignTypes').Report; jobStatus: import('./campaignTypes').JobStatus; seed: Seed; trialRequest: TrialRequest; profile: Profile; control: Control; httpObservation: Observation; feedback: Feedback; serverSnapshot: Snapshot }
+export interface ContractMap { sastMetadata: import('./sastMapping').SastMetadata; scope: Scope; slice: Slice; evidence: EvidenceSummary; assessment: Assessment; runOptions: import('./campaignTypes').RunOptions; report: import('./campaignTypes').Report; jobStatus: import('./campaignTypes').JobStatus; seed: Seed; trialRequest: TrialRequest; profile: Profile; control: Control; httpObservation: Observation; feedback: Feedback; serverSnapshot: Snapshot }
 export interface ContractsPort { validate<K extends keyof ContractMap>(name: K, input: unknown): ContractMap[K]; assess(input: Feedback): Assessment }
 export interface EvidencePort {
   readonly expectedSourceDigest: string;

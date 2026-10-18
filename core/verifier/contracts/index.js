@@ -3,6 +3,8 @@ const Ajv = require('ajv');
 const { CONTRACT_VERSION, LIMITS, ID_PATTERN, DIGEST_PATTERN, POINTS, FIXTURE } = require('../generated/domain/config');
 const { REPORT_STORAGE } = require('../generated/domain/campaignConfig');
 const { campaignSchemas } = require('../generated/adapters/campaignSchemas');
+const { sastSchemas } = require('../generated/adapters/sastSchemas');
+const { assertSastMetadata } = require('../generated/domain/sastMapping');
 const { assertReportIntegrity } = require('../generated/domain/reportIntegrity');
 const ajv = new Ajv({ strict: true, ownProperties: true });
 const id = { type: 'string', pattern: ID_PATTERN };
@@ -29,6 +31,7 @@ const correlation = { jobId: id, trialId: id, seedId: id, requestId: id, authPro
 const serverEvent = object({ ...correlation, evidenceId: id, point: { enum: Object.values(POINTS) }, profile: { enum: FIXTURE.roles }, recordId: { type: ['string', 'null'], maxLength: LIMITS.identifierLength }, oracle: { enum: ['passed', 'violated', 'inconclusive'] }, sourceDigest: { type: 'string', pattern: DIGEST_PATTERN }, mode: { enum: FIXTURE.modes } });
 schemas.serverSnapshot = object({ schemaVersion: version, sourceDigest: { type: 'string', pattern: DIGEST_PATTERN }, instrumentation: { enum: ['verified', 'unavailable'] }, complete: { type: 'boolean' }, events: { type: 'array', maxItems: LIMITS.evidenceEvents, items: serverEvent } });
 Object.assign(schemas, campaignSchemas(schemas, id, serverEvent));
+Object.assign(schemas, sastSchemas);
 const validators = Object.fromEntries(Object.entries(schemas).map(([name, schema]) => [name, ajv.compile(schema)]));
 function cloneJson(value, depth = 0, seen = new Set()) {
   if (depth > 20) throw Error('JSON nesting limit');
@@ -57,6 +60,7 @@ function validate(name, input) {
   if (Buffer.byteLength(JSON.stringify(value)) > maximumBytes) throw Error('JSON size limit');
   if (!validators[name](value)) throw Error(`Invalid ${name}: ${ajv.errorsText(validators[name].errors)}`);
   if (name === 'report') assertReportIntegrity(value, { validate, assess });
+  if (name === 'sastMetadata') assertSastMetadata(value);
   if (name === 'slice' && value.endLine < value.startLine) throw Error('Invalid line range');
   if (name === 'seed' && value.omitFields.some(key => Object.hasOwn(value.values, key))) throw Error('Field cannot be supplied and omitted');
   if (name === 'feedback') {
