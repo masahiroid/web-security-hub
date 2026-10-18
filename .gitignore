@@ -57,3 +57,7 @@ src-tauri/tauri.local.*.json
 /.internal/
 *.internal.md
 *.internal.html
+
+# JavaScript emitted from the incremental verifier TypeScript sources.
+/core/verifier/generated/
+/public/generated/

@@ -41,5 +41,11 @@ if (-not (Test-Path node_modules) -or -not (Test-Path -LiteralPath $stamp) -or (
     [IO.File]::WriteAllText($stamp, $hash)
 }
 if ($args -contains '--doctor') { & $node (Join-Path $root 'desktop/environment.js') }
-else { & $node (Join-Path $root 'scripts/launch.js') @args }
+else {
+    foreach ($configuration in @('tsconfig.verifier.json', 'tsconfig.verifier-ui.json')) {
+        & $node (Join-Path $root 'node_modules/typescript/bin/tsc') -p (Join-Path $root $configuration)
+        if ($LASTEXITCODE -ne 0) { throw 'TypeScript build failed.' }
+    }
+    & $node (Join-Path $root 'scripts/launch.js') @args
+}
 exit $LASTEXITCODE

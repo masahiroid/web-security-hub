@@ -11,10 +11,10 @@ Web Security Hub is a locally run web-security assessment and form-regression te
 
 | Platform | Installer | Status |
 |---|---|---|
-| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
-| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_windows_x64_setup.exe) | Unsigned preview |
+| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
+| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_windows_x64_setup.exe) | Unsigned |
 
-[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v1.3.0). Use the source edition on Intel Macs or Linux. Windows interactive smoke testing is still pending.
+[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v2.0.0). Use the source edition on Intel Macs or Linux. Windows installer operation was verified in a Windows CI environment.
 
 ## Desktop and double-click startup
 
@@ -64,6 +64,10 @@ To passively assess an authorized target from the CLI:
 ```sh
 npm run dynamic-scan -- https://staging.example.com/
 ```
+
+## Local sample verification (2.0.0)
+
+Run an isolated fixture campaign with private JSON/HTML reports. Run `npm run verifier:run -- --mode changed` after installing source dependencies. See the [verifier guide](core/verifier/README.md) for baseline/fixed modes, limits and cancellation. The desktop Sample verification workspace also supports execution, cancellation, evidence inspection and HTML reports. See the [illustrated hands-on guide](docs/training/VERIFIER.md). Available starting with 2.0.0.
 
 ## ZAP integration
 

@@ -1,0 +1,26 @@
+#panel-verifier{--verifier-control-width:280px;--verifier-gap:16px;--verifier-padding:16px;--verifier-radius:10px}
+.verifier-layout{display:grid;grid-template-columns:var(--verifier-control-width) minmax(0,1fr);gap:var(--verifier-gap);flex:1;min-height:0}
+.verifier-config,.verifier-results{display:flex;flex-direction:column;min-height:0;min-width:0;background:white;border:1px solid var(--line);border-radius:var(--verifier-radius);padding:var(--verifier-padding)}
+.verifier-config .workspace-tabs,.verifier-results .workspace-tabs{gap:0;flex-wrap:nowrap}
+.verifier-config .workspace-tabs button,.verifier-results .workspace-tabs button{font-size:12px;padding:8px}
+.verifier-body{flex:1;min-height:0;overflow:auto;padding-top:14px}
+.verifier-body fieldset{border:0;padding:0;margin:0;background:transparent}
+.verifier-actions{display:flex;gap:8px;flex-shrink:0;padding-top:12px;border-top:1px solid var(--line)}
+#verifierStatus{min-height:34px;flex-shrink:0;font-size:12px;color:var(--accent);padding:10px 0;overflow-wrap:anywhere}
+#verifierSummary{padding:12px 0;font-weight:600;flex-shrink:0}
+.verifier-table-wrap{min-height:0;overflow:auto;flex:1}
+.verifier-table{width:100%;border-collapse:collapse;font-size:12px}
+.verifier-table th,.verifier-table td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.verifier-table th{position:sticky;top:0;background:white;font-size:11px;color:var(--ink-soft)}
+.verifier-reproduced{background:#fff2e7;color:#874516}
+.verifier-results [data-vbody]{display:flex;flex-direction:column;min-height:0;flex:1}
+#verifierEvidence{overflow:auto;min-height:0;font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;flex:1}
+#verifierSaved{font-size:11px;color:var(--ink-soft);padding-top:10px}
+#verifierDownload{font-size:12px;margin-top:8px}
+@media(max-width:1100px){#panel-verifier{--verifier-control-width:240px;--verifier-gap:12px;--verifier-padding:12px}.verifier-table th,.verifier-table td{padding:8px 5px;font-size:11px}}
+
+body:has(#panel-verifier.active) .site-picker{visibility:hidden}
+.verifier-table tbody tr{cursor:pointer}
+.verifier-table tbody tr:hover{box-shadow:inset 3px 0 var(--accent)}
+
+#verifierReportReader{width:100%;border:0;min-height:0;flex:1}

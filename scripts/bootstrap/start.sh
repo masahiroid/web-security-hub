@@ -34,4 +34,6 @@ if [ ! -d node_modules ] || [ ! -f .runtime/dependencies.sha256 ] || [ "$(cat .r
   printf '%s' "$LOCK_HASH" > .runtime/dependencies.sha256
 fi
 if [ "${1:-}" = "--doctor" ]; then exec "$NODE" desktop/environment.js; fi
+"$NODE" node_modules/typescript/bin/tsc -p tsconfig.verifier.json
+"$NODE" node_modules/typescript/bin/tsc -p tsconfig.verifier-ui.json
 exec "$NODE" scripts/launch.js "$@"

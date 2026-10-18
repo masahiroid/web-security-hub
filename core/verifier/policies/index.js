@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { validate } = require('../contracts');
+const { CONTRACT_VERSION } = require('../generated/domain/config');
 function createRegistry({ roots, authProfileIds, now = Date.now }) {
   const catalog = Object.fromEntries(Object.entries(roots).map(([id, root]) => [id, fs.realpathSync(root)]));
   const profiles = new Set(authProfileIds);
@@ -63,7 +64,7 @@ function createRegistry({ roots, authProfileIds, now = Date.now }) {
     },
     status(handle) {
       const job = get(handle, false);
-      return Object.freeze({ jobId: handle.jobId, state: job.cancelled ? 'cancelled' : now() >= job.expiresAt || job.controller.signal.aborted ? 'expired' : 'active', trials: job.trials, running: job.running.size, expiresAt: job.expiresAt });
+      return validate('jobStatus', { schemaVersion: CONTRACT_VERSION, jobId: handle.jobId, maxTrials: job.scope.maxTrials, maxConcurrency: job.scope.maxConcurrency, state: job.cancelled ? 'cancelled' : now() >= job.expiresAt || job.controller.signal.aborted ? 'expired' : 'active', trials: job.trials, running: job.running.size, expiresAt: job.expiresAt });
     },
     dispose(handle) {
       const job = get(handle, false);

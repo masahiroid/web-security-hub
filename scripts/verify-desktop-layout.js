@@ -20,17 +20,17 @@ const {createHost}=require('../desktop/host');
      if(width===1280)await page.screenshot({path:path.join(directory,`home-${n}-${lang}.png`),mask:[page.locator('#storage'),page.locator('.check:nth-child(2) > span:last-child'),page.locator('.check:nth-child(3) > span:last-child')],maskColor:'#dce3ea'});
     }
     await page.goto(host.origin+'/');await page.selectOption('#languageSelect',lang);await page.waitForFunction(l=>document.documentElement.lang===l,lang);
-    for(const tab of ['siteSetup','testCases','replay','dynamic','static','about']) {
+    for(const tab of ['siteSetup','testCases','replay','dynamic','static','verifier','about']) {
      await page.click(`[data-tab=${tab}]`);
      assert(await page.evaluate(()=>document.body.scrollHeight<=innerHeight&&document.body.scrollWidth<=innerWidth),`${tab} overflows`);
      const sub=page.locator(`#panel-${tab} .workspace-tabs button`);
-     for(let i=0;i<await sub.count();i++) {await sub.nth(i).click();const selected=page.locator(`#panel-${tab} .workspace-page:not([hidden])`);assert.equal(await selected.count(),1);}
+     for(let i=0;i<await sub.count();i++) {if(await sub.nth(i).isDisabled())continue;await sub.nth(i).click();if(tab==='verifier'){const target=await sub.nth(i).getAttribute('data-vpage');assert(await page.locator('#'+target).isVisible());}else{const selected=page.locator(`#panel-${tab} .workspace-page:not([hidden])`);assert.equal(await selected.count(),1);}}
      if(await sub.count())await sub.first().click();
      if(width===1280)await page.screenshot({path:path.join(directory,`${tab}-${lang}.png`)});
     }
     await page.click('[data-tab=static]');await page.fill('#sourceDir','unsaved-help-check');await page.click('#helpBtn');await page.frameLocator('#helpReader').locator('h1').waitFor();
     assert(await page.evaluate(()=>document.body.scrollWidth<=innerWidth),'Help header overflows');if(width===1280)await page.screenshot({path:path.join(directory,`help-${lang}.png`)});await page.click('#closeHelp');assert.equal(await page.inputValue('#sourceDir'),'unsaved-help-check');
-    checks.push(`${width}×${height} ${lang}: home, six workspaces, all sub-tabs fit; help preserves unsaved input`);
+    checks.push(`${width}×${height} ${lang}: home, seven workspaces, all sub-tabs fit; help preserves unsaved input`);
    }
   }
   for(const file of ['/desktop/guide.ja.html','/desktop/guide.html','/training/README.ja.html','/training/README.html']) {

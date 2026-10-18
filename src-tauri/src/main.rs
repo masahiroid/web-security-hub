@@ -37,10 +37,15 @@ fn main() {
             let node = if cfg!(debug_assertions) {
                 std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("binaries/web-security-node-{}{}", env!("WSH_TARGET"), if cfg!(windows) { ".exe" } else { "" }))
             } else { std::env::current_exe()?.parent().unwrap().join(if cfg!(windows) { "web-security-node.exe" } else { "web-security-node" }) };
+            // Node 22's main-module resolver rejects Windows verbatim drive paths.
+            // Simplify only where Win32 semantics are equivalent; preserve Unicode.
+            let resource = dunce::simplified(&resource).to_path_buf();
+            let node = dunce::simplified(&node).to_path_buf();
+            let data_dir = std::env::var_os("WEB_SECURITY_HUB_DATA_DIR").map(std::path::PathBuf::from).unwrap_or(app.path().app_data_dir()?);
             let mut command = Command::new(node);
             command.arg(resource.join("desktop/host.js")).current_dir(&resource)
                 .env("WEB_SECURITY_HUB_PACKAGED", "1")
-                .env("WEB_SECURITY_HUB_DATA_DIR", std::env::var_os("WEB_SECURITY_HUB_DATA_DIR").map(std::path::PathBuf::from).unwrap_or(app.path().app_data_dir()?))
+                .env("WEB_SECURITY_HUB_DATA_DIR", dunce::simplified(&data_dir))
                 .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
             #[cfg(unix)] { use std::os::unix::process::CommandExt; command.process_group(0); }
             #[cfg(windows)] { use std::os::windows::process::CommandExt; command.creation_flags(0x08000000); }
@@ -57,7 +62,7 @@ fn main() {
                                 }
                             }
                         }
-                        status.lock().unwrap().error = Some("The background service exited. Close and reopen the app.".into());
+                        status.lock().unwrap().error.get_or_insert_with(|| "The background service exited. Close and reopen the app.".into());
                     });
                     let status = state.status.clone();
                     std::thread::spawn(move || {

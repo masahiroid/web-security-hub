@@ -3762,8 +3762,9 @@ dependencies = [
 
 [[package]]
 name = "web-security-hub-desktop"
-version = "1.3.0"
+version = "2.0.0"
 dependencies = [
+ "dunce",
  "libc",
  "serde",
  "serde_json",

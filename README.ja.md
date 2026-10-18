@@ -11,10 +11,10 @@ OWASP のリスク分類を基準にした、ローカル実行の Web セキュ
 
 | OS | インストーラー | 状態 |
 |---|---|---|
-| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
-| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v1.3.0/Web-Security-Hub_1.3.0_windows_x64_setup.exe) | 未署名のプレビュー |
+| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
+| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_windows_x64_setup.exe) | 未署名 |
 
-[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v1.3.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版の実機での操作確認は今後行います。
+[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v2.0.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版は Windows の CI 環境でインストール後の操作を確認しています。
 
 ## デスクトップ版・ダブルクリック起動
 
@@ -64,6 +64,10 @@ CLI で許可済みの対象をパッシブ診断する場合:
 ```sh
 npm run dynamic-scan -- https://staging.example.com/
 ```
+
+## ローカルサンプル検証（2.0.0）
+
+専用サンプルの一括検証と非公開JSON／HTMLレポートの保存が使えます。ソースの依存関係を導入後、`npm run verifier:run -- --mode changed`で実行できます。正常版・修正版、実行上限・取消については[検証機能ガイド](core/verifier/README.md)を参照してください。アプリの「サンプル検証」画面からも実行・取消・証拠確認・HTMLレポート表示ができます。[画像付きハンズオン](docs/training/VERIFIER.ja.md)を用意しています。2.0.0からの機能です。
 
 ## ZAP との統合
 

@@ -19,6 +19,9 @@ const exploreRoutes = require('./routes/explore');
 const mobileRoutes = require('./routes/mobile');
 
 const app = express();
+const verifier = require('../core/verifier/generated/adapters/verifierRouter').createVerifierRouter({ applicationVersion: require('../package.json').version });
+app.use('/api/verifier', verifier.router);
+app.set('closeVerifier', verifier.close);
 app.use(express.json({ limit: '5mb' }));
 
 app.use('/api', sitesRoutes);
@@ -44,7 +47,7 @@ app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 
 const PORT = process.env.PORT || 4173;
 if (require.main === module) {
-  const httpServer = app.listen(PORT, () => {
+  const httpServer = app.listen(PORT, '127.0.0.1', () => {
     console.log(`Web Security Hub listening on http://localhost:${PORT}`);
   });
   // Exposed so server/routes/control.js can close/restart this exact

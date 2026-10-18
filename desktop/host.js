@@ -84,6 +84,7 @@ async function createHost({ port = 0 } = {}) {
   const server = app.listen(port, '127.0.0.1'); await once(server, 'listening');
   const origin = `http://127.0.0.1:${server.address().port}`;
   return { origin, url: `${origin}/__desktop/auth?token=${token}`, async close() {
+    await require('../server').get('closeVerifier')?.();
     for (const s of [sampleServer, server].filter(Boolean)) { s.closeAllConnections?.(); await new Promise(r => s.close(r)); }
   } };
 }

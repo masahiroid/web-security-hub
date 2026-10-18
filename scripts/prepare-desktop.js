@@ -5,7 +5,12 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 process.env.PATH = path.join(require('os').homedir(), '.cargo/bin') + path.delimiter + process.env.PATH;
 const root = path.resolve(__dirname, '..');
+const verifierUiSourceDirectory = path.join(root, 'public/ts');
+const verifierSourceDirectory = path.join(root, 'core/verifier/typed');
 function publicResource(file) {
+  if (file === verifierUiSourceDirectory || file.startsWith(verifierUiSourceDirectory + path.sep)) return false;
+  if (file.endsWith('.d.ts')) return false;
+  if (file === verifierSourceDirectory || file.startsWith(verifierSourceDirectory + path.sep)) return false;
   const name=path.basename(file);
   if(/(?:^|[\\/])(?:internal|\.internal)(?:[\\/]|$)/.test(file)||/\.internal\.(?:md|html)$/.test(name))return false;
   return !['.git','.DS_Store','node_modules','.runtime'].includes(name)
@@ -20,6 +25,9 @@ function run(command, args, options = {}) {
 }
 async function main() {
   require('./desktop-config').ensureDesktopConfig();
+  // Compile the incremental TypeScript modules before copying production resources.
+  run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.verifier.json')]);
+  run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.verifier-ui.json')]);
   const host = spawnSync('rustc', ['--print','host-tuple'], { encoding:'utf8' });
   if (host.status !== 0) throw new Error('Install Rust and the Tauri platform prerequisites before building the desktop app.');
   const target = host.stdout.trim();

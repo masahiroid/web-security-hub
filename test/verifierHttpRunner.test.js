@@ -5,6 +5,14 @@ const http = require('http');
 const { createRegistry } = require('../core/verifier/policies');
 const { createHttpRunner } = require('../core/verifier/runners/httpRunner');
 const { createFixture } = require('../training/verifier-site/server');
+const { FIXTURE, HTTP_STATUS, TRANSPORT, POINTS, CONTRACT_VERSION } = require('../core/verifier/generated/domain/config');
+const { collectEvidence } = require('../core/verifier/generated/application/collectEvidence');
+const { createFixtureLedger } = require('../core/verifier/generated/adapters/fixtureLedger');
+const { sourceFingerprint } = require('../core/verifier/generated/adapters/sourceFingerprint');
+const contracts = require('../core/verifier/contracts');
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
 const seed = (seedId, values = { participants: 1, label: 'test' }) => ({ schemaVersion: 1, seedId, values, omitFields: [], rationale: 'Known fixture input' });
 async function within(promise, timeout = 5000) {
   let timer;
@@ -18,12 +26,12 @@ async function serve(t, handler) {
   t.after(() => new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }));
   return `http://127.0.0.1:${server.address().port}`;
 }
-function setup(t, origin, { route = '/boundary', method = 'POST', allowedFields = ['participants', 'label'], timeoutMs = 2000, ttlMs = 10000, profiles, controls = [], maxTrials = 20 } = {}) {
+function setup(t, origin, { route = '/boundary', method = 'POST', allowedFields = ['participants', 'label'], timeoutMs = 2000, ttlMs = 10000, profiles, controls = [], maxTrials = 20, evidenceSource } = {}) {
   profiles ||= ['learner-a', 'learner-b'].map(profileId => ({ schemaVersion: 1, profileId, origin, setup: [{ route: '/session', method: 'POST', values: { profile: profileId }, expectedStatus: 200 }] }));
   const registry = createRegistry({ roots: { fixture: __dirname }, authProfileIds: profiles.map(p => p.profileId) });
   const handle = registry.create({ schemaVersion: 1, sourceRootId: 'fixture', origin, route, method, allowedFields, authProfileIds: profiles.map(p => p.profileId), ttlMs, maxTrials, maxConcurrency: 2 });
   t.after(() => { try { registry.dispose(handle); } catch {} });
-  const runner = createHttpRunner({ registry, profiles, controls, timeoutMs });
+  const runner = createHttpRunner({ registry, profiles, controls, timeoutMs, evidenceSource });
   const input = (s = seed('s1'), authProfileId = profiles[0].profileId) => ({ url: origin + route, method, authProfileId, seed: s });
   return { registry, handle, runner, input };
 }
@@ -222,4 +230,189 @@ test('cancellation during profile initialization closes setup and never dispatch
   assert.equal(result.observation.dispatched, false);
   assert.deepEqual(routes, ['/session']);
   assert.equal(registry.status(handle).running, 0);
+});
+
+function fixtureEvidence(fixture, overrides = {}) {
+  return { expectedSourceDigest: fixture.sourceDigest, currentSourceDigest: signal => fixture.currentSourceDigest(signal), read: async correlation => fixture.readEvidence(correlation), ...overrides };
+}
+async function resetFixture(origin, fixture, mode) {
+  const response = await fetch(origin + '/control', { method: 'POST', headers: { 'Content-Type': TRANSPORT.jsonContentType, [FIXTURE.controlHeader]: fixture.controlToken }, body: JSON.stringify({ action: 'reset', mode }) });
+  assert.equal(response.status, HTTP_STATUS.ok);
+}
+function readControl(origin) {
+  return { schemaVersion: CONTRACT_VERSION, origin, route: '/records/record-a', method: 'GET', authProfileId: 'learner-a', seed: seed('normal-owner', {}), expectedStatus: HTTP_STATUS.ok, expectedJson: { owner: 'learner-a' } };
+}
+
+test('correlated ownership evidence reproduces only the changed fixture and separates every role', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, fixture.app);
+  const profiles = FIXTURE.roles.map(profileId => ({ schemaVersion: CONTRACT_VERSION, profileId, origin, setup: [{ route: '/session', method: 'POST', values: { profile: profileId }, expectedStatus: HTTP_STATUS.ok }] }));
+  const { runner, handle, input } = setup(t, origin, { route: '/records/record-a', method: 'GET', allowedFields: [], profiles, controls: [readControl(origin)], evidenceSource: fixtureEvidence(fixture), maxTrials: 40 });
+  for (const mode of FIXTURE.modes) {
+    await resetFixture(origin, fixture, mode);
+    for (const profile of FIXTURE.roles) {
+      const pair = await runner.runPair(handle, input(seed(`${mode}-${profile}`, {}), profile));
+      const candidate = pair.candidate;
+      assert.equal(pair.state, 'completed');
+      assert.equal(candidate.evidence.state, 'verified');
+      const violated = mode === FIXTURE.changedMode && profile === 'learner-b';
+      assert.equal(candidate.feedback.oracle, violated ? 'violated' : 'passed');
+      assert.equal(candidate.assessment.result, violated ? 'reproduced' : 'no_issue_observed_in_scope');
+      assert.equal(candidate.assessment.vexStatus, 'under_investigation');
+      assert.equal(candidate.feedback.sourceDigest, fixture.sourceDigest);
+      assert.ok(candidate.feedback.evidenceIds.length);
+      assert.ok(candidate.evidence.events.every(event => event.requestId === candidate.observation.requestId && event.trialId === candidate.observation.trialId && event.seedId === candidate.observation.seedId && event.authProfileId === profile && event.profile === profile));
+      assert.equal(candidate.evidence.events.some(event => pair.control.feedback.evidenceIds.includes(event.evidenceId)), false);
+      if (profile === FIXTURE.anonymous) assert.equal(candidate.feedback.reachability, 'not_observed');
+    }
+  }
+});
+
+test('confirmation oracle distinguishes a valid confirmed control from missing transitions', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, fixture.app);
+  const confirmedProfile = 'confirmed-a';
+  const sessionStep = { route: '/session', method: 'POST', values: { profile: 'learner-a' }, expectedStatus: HTTP_STATUS.ok };
+  const profiles = [
+    { schemaVersion: CONTRACT_VERSION, profileId: confirmedProfile, origin, setup: [sessionStep, { route: '/records/record-a/confirm', method: 'POST', values: {}, expectedStatus: HTTP_STATUS.ok }] },
+    { schemaVersion: CONTRACT_VERSION, profileId: 'learner-a', origin, setup: [sessionStep] }
+  ];
+  const normal = { schemaVersion: CONTRACT_VERSION, origin, route: '/records/record-a/complete', method: 'POST', authProfileId: confirmedProfile, seed: seed('normal-confirmed', {}), expectedStatus: HTTP_STATUS.ok, expectedJson: { completed: true } };
+  const { runner, handle, input } = setup(t, origin, { route: normal.route, allowedFields: [], profiles, controls: [normal], evidenceSource: fixtureEvidence(fixture) });
+  for (const mode of FIXTURE.modes) {
+    await resetFixture(origin, fixture, mode);
+    const pair = await runner.runPair(handle, input(seed(`${mode}-missing-confirmation`, {}), 'learner-a'));
+    const changed = mode === FIXTURE.changedMode;
+    assert.equal(pair.control.feedback.oracle, 'passed');
+    assert.equal(pair.candidate.observation.status, changed ? HTTP_STATUS.ok : HTTP_STATUS.conflict);
+    assert.equal(pair.candidate.feedback.oracle, changed ? 'violated' : 'passed');
+    assert.equal(pair.candidate.assessment.result, changed ? 'reproduced' : 'no_issue_observed_in_scope');
+    assert.equal(pair.candidate.feedback.reachability, changed ? 'observed' : 'not_observed');
+  }
+});
+
+test('boundary and Unicode evidence has independent expectations for accepted and rejected values', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, fixture.app);
+  const { runner, handle, input } = setup(t, origin, { controls: [control(origin)], evidenceSource: fixtureEvidence(fixture) });
+  const cases = [
+    { participants: FIXTURE.participantsMaximum, label: 'e\u0301' },
+    { participants: FIXTURE.participantsMaximum + 1, label: 'boundary' },
+    { participants: FIXTURE.participantsMinimum, label: '😀'.repeat(FIXTURE.labelMaximum + 1) }
+  ];
+  for (const [index, values] of cases.entries()) {
+    const pair = await runner.runPair(handle, input(seed(`unicode-${index}`, values)));
+    assert.equal(pair.candidate.feedback.oracle, 'passed');
+    assert.equal(pair.candidate.feedback.reachability, 'observed');
+    assert.equal(pair.candidate.evidence.events[0].point, POINTS.boundary);
+    assert.equal(pair.candidate.assessment.vexStatus, 'under_investigation');
+  }
+});
+
+test('disabled or truncated instrumentation cannot be interpreted as a sink not reached', async t => {
+  for (const options of [{ instrumentation: false }, { evidenceCapacity: 1 }]) {
+    const fixture = createFixture(options);
+    const origin = await serve(t, fixture.app);
+    const { runner, handle, input } = setup(t, origin, { evidenceSource: fixtureEvidence(fixture) });
+    await runner.run(handle, input(seed('first')));
+    const result = await runner.run(handle, input(seed('second')));
+    assert.equal(result.evidence.state, options.instrumentation === false ? 'unavailable' : 'incomplete');
+    assert.equal(result.feedback.reachability, 'unavailable');
+    assert.equal(result.feedback.oracle, 'inconclusive');
+    assert.equal(result.assessment.result, 'under_investigation');
+  }
+});
+
+test('wrong request, role, build or malformed snapshot is discarded rather than mixed into feedback', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, fixture.app);
+  const corruptions = [
+    snapshot => ({ ...snapshot, events: snapshot.events.map(event => ({ ...event, requestId: 'other-request' })) }),
+    snapshot => ({ ...snapshot, events: snapshot.events.map(event => ({ ...event, authProfileId: 'other-profile' })) }),
+    snapshot => ({ ...snapshot, sourceDigest: 'a'.repeat(fixture.sourceDigest.length) }),
+    snapshot => ({ ...snapshot, events: snapshot.events.map(event => ({ ...event, sourceDigest: 'b'.repeat(fixture.sourceDigest.length) })) }),
+    snapshot => ({ ...snapshot, extra: 'forbidden' }),
+    snapshot => ({ ...snapshot, complete: true, events: [] }),
+    snapshot => ({ ...snapshot, events: [...snapshot.events, ...snapshot.events] })
+  ];
+  for (const [index, corrupt] of corruptions.entries()) {
+    const evidenceSource = fixtureEvidence(fixture, { read: async correlation => corrupt(fixture.readEvidence(correlation)) });
+    const { runner, handle, input } = setup(t, origin, { evidenceSource });
+    const result = await runner.run(handle, input(seed(`corrupt-${index}`)));
+    assert.notEqual(result.evidence.state, 'verified');
+    assert.equal(result.feedback.reachability, 'unavailable');
+    assert.equal(result.feedback.oracle, 'inconclusive');
+    assert.deepEqual(result.feedback.evidenceIds, []);
+  }
+});
+
+test('real source-file changes before or during collection invalidate loaded-build evidence', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'verifier-source-'));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const file = path.join(directory, 'fixture.js');
+  const files = [{ name: 'fixture', file }];
+  await fs.writeFile(file, 'initial build');
+  const sourceDigest = await sourceFingerprint(files);
+  const correlation = { jobId: 'job', trialId: 'trial', seedId: 'seed', requestId: 'request', authProfileId: 'learner-a' };
+  const headers = Object.fromEntries(Object.entries(TRANSPORT.headers).map(([field, header]) => [header, correlation[field]]));
+  const ledger = createFixtureLedger({ sourceDigest, instrumentation: true });
+  ledger.record(headers, POINTS.read, 'learner-a', 'record-a', 'passed', FIXTURE.initialMode); ledger.finish(headers);
+  const port = { expectedSourceDigest: sourceDigest, currentSourceDigest: signal => sourceFingerprint(files, signal), read: async () => ledger.read(correlation) };
+  const signal = new AbortController().signal;
+  assert.equal((await collectEvidence(port, correlation, contracts, signal)).state, 'verified');
+  await fs.writeFile(file, 'changed build');
+  assert.equal((await collectEvidence(port, correlation, contracts, signal)).state, 'source_mismatch');
+  await fs.writeFile(file, 'initial build');
+  const changedDuringRead = { ...port, read: async () => { await fs.writeFile(file, 'mid-read change'); return ledger.read(correlation); } };
+  assert.equal((await collectEvidence(changedDuringRead, correlation, contracts, signal)).state, 'source_mismatch');
+});
+
+test('a fake HTTP 200 without a server event stays inconclusive and cannot pass a verified control', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, (req, res) => {
+    if (req.url === '/boundary') { res.end(JSON.stringify({ accepted: true })); return; }
+    fixture.app(req, res);
+  });
+  const { runner, handle, input } = setup(t, origin, { controls: [control(origin)], evidenceSource: fixtureEvidence(fixture) });
+  const pair = await runner.runPair(handle, input());
+  assert.equal(pair.state, 'control_failed');
+  assert.equal(pair.candidate, null);
+  assert.equal(pair.control.evidence.state, 'incomplete');
+  assert.equal(pair.control.assessment.result, 'under_investigation');
+});
+
+test('evidence collection respects cancellation and releases reservations even if its port stalls', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, fixture.app);
+  let reading;
+  const started = new Promise(resolve => { reading = resolve; });
+  const evidenceSource = fixtureEvidence(fixture, { read: async () => { reading(); return new Promise(() => {}); } });
+  const { runner, handle, input, registry } = setup(t, origin, { evidenceSource });
+  const pending = runner.run(handle, input());
+  await within(started);
+  registry.cancel(handle);
+  const result = await within(pending);
+  assert.equal(result.observation.outcome, 'cancelled');
+  assert.equal(result.evidence.state, 'incomplete');
+  assert.equal(result.feedback.oracle, 'inconclusive');
+  assert.equal(registry.status(handle).running, 0);
+});
+
+
+test('a read sink followed by a fake 200 error body does not reproduce a disclosure', async t => {
+  const fixture = createFixture();
+  const origin = await serve(t, (req, res) => {
+    if (req.headers['x-verifier-seed-id'] === 'fake-disclosure') {
+      const end = res.end.bind(res);
+      res.end = () => { res.removeHeader('Content-Length'); return end(JSON.stringify({ error: 'fake successful error page' })); };
+    }
+    fixture.app(req, res);
+  });
+  await resetFixture(origin, fixture, FIXTURE.changedMode);
+  const { runner, handle, input } = setup(t, origin, { route: '/records/record-a', method: 'GET', allowedFields: [], controls: [readControl(origin)], evidenceSource: fixtureEvidence(fixture) });
+  const pair = await runner.runPair(handle, input(seed('fake-disclosure', {}), 'learner-b'));
+  assert.equal(pair.candidate.observation.status, HTTP_STATUS.ok);
+  assert.equal(pair.candidate.feedback.reachability, 'observed');
+  assert.equal(pair.candidate.feedback.oracle, 'inconclusive');
+  assert.equal(pair.candidate.assessment.result, 'under_investigation');
 });
