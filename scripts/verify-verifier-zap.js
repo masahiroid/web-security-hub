@@ -12,12 +12,13 @@ const SETTINGS = Object.freeze({ ttlMs: 60000, trialMs: 15000, maxTrials: 2, max
 async function main() {
   const controller = new AbortController(); const cancel = () => controller.abort(); process.once('SIGINT', cancel); process.once('SIGTERM', cancel);
   const checks = [];
+  const summary = result => JSON.stringify({ state: result.state, control: { outcome: result.pair.control.observation.outcome, reason: result.pair.control.observation.reason, zap: result.pair.control.zap }, candidate: result.pair.candidate ? { outcome: result.pair.candidate.observation.outcome, reason: result.pair.candidate.observation.reason, zap: result.pair.candidate.zap } : null });
   try {
     if (process.argv.slice(2).some(value => value !== '--install')) throw Error('Use --install only');
     if (process.argv.includes('--install')) await installZapRuntime(DATA_ROOT, controller.signal);
     assert(await readZapInstallation(DATA_ROOT), 'Install the managed engine first: --install');
     const sample = await runSastFixture(controller.signal, { useZap: true });
-    assert.equal(sample.state, 'completed'); assert.equal(sample.pair.control.zap.state, 'completed'); assert.equal(sample.pair.candidate.zap.state, 'completed');
+    assert.equal(sample.state, 'completed', summary(sample)); assert.equal(sample.pair.control.zap.state, 'completed'); assert.equal(sample.pair.candidate.zap.state, 'completed');
     assert(sample.pair.control.zap.alerts.some(alert => alert.pluginId === '10037'));
     assert.notDeepEqual(sample.pair.control.zap.messageIds, sample.pair.candidate.zap.messageIds);
     assert(sample.pair.candidate.zap.alerts.every(alert => sample.pair.candidate.zap.messageIds.includes(alert.messageId)));
@@ -39,7 +40,7 @@ async function main() {
       const runner=createHttpRunner({registry,contracts,zap:engine.port,profiles,timeoutMs:SETTINGS.trialMs,
         controls:[{schemaVersion:1,origin,route,method:'GET',authProfileId:'learner-a',seed:seed('role-normal'),expectedStatus:200,expectedJson:{owner:'learner-a'}}]});
       const pair=await runner.runPair(handle,{url:origin+route,method:'GET',authProfileId:'learner-b',seed:seed('role-other')});
-      assert.equal(pair.state,'completed');assert.equal(pair.control.zap.state,'completed');assert.equal(pair.candidate.zap.state,'completed');
+      assert.equal(pair.state,'completed',summary({state:pair.state,pair}));assert.equal(pair.control.zap.state,'completed');assert.equal(pair.candidate.zap.state,'completed');
       assert.equal(pair.control.observation.authProfileId,'learner-a');assert.equal(pair.candidate.observation.authProfileId,'learner-b');
       assert.notDeepEqual(pair.control.zap.messageIds,pair.candidate.zap.messageIds);
       assert.notEqual(pair.control.zap.sessionId,sample.pair.control.zap.sessionId);
