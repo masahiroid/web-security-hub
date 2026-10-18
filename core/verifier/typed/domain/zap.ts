@@ -2,7 +2,7 @@ import type { Correlation, Observation, TrialRequest } from './types';
 
 export const ZAP = Object.freeze({
   version: '2.17.0', heapMb: 512, cleanupRetries: 5, temporaryHistoryType: 0, proxyHistoryType: 1, startupMs: 90_000, shutdownMs: 10_000, apiTimeoutMs: 5_000,
-  passiveMs: 15_000, pollMs: 200, maximumMessages: 256, maximumAlerts: 128,
+  passiveMs: 30_000, pollMs: 200, maximumMessages: 256, maximumAlerts: 128,
   apiBytes: 4 * 1024 * 1024, downloadMs: 600_000, maximumArchiveBytes: 350 * 1024 * 1024,
   directoryMode: 0o700, fileMode: 0o600, keyBytes: 32, host: '127.0.0.1',
   endpoints: Object.freeze({ version: '/JSON/core/view/version/', session: '/JSON/core/view/sessionLocation/', messages: '/JSON/core/view/messages/',

@@ -50,7 +50,7 @@ ZAPタブから任意環境を導入します。公式ZAP/Temurin releaseから�
 
 ![ZAP導入](images/sast-zap-setup-ja.png)
 
-checkboxを有効にし、サンプルまたは許可した対象を実行します。毎回専用process・private home・新しいsessionを所有し、共有ZAPを採用・初期化しません。受動解析だけでspider/active scanは行いません。queue待機は15秒までとし、取消・上限・取得不能・未完了では証拠を採用しません。APIは認証付きloopbackだけです。通常終了と親終了の監視処理が所有process/sessionを回収します。
+checkboxを有効にし、サンプルまたは許可した対象を実行します。毎回専用process・private home・新しいsessionを所有し、共有ZAPを採用・初期化しません。受動解析だけでspider/active scanは行いません。queue待機は30秒までとし、取消・上限・取得不能・未完了では証拠を採用しません。APIは認証付きloopbackだけです。通常終了と親終了の監視処理が所有process/sessionを回収します。
 
 ![試行ごとのZAP証拠](images/sast-zap-ja.png)
 

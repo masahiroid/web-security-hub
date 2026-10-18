@@ -4,7 +4,8 @@ const POLICY = Object.freeze({ installMs: 600000, trialMs: 180000, normalStatus:
 async function completed(page, route, button) {
   const response = page.waitForResponse(value => value.url().endsWith(route) && value.request().method() === 'POST', { timeout: POLICY.trialMs });
   await page.click(button); const result = await (await response).json();
-  assert.equal(result.state, 'completed'); assert.equal(result.runtimeSource, 'unverified');
+  const summary = trial => trial ? { outcome: trial.observation.outcome, reason: trial.observation.reason, zap: trial.zap?.state, zapReason: trial.zap?.reason } : null;
+  assert.equal(result.state, 'completed', JSON.stringify({ route, state: result.state, control: summary(result.pair?.control), candidate: summary(result.pair?.candidate) })); assert.equal(result.runtimeSource, 'unverified');
   assert.equal(result.pair.control.observation.status, POLICY.normalStatus);
   assert.equal(result.pair.candidate.observation.status, POLICY.candidateStatus);
   assert.equal(result.pair.candidate.assessment.result, 'under_investigation');

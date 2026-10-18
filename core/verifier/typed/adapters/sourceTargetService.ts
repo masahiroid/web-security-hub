@@ -2,6 +2,7 @@ import { isAbsolute } from 'node:path';
 import * as contracts from '../../contracts';
 import { createRegistry } from '../../policies';
 import { CONTRACT_VERSION } from '../domain/config';
+import { ZAP } from '../domain/zap';
 import { SOURCE_TRIAL } from '../domain/sourceBinding';
 import { createConfinedSourceReader } from './confinedSourceReader';
 import { createSastBoundRunner } from '../application/sastBoundRunner';
@@ -25,7 +26,7 @@ export async function runSourceTarget(input: unknown, dataRoot: string, signal: 
     if (signal.aborted) cancel();
     if (options.useZap) engine = await startOwnedZap(dataRoot, signal);
     const seed = (seedId: string, values: typeof options.normalValues) => ({ schemaVersion: CONTRACT_VERSION, seedId, values, omitFields: [], rationale: 'Explicit local source verification input' });
-    const runner = createSastBoundRunner({ contracts, registry, source, finding: options.finding, scope, timeoutMs: SOURCE_TRIAL.timeoutMs,
+    const runner = createSastBoundRunner({ contracts, registry, source, finding: options.finding, scope, timeoutMs: engine ? ZAP.passiveMs : SOURCE_TRIAL.timeoutMs,
       ...(engine ? { zap: engine.port } : {}), profiles: [{ schemaVersion: CONTRACT_VERSION, profileId: SOURCE_TRIAL.profileId, origin: options.origin, setup: [] }],
       controls: [{ schemaVersion: CONTRACT_VERSION, origin: options.origin, route: scope.route, method: scope.method,
         seed: seed(SOURCE_TRIAL.controlId, options.normalValues), expectedStatus: options.expectedStatus, expectedJson: options.expectedJson }] });

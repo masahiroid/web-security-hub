@@ -47,7 +47,7 @@
 <h2>4. 必要に応じZAPを導入する</h2>
 <p>ZAPタブから任意環境を導入します。公式ZAP/Temurin releaseから約330 MBをdownloadし、固定size/SHA-256を確認して展開します。ZAP 2.17.0とTemurin JRE 17.0.20.1+1はアプリ本体とは別の非公開アプリデータに置き、Java heapは512 MiBです。初回導入はインターネットが必要ですが、導入後のローカル検証はオフラインでも利用できます。取消時は途中の展開を除去します。「導入を確認」はreceipt/fileを再検査して修復へ進めます。配布元のlicense/noticeを保持します。</p>
 <p><img src="images/sast-zap-setup-ja.png" alt="ZAP導入" /></p>
-<p>checkboxを有効にし、サンプルまたは許可した対象を実行します。毎回専用process・private home・新しいsessionを所有し、共有ZAPを採用・初期化しません。受動解析だけでspider/active scanは行いません。queue待機は15秒までとし、取消・上限・取得不能・未完了では証拠を採用しません。APIは認証付きloopbackだけです。通常終了と親終了の監視処理が所有process/sessionを回収します。</p>
+<p>checkboxを有効にし、サンプルまたは許可した対象を実行します。毎回専用process・private home・新しいsessionを所有し、共有ZAPを採用・初期化しません。受動解析だけでspider/active scanは行いません。queue待機は30秒までとし、取消・上限・取得不能・未完了では証拠を採用しません。APIは認証付きloopbackだけです。通常終了と親終了の監視処理が所有process/sessionを回収します。</p>
 <p><img src="images/sast-zap-ja.png" alt="試行ごとのZAP証拠" /></p>
 <p>各試行を展開し、job/trial/seed/request/profileの5ID、ZAP session/message ID、redacted alert fingerprint/plugin ID/rankを確認します。5IDとmethod/正確なURLが1つのproxy messageに一致する必要があります。同URLでも正常側の警告を候補へ流用せず、重複警告をまとめます。生のrequest/response body、Cookie、API key、絶対ソースrootはreportへ含めません。サンプルの受動header警告は未使用TLS flagと別の証拠です。<strong>受動警告はSAST指摘の確定ではなく、警告0件も安全の証明ではありません。</strong> 無効・未完了も明示します。</p>
 <h2>5. 結果を保存・参照する</h2>

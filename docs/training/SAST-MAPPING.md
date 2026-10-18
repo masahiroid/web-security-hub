@@ -50,7 +50,7 @@ In the ZAP tab, install the optional environment. It downloads approximately 330
 
 ![Optional engine setup](images/sast-zap-setup-en.png)
 
-Enable the checkbox and run the sample or authorized target. Each run owns a fresh process, private home and session; it does not adopt or clear a shared ZAP daemon. Passive analysis only: no spider or active scan. The runner waits for the queue with a 15-second bound and fails closed on cancellation, limits, unavailable or incomplete evidence. API reads are authenticated and loopback-only. Normal shutdown and the parent-death guardian clean up owned processes/session data.
+Enable the checkbox and run the sample or authorized target. Each run owns a fresh process, private home and session; it does not adopt or clear a shared ZAP daemon. Passive analysis only: no spider or active scan. The runner waits for the queue with a 30-second bound and fails closed on cancellation, limits, unavailable or incomplete evidence. API reads are authenticated and loopback-only. Normal shutdown and the parent-death guardian clean up owned processes/session data.
 
 ![Per-trial passive evidence](images/sast-zap-en.png)
 
