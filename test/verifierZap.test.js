@@ -35,7 +35,7 @@ test('ZAP associates alerts by five identities and message ID, deduplicates and 
 test('same URL with a different seed/profile or an old request never supplies evidence', async () => {
   for (const changes of [{requestId:'old-request'}, {seedId:'other-seed'}, {authProfileId:'learner-b'}, {trialId:'other-trial'}, {jobId:'other-job'}]) {
     const x=fixture({messages:[{id:'1',type:'1',requestHeader:headers({...correlation,...changes})}],alerts:[alert()]});
-    const result=await x.port.collect(observation,target,new AbortController().signal);
+    const result=await x.port.collect(observation,target,AbortSignal.timeout(500));
     assert.equal(result.state,'incomplete');assert.equal(result.alerts.length,0);assert.equal(result.messageIds.length,0);
   }
 });
@@ -51,7 +51,7 @@ test('wrong route/method/origin, duplicate headers and duplicated message owners
 test('queue cancellation, missing messages, invalid data, size limits and undispatched trials are explicit', async () => {
   const controller=new AbortController();const x=fixture({queue:'1'});const pending=x.port.collect(observation,target,controller.signal);controller.abort();
   assert.equal((await pending).state,'incomplete');
-  assert.equal((await fixture({messages:[]}).port.collect(observation,target,new AbortController().signal)).reason,'message_missing');
+  assert.equal((await fixture({messages:[]}).port.collect(observation,target,AbortSignal.timeout(500))).reason,'message_missing');
   assert.equal((await fixture({override:{[ZAP.endpoints.messageCount]:{numberOfMessages:String(ZAP.maximumMessages+1)}}}).port.collect(observation,target,new AbortController().signal)).reason,'limit');
   assert.equal((await fixture({alerts:[{...alert(),risk:'UNKNOWN'}]}).port.collect(observation,target,new AbortController().signal)).state,'error');
   assert.equal((await fixture().port.collect({...observation,dispatched:false},target,new AbortController().signal)).state,'incomplete');
@@ -83,4 +83,19 @@ test('the ZAP API adapter rejects non-local origins, mutations, redirects and ov
   await assert.rejects(api.get('/JSON/core/action/newSession/',{},signal));
   await assert.rejects(api.get(ZAP.endpoints.version,{},signal));assert.equal(redirected,0);
   await assert.rejects(api.get(ZAP.endpoints.queue,{},signal));
+});
+
+// A zero queue can precede history publication or a newly registered task.
+test('transient missing history and restarted passive queues are retried within the same deadline', async () => {
+  let messages = 0; let queue = 0; let alertReads = 0;
+  const api = { get: async endpoint => {
+    if (endpoint === ZAP.endpoints.queue) return { recordsToScan: ++queue === 5 ? '1' : '0' };
+    if (endpoint === ZAP.endpoints.messageCount) return { numberOfMessages: '1' };
+    if (endpoint === ZAP.endpoints.messages) return { messages: ++messages === 1 ? [] : [{ id: '1', type: '1', requestHeader: headers() }] };
+    if (endpoint === ZAP.endpoints.alertCount) return { numberOfAlerts: '1' };
+    if (endpoint === ZAP.endpoints.alerts) { alertReads++; return { alerts: [alert()] }; }
+    throw Error('Unexpected endpoint');
+  } };
+  const result = await createZapEvidence(api, 'http://127.0.0.1:8090', randomUUID()).collect(observation, target, AbortSignal.timeout(3000));
+  assert.equal(result.state, 'completed'); assert(messages >= 2); assert.equal(alertReads, 2); assert.equal(result.alerts.length, 1);
 });
