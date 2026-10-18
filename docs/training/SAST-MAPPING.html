@@ -1,58 +1,65 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inspect individual SAST findings and route attribution</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>Inspect individual SAST findings and route attribution</h1>
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAST findings, local verification and ZAP evidence</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>SAST findings, local verification and ZAP evidence</h1>
 <p><a href="SAST-MAPPING.ja.html">日本語</a> · <a href="README.html">Basic hands-on</a></p>
-<p>This feature is on the development branch for 3.0.0. It is not included in the published 2.0.0 installers.
-Use the source edition with <code>npm install</code> and <code>npm start</code>.</p>
-<h2>1. Analyze the teaching source</h2>
-<p>Open <strong>Static Analysis</strong>, enter the absolute path to <code>training/sast/routes</code> in this checkout, and run analysis.
-These files are read-only teaching inputs. Do not launch them with Node or deploy them to a server.</p>
-<p>Three <code>SAST-DANGEROUS-EVAL</code> findings appear. They share a rule ID but have separate finding instance IDs.
-Expand <strong>Route mapping</strong> to inspect source SHA-256, line/column span and static candidates.</p>
-<p><img src="images/sast-mapping-en.png" alt="Individual SAST identities and route attribution" /></p>
-<h2>2. Compare unique, ambiguous and unavailable mappings</h2>
+<p>Available in Web Security Hub 3.0.0. Open <strong>Static Analysis</strong>. Its five control tabs separate source analysis, the shipped sample, an authorized target, input values and the optional ZAP environment. Help opens here without clearing your inputs or results.</p>
+<h2>1. Compare individual findings</h2>
+<p>In the source tab, analyze the absolute path to <code>training/sast/routes</code> in a source checkout. These three files are inert teaching inputs: do not execute or deploy them. Static analysis does not send HTTP requests.</p>
+<p><img src="images/sast-mapping-en.png" alt="Individual findings" /></p>
 <table>
 <thead>
 <tr>
 <th>File</th>
-<th>Display</th>
-<th>Meaning</th>
+<th>Mapping</th>
+<th>Interpretation</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>mapped.js</code></td>
+<td>mapped.js</td>
 <td>One candidate</td>
-<td>A direct local helper call is attributed to <code>POST /api/calculate</code></td>
+<td>Local helper attributed to POST /api/calculate</td>
 </tr>
 <tr>
-<td><code>ambiguous.js</code></td>
+<td>ambiguous.js</td>
 <td>Ambiguous</td>
-<td>Shared code is registered for <code>POST /first</code> and <code>POST /second</code></td>
+<td>Shared code registered for POST /first and POST /second</td>
 </tr>
 <tr>
-<td><code>dynamic.js</code></td>
+<td>dynamic.js</td>
 <td>Unavailable</td>
-<td>An environment-dependent path is not guessed</td>
+<td>Environment-dependent route is not guessed</td>
 </tr>
 </tbody>
 </table>
-<p>One candidate means one supported registration in the same file. It does not establish runtime reachability, reproduce a vulnerability or grant permission to test a target. Static analysis itself does not send HTTP requests.</p>
-<h2>3. Track findings in reports</h2>
-<p><img src="images/sast-mapping-detail-en.png" alt="Instance identity, source hash and route details" /></p>
-<p>JSON, HTML, Markdown and SARIF reports retain the instance ID, source hash and mapping metadata. SARIF preserves the original <code>ruleId</code>; instance IDs are added as <code>partialFingerprints</code>.
-Identical file bytes, relative path and match position produce the same ID. Editing the source changes the ID. Do not reuse an old result as evidence for modified source.
-Lines/columns are one-based; offsets and columns use UTF-16; the end of a span is exclusive.</p>
-<h2>4. Check source and scope with a dedicated executable sample</h2>
-<p>In <strong>Static Analysis</strong>, click <strong>Run source/scope sample</strong>. No source path or terminal is needed for this operation. It starts only the shipped sample on a temporary numeric loopback port; it never runs the source entered in the field above. <strong>Cancel</strong> stops the owned run. Your input and previous SAST results stay intact.</p>
-<p>The sample's compiled JavaScript contains an unused <code>rejectUnauthorized: false</code> object. SAST detects the pattern, but the flag is never applied to a TLS connection. This is a source-binding exercise, not an intentional TLS vulnerability.</p>
-<p><img src="images/sast-binding-en.png" alt="Source binding and correlated normal/candidate requests" /></p>
-<p>Expected results: normal control <strong>HTTP 200</strong>, candidate <strong>HTTP 422</strong>, both assessments <strong>under investigation</strong>. Expand Route mapping and each trial's IDs. They belong to one finding and job, with separate trial, seed and request IDs. The anonymous profile is explicit.</p>
-<p>Before each setup/target send and after each successful response, the runner rereads the bounded source and checks its rule, span, hash, instance ID and route against a separately authorized scope. Changed or unavailable source blocks further sends and invalidates the result. Ambiguous, unsupported and parameterized candidates cannot create a bound runner. These checks do not prove that the running process loaded the same bytes or reached the flagged code.</p>
-<p>Results stay on this screen and are not automatically saved. In the source edition, the equivalent command emits JSON to stdout:</p>
+<p>Expand Route mapping. The rule ID remains compatible with earlier reports; the individual finding ID hashes the file bytes, relative path and match span. Edited source gets a new ID. SHA-256, one-based lines/columns and UTF-16 offsets identify the snapshot; span ends are exclusive. JSON/HTML/Markdown/SARIF retain metadata; SARIF adds individual partial fingerprints.</p>
+<p><img src="images/sast-mapping-detail-en.png" alt="Finding details" /></p>
+<p>A unique static route does not grant execution permission or prove reachability. Supported mapping is file-local JavaScript (.js/.cjs/.mjs), literal Express registrations/mounts, local middleware/handlers and direct helper calls. Imported handlers, factories, conditional/computed/chained registrations and analysis limits remain unavailable or ambiguous. Other-language findings remain visible without supported route attribution.</p>
+<h2>2. Run the shipped source/scope sample</h2>
+<p>Select the sample tab and run it. No terminal or path is needed. Only the trusted, shipped app starts on a temporary loopback port. Entered source is never loaded as a program. Cancel stops the owned run; previous source inputs and static results remain.</p>
+<p><img src="images/sast-binding-en.png" alt="Sample result" /></p>
+<p>Expect normal HTTP <strong>200</strong> and candidate <strong>422</strong>, both <strong>under investigation</strong>. The unused <code>rejectUnauthorized: false</code> object triggers a SAST rule but is never applied to a TLS connection. This exercises source binding; HTTP results do not establish a TLS vulnerability.</p>
+<p>Before sending and after receiving, the runner rereads bounded source and rechecks rule/span/digest/instance/route against a separately authorized scope. It checks again after waiting for passive analysis. Changed or unavailable source invalidates evidence and prevents further requests. These checks do not attest which bytes a running process loaded or whether the flagged sink executed.</p>
+<h2>3. Verify an authorized local JSON API</h2>
+<p>Start your own test app separately. Analyze its source, then choose a supported finding in the target tab. Only a single, literal, unencoded ASCII GET/POST path is executable; parameter templates and ambiguous mappings cannot run. Use a numeric loopback HTTP origin with an explicit nondefault port, for example <code>http://127.0.0.1:4300</code>. Remote hosts, HTTPS and arbitrary authentication profiles are outside this feature.</p>
+<p>In the values tab, enter JSON objects for normal and candidate values, a positive 2xx normal status, and at least one expected normal JSON field. GET encodes scalar values in the query; POST sends JSON. For the shipped example the values are <code>{&quot;label&quot;:&quot;normal&quot;}</code>, <code>{&quot;label&quot;:&quot;&quot;}</code> and expected <code>{&quot;accepted&quot;:true}</code> with status 200. Use values appropriate to your API.</p>
+<p><img src="images/sast-target-settings-en.png" alt="Target configuration" /></p>
+<p>Authorize this target explicitly and run. Changing the source selection, finding or origin clears authorization. The normal control runs first; failed normal control skips the candidate. The profile is anonymous with no stored cookies, no redirect following and no retries. The anonymous response stream is capped at 64 KiB. Source files are bounded to 1 MiB and static analysis has bounded traversal limits.</p>
+<p><img src="images/sast-target-en.png" alt="Local target result" /></p>
+<h2>4. Optionally install and enable ZAP</h2>
+<p>In the ZAP tab, install the optional environment. It downloads approximately 330 MB from the official ZAP/Temurin releases and validates pinned sizes/SHA-256 before extraction. ZAP 2.17.0 and Temurin JRE 17.0.20.1+1 are stored in private application data, separately from the app bundle. Java heap is limited to 512 MiB. Internet access is needed for initial installation; the installed engine can verify local targets offline. Cancellation removes partial staging. Check installation validates the local receipt/files and permits repair. Vendor notices are retained.</p>
+<p><img src="images/sast-zap-setup-en.png" alt="Optional engine setup" /></p>
+<p>Enable the checkbox and run the sample or authorized target. Each run owns a fresh process, private home and session; it does not adopt or clear a shared ZAP daemon. Passive analysis only: no spider or active scan. The runner waits for the queue with a 15-second bound and fails closed on cancellation, limits, unavailable or incomplete evidence. API reads are authenticated and loopback-only. Normal shutdown and the parent-death guardian clean up owned processes/session data.</p>
+<p><img src="images/sast-zap-en.png" alt="Per-trial passive evidence" /></p>
+<p>Expand each trial to inspect job/trial/seed/request/profile IDs, ZAP session/message IDs and redacted alert fingerprints/plugin IDs/ranks. All five IDs plus method and exact URL must match one proxied message. A warning on the normal request does not transfer to the candidate even at the same URL. Duplicate alerts are coalesced. No raw request/response bodies, cookies, API keys or absolute source roots enter reports. The sample's passive header warnings are separate from its unused TLS flag. <strong>Passive warnings do not confirm a SAST finding; zero warnings do not prove safety.</strong> Disabled and incomplete states are explicit.</p>
+<h2>5. Save and inspect results</h2>
+<p>Each completed API operation saves private JSON and escaped, script-free bilingual HTML under application data <code>artifacts/private/source-verifier/&lt;report-id&gt;/</code>. JSON downloads and an inline HTML reader are available in the execution result. Access is tied to the current app session; reports on disk remain after restart. Preserve private files yourself when needed. Static-analysis reports are separate.</p>
+<p>Input payload values are deliberately omitted from saved source reports. To reproduce your own trial, keep the source snapshot and a private source-plan JSON with the exact inputs. Do not commit credentials, local plans or private reports. Source results always remain <strong>under investigation</strong> without runtime instrumentation and an independent business oracle.</p>
+<p>Source edition commands:</p>
 <pre><code class="language-sh">npm run verifier:run -- --sast-sample
+npm run verifier:run -- --zap-install
+npm run verifier:run -- --zap-status
+npm run verifier:run -- --sast-sample --zap
+npm run verifier:run -- --source-plan /absolute/private/plan.json
 </code></pre>
-<p>This dedicated option cannot be combined with campaign options or arbitrary URL/source arguments. Existing baseline/changed/fixed campaign commands and their private JSON/HTML reports are unchanged.</p>
-<h2>Coverage and remaining work</h2>
-<p>Supported inputs are <code>.js</code>, <code>.cjs</code> and <code>.mjs</code> with top-level Express creation, literal route/mount paths, and local handlers, middleware and directly called helper functions. Parameterized paths are displayed as templates.
-Imported routers/handlers, factories, dynamic/conditional/computed/chained registrations and analysis limits do not yield a unique conclusion. Existing SAST findings in TypeScript and other languages remain visible, with route mapping marked unsupported.</p>
-<p>The dedicated sample and backend adapter now bind a finding to an authorized exact route. Selecting arbitrary applications in the GUI, attesting loaded source, correlating per-trial ZAP evidence and validating the 3.0.0 installers remain incomplete.</p>
+<p>A source plan contains <code>sourceDir</code>, current <code>finding</code> metadata (ruleId, findingInstanceId, sourceDigest, relativePath, sourceSpan, routeMapping), <code>origin</code>, <code>normalValues</code>, <code>candidateValues</code>, <code>expectedJson</code>, <code>expectedStatus</code>, <code>authorized: true</code> and <code>useZap</code>. It uses the same strict contract and scope checks as the GUI. Flags cannot be mixed with campaign options. CLI prints JSON and private saved paths; cancellation exits 130. Existing baseline/changed/fixed campaigns remain available.</p>
+<p>Optional engines: <a href="https://www.zaproxy.org/download/">ZAP</a> (Apache-2.0), <a href="https://adoptium.net/temurin/">Temurin</a> (GPLv2 with Classpath Exception). The desktop installer excludes source-only Appium/WebdriverIO automation dependencies. The source tree still has extract-zip advisories through that optional automation chain; see <a href="../../SECURITY.html">security</a>.</p>
 </main></html>

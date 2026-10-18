@@ -11,10 +11,10 @@ Web Security Hub is a locally run web-security assessment and form-regression te
 
 | Platform | Installer | Status |
 |---|---|---|
-| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
-| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v2.0.0/Web-Security-Hub_2.0.0_windows_x64_setup.exe) | Unsigned |
+| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v3.0.0/Web-Security-Hub_3.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
+| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v3.0.0/Web-Security-Hub_3.0.0_windows_x64_setup.exe) | Unsigned |
 
-[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v2.0.0). Use the source edition on Intel Macs or Linux. Windows installer operation was verified in a Windows CI environment.
+[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v3.0.0). Use the source edition on Intel Macs or Linux. Windows installer operation was verified in a Windows CI environment.
 
 ## Desktop and double-click startup
 
@@ -102,3 +102,7 @@ Copyright 2024–2026 Masahiro NAKATSUGAWA.
 Web Security Hub is distributed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for copyright and attribution information.
 
 Development branch: [SAST finding IDs and static route candidates](docs/training/SAST-MAPPING.md) are available in the source edition. The GUI and CLI include a dedicated source/scope binding sample; arbitrary-application execution and ZAP integration remain pending; this feature is not included in the published 2.0.0 installers.
+
+## 3.0.0 source verification
+
+Analyze individual SAST findings, run the shipped source/scope sample or an explicitly authorized local JSON API, and optionally install ZAP from the GUI. Read [the illustrated guide](docs/training/SAST-MAPPING.md) for private JSON/HTML reports, limits and interpretation. Source-only results remain under investigation. [Dependency scope](SECURITY.md).

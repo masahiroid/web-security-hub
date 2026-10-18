@@ -1,6 +1,6 @@
 'use strict';
 // Optional native integration check; no Apple credentials or personal settings.
-const fs = require('fs'); const path = require('path'); const os = require('os'); const net = require('net');
+const http = require('node:http'); const fs = require('fs'); const path = require('path'); const os = require('os'); const net = require('net');
 const { spawn, spawnSync } = require('child_process'); const { chromium } = require('playwright');
 const SETTINGS = Object.freeze({ startupMs: 60000, pollMs: 250, closeMs: 15000, expectedCandidates: 22, expectedViolations: 4, diagnosticChars: 64 * 1024 });
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -25,8 +25,13 @@ function ciDebugPolicy(executable, port) {
 (async()=>{
  if(process.platform!=='win32')throw Error('Run this check on Windows');
  const bundle=path.resolve('src-tauri/target/release/bundle/nsis'); const name=fs.readdirSync(bundle).find(file=>file.endsWith('.exe')); if(!name)throw Error('Build NSIS first');
- const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'wsh-native-')); const install=path.join(temporary,'app'); const checks=[]; let application; let browser; let removePolicy=()=>{};
+ const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'wsh-native-')); const install=path.join(temporary,'app'); const checks=[]; let application; let browser; let target; let removePolicy=()=>{};
  try{
+  const sourceDirectory=path.join(temporary,'source'); fs.mkdirSync(sourceDirectory);
+  fs.copyFileSync(path.resolve('core/verifier/generated/adapters/sastFixtureApp.js'),path.join(sourceDirectory,'app.js'));
+  target=http.createServer(require('../core/verifier/generated/adapters/sastFixtureApp'));
+  await new Promise(resolve=>target.listen(0,'127.0.0.1',resolve));
+  const targetOrigin=`http://127.0.0.1:${target.address().port}`;
   const installer=spawnSync(path.join(bundle,name),['/S',`/D=${install}`],{windowsVerbatimArguments:true,timeout:SETTINGS.startupMs}); if(installer.status!==0)throw Error('Installer failed');
   const executables=fs.readdirSync(install).filter(file=>file.endsWith('.exe')&&!/^uninstall|web-security-node/i.test(file)); if(executables.length!==1)throw Error('Installed application not found');
   checks.push('NSIS installation completed'); console.log(checks.at(-1));
@@ -57,15 +62,7 @@ function ciDebugPolicy(executable, port) {
     checks.push(`${lang}/${mode}: native UI PASS`);
    }
    await page.fill('#verifierSeed','43'); await page.click('#helpBtn'); await page.frameLocator('#helpReader').locator('h1').waitFor(); await page.click('#closeHelp'); if(await page.inputValue('#verifierSeed')!=='43')throw Error('Native help lost inputs');
-   await page.click('[data-tab=static]'); await page.fill('#sourceDir','retained-source-input');
-   const sampleResponse=page.waitForResponse(response=>response.url().endsWith('/api/verifier/sast-sample'));
-   await page.click('#runSastBinding'); const sample=await(await sampleResponse).json();
-   if(sample.state!=='completed'||sample.pair.control.observation.status!==200||sample.pair.candidate.observation.status!==422||sample.pair.candidate.assessment.result!=='under_investigation'||sample.runtimeSource!=='unverified')throw Error('Native source binding mismatch');
-   await page.waitForFunction(()=>!document.getElementById('runSastBinding').disabled);
-   if(await page.inputValue('#sourceDir')!=='retained-source-input')throw Error('Native source binding lost inputs');
-   await page.click('#helpBtn'); const guide=await page.frameLocator('#helpReader').locator('h1').innerText(); if(!guide.includes('SAST'))throw Error('Native SAST guide mismatch'); await page.click('#closeHelp');
-   if(!(await page.locator('#sastBindingResult').innerText()).includes('POST /inspect'))throw Error('Native source binding result lost');
-   checks.push(`${lang}/source-scope: native UI 200/422, guide and retained inputs PASS`);
+   checks.push(await require('./verify-source-native-ui')(page,lang,sourceDirectory,targetOrigin));
    await page.click('[data-tab=verifier]');
   }
   const close=spawnSync('powershell.exe',['-NoProfile','-Command','(Get-Process -Id $env:WSH_NATIVE_PID).CloseMainWindow()'],{env:{...process.env,WSH_NATIVE_PID:String(application.pid)},encoding:'utf8'}); if(close.status!==0)throw Error('Could not close owned window');
@@ -77,6 +74,7 @@ function ciDebugPolicy(executable, port) {
  }finally{
   if(application&&application.exitCode===null)spawnSync('taskkill',['/PID',String(application.pid),'/T','/F']);
   if(browser)await browser.close().catch(()=>{});
+  if(target)await new Promise(resolve=>{target.close(resolve);target.closeAllConnections();});
   removePolicy();
   fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5,retryDelay:SETTINGS.pollMs});
  }

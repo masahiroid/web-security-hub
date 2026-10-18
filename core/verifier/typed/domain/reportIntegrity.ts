@@ -8,6 +8,8 @@ export function assertReportIntegrity(report: Report, contracts: ContractsPort):
   if (Object.entries(totals).some(([key, value]) => Reflect.get(report.totals, key) !== value) || report.totals.trials > report.options.maxTrials) throw Error('Invalid report totals');
   const check = (result: Result) => {
     contracts.validate('feedback', result.feedback);
+    if (result.zap) { contracts.validate('zapEvidence', result.zap); if (result.zap.state !== result.feedback.zap) throw Error('ZAP state mismatch'); }
+    else if (result.feedback.zap !== 'disabled') throw Error('Missing ZAP evidence');
     const expected = contracts.assess(result.feedback);
     const assessmentMatches = Object.entries(expected).every(([key, value]) => Array.isArray(value) ? JSON.stringify(value) === JSON.stringify(Reflect.get(result.assessment, key)) : value === Reflect.get(result.assessment, key));
     if (result.feedback.seedId !== result.observation.seedId || result.feedback.outcome !== result.observation.outcome || result.feedback.status !== result.observation.status || !assessmentMatches) throw Error('Invalid assessment identity');

@@ -252,3 +252,9 @@ Expressルート候補を追加しています。共有ハンドラーは複数�
 解析不能として表示します。実行許可・実行時の到達証拠には使いません。
 専用サンプルは画面/CLIからソースと許可済みの完全一致ルートを照合して試行できます。任意アプリの選択・起動中コードの同一性確認・ZAPは未完成で、公開済み2.0.0の配布版には含まれません。
 [ソース版の画像付きガイド](../../docs/training/SAST-MAPPING.ja.md)を参照してください。
+
+## 3.0.0 source and passive evidence
+
+`typed/domain` defines immutable source/ZAP contracts and correlation rules, `typed/application` composes source-guarded trials, and `typed/adapters` owns bounded HTTP, filesystem, API, installation and process lifecycles. `typed/cli/arguments.ts` validates CLI inputs before side effects. Generated JavaScript is not tracked.
+
+GUI and CLI support the shipped source sample and an explicitly authorized, anonymous numeric-loopback HTTP JSON target with one literal GET/POST route. Source is never loaded. Results save privately under `artifacts/private/source-verifier`. Optional owned ZAP sessions contribute per-message passive evidence without proving SAST reachability or VEX status. Source changes invalidate evidence, including during passive waits. See the [bilingual guide](../../docs/training/SAST-MAPPING.md) for exact limits, commands and supported syntax.

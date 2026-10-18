@@ -20,6 +20,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm audit --omit=dev --prefix desktop/runtime
       - run: npm test
+      - name: Verify real owned ZAP runtime
+        run: npm run verifier:verify-zap -- --install
       - run: npm run release:check
       - run: npm run desktop:build -- --bundles nsis -- --locked
       - name: Verify installed native application

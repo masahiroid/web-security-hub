@@ -62,3 +62,5 @@ Windows / Linux のビルド定義はありますが、この macOS セッショ
 ## 配布版の範囲
 
 初版のネイティブ配布は Web 自動化・診断と教材を対象にし、Appium / WebdriverIO は同梱しません。モバイルはソース／CLI 版で利用します。配布用依存関係は `desktop/runtime/package{,-lock}.json` で独立して固定しています。ソース版のモバイル依存には監査指摘が残っており、一般配布前の課題として分離しています。
+
+3.0.0ではソース解析画面から任意ZAP環境を導入できます。[ソース検証ガイド](../training/SAST-MAPPING.ja.md)を参照してください。従来の動的診断のZAP設定とは独立しています。WindowsはWindows CIでインストール後の操作を確認し、Linux native導入は未確認です。

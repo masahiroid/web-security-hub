@@ -24,12 +24,18 @@ const save=document.createElement('div'); save.className='workspace-actionbar'; 
 for (const [id,resultIds] of [['dynamic',['dynamicResult']],['static',['staticResult','sastBindingResult']],['testCases',['pipelineLog','pipelineResult']],['replay',['replayLog','replayResult']]]) {
   const panel=document.getElementById(`panel-${id}`);
   const heading=panel.querySelector(':scope > h2');
-  const controls=document.createElement('div'); controls.className='workspace-controls';
+  const controls=document.createElement('div'); controls.className='workspace-controls'; controls.id=`${panel.id}-controls`;
   const output=document.createElement('div'); output.className='workspace-output'; output.setAttribute('aria-label','Results');
   const caption=label(document.createElement('div'),localized('実行結果','Results','Résultats')); caption.className='output-caption'; output.append(caption);
   const empty=label(document.createElement('div'),localized('実行すると、ここに結果が表示されます。','Results will appear here after you run the task.','Les résultats apparaîtront ici après exécution.')); empty.className='output-empty'; output.append(empty);
   resultIds.forEach(id=>output.append(document.getElementById(id)));
   [...panel.childNodes].filter(n=>n!==heading).forEach(n=>controls.append(n));
+  if(id==='static') {
+    const sample=controls.querySelector('#sastSampleSettings'); const engine=controls.querySelector('#sastZapEnvironment');
+    engine.prepend(controls.querySelector('.sast-zap-checkbox')); controls.append(engine); const target=controls.querySelector('#sastTargetSettings'); const values=controls.querySelector('#sastTargetValues');
+    const general=[...controls.childNodes].filter(node=>![sample,engine,target,values].includes(node));
+    subpages(controls,[[localized('ソース解析','Source analysis'),general],[localized('専用サンプル','Sample'),[sample]],[localized('許可した対象','Authorized target'),[target]],[localized('入力値','Input values'),[values]],[localized('ZAP環境','ZAP setup'),[engine]]]);
+  }
   if(id==='dynamic') {
     const fieldsets=[...controls.querySelectorAll(':scope > fieldset')];
     const general=[...controls.childNodes].filter(n=>!fieldsets.includes(n));

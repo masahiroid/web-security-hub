@@ -177,79 +177,183 @@
       "lang": "ja",
       "step": "sast-mapping",
       "file": "docs/training/images/sast-mapping-ja.png",
-      "appVersion": "2.0.0",
-      "development": true,
+      "appVersion": "3.0.0",
+      "development": false,
       "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:12.004Z",
       "viewport": {
         "width": 1440,
         "height": 1200
-      },
-      "capturedAt": "2026-10-18T06:13:59.363Z"
+      }
     },
     {
       "lang": "ja",
       "step": "sast-mapping-detail",
       "file": "docs/training/images/sast-mapping-detail-ja.png",
-      "appVersion": "2.0.0",
-      "development": true,
+      "appVersion": "3.0.0",
+      "development": false,
       "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:12.080Z",
       "viewport": {
         "width": 1440,
         "height": 1200
-      },
-      "capturedAt": "2026-10-18T06:13:59.430Z"
+      }
     },
     {
       "lang": "en",
       "step": "sast-mapping",
       "file": "docs/training/images/sast-mapping-en.png",
-      "appVersion": "2.0.0",
-      "development": true,
+      "appVersion": "3.0.0",
+      "development": false,
       "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:24.845Z",
       "viewport": {
         "width": 1440,
         "height": 1200
-      },
-      "capturedAt": "2026-10-18T06:13:59.813Z"
+      }
     },
     {
       "lang": "en",
       "step": "sast-mapping-detail",
       "file": "docs/training/images/sast-mapping-detail-en.png",
-      "appVersion": "2.0.0",
-      "development": true,
+      "appVersion": "3.0.0",
+      "development": false,
       "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:24.914Z",
       "viewport": {
         "width": 1440,
         "height": 1200
-      },
-      "capturedAt": "2026-10-18T06:13:59.881Z"
+      }
     },
     {
       "lang": "ja",
       "step": "sast-binding",
       "file": "docs/training/images/sast-binding-ja.png",
-      "appVersion": "2.0.0",
-      "development": true,
+      "appVersion": "3.0.0",
+      "development": false,
       "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:12.326Z",
       "viewport": {
         "width": 1440,
         "height": 1200
-      },
-      "capturedAt": "2026-10-18T06:13:59.706Z"
+      }
     },
     {
       "lang": "en",
       "step": "sast-binding",
       "file": "docs/training/images/sast-binding-en.png",
-      "appVersion": "2.0.0",
-      "development": true,
+      "appVersion": "3.0.0",
+      "development": false,
       "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:25.149Z",
       "viewport": {
         "width": 1440,
         "height": 1200
-      },
-      "capturedAt": "2026-10-18T06:14:00.098Z"
+      }
+    },
+    {
+      "lang": "ja",
+      "step": "sast-target",
+      "file": "docs/training/images/sast-target-ja.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:12.569Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "ja",
+      "step": "sast-target-settings",
+      "file": "docs/training/images/sast-target-settings-ja.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:12.472Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "ja",
+      "step": "sast-zap",
+      "file": "docs/training/images/sast-zap-ja.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:24.703Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "ja",
+      "step": "sast-zap-setup",
+      "file": "docs/training/images/sast-zap-setup-ja.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:18.570Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "en",
+      "step": "sast-target",
+      "file": "docs/training/images/sast-target-en.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:25.386Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "en",
+      "step": "sast-target-settings",
+      "file": "docs/training/images/sast-target-settings-en.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:25.288Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "en",
+      "step": "sast-zap",
+      "file": "docs/training/images/sast-zap-en.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:31.896Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
+    },
+    {
+      "lang": "en",
+      "step": "sast-zap-setup",
+      "file": "docs/training/images/sast-zap-setup-en.png",
+      "appVersion": "3.0.0",
+      "development": false,
+      "targetVersion": "3.0.0",
+      "capturedAt": "2026-10-18T08:03:25.511Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1200
+      }
     }
   ],
   "runs": [

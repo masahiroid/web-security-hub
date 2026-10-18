@@ -1,2 +1,7 @@
 Web Security Hub
 Copyright 2024–2026 Masahiro NAKATSUGAWA
+
+Optional managed engines (downloaded separately, not included in installers):
+OWASP ZAP 2.17.0 — Apache License 2.0; https://www.zaproxy.org/
+Eclipse Temurin JRE 17 — GPLv2 with Classpath Exception;
+https://adoptium.net/temurin/ . Vendor license/notice files remain in each download.

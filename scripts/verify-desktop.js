@@ -73,7 +73,7 @@ async function main() {
     evidence.checks.push('SAST source prefilled without commands; report stored in user data and served successfully');
     const sourceInput = await page.inputValue('#sourceDir');
     const bindingResponse = page.waitForResponse(response => response.url().endsWith('/api/verifier/sast-sample'));
-    await page.click('#runSastBinding'); const binding = await (await bindingResponse).json();
+    await page.click('[aria-controls=panel-static-controls-page-1]'); await page.click('#runSastBinding'); const binding = await (await bindingResponse).json();
     assert.equal(binding.state, 'completed'); assert.equal(binding.pair.control.observation.status, 200);
     assert.equal(binding.pair.candidate.observation.status, 422); assert.equal(binding.pair.candidate.assessment.result, 'under_investigation');
     await page.waitForFunction(() => !document.getElementById('runSastBinding').disabled);

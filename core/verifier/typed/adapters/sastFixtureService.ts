@@ -8,9 +8,17 @@ import { createSastBoundRunner } from '../application/sastBoundRunner';
 import { createConfinedSourceReader } from './confinedSourceReader';
 import { createStaticFileAnalysis } from './staticFileAnalysis';
 import app = require('./sastFixtureApp');
+import { DATA_ROOT } from '../../../paths';
+import { startOwnedZap } from './ownedZapRuntime';
+import { ZAP, type ZapPort } from '../domain/zap';
 
 /** Only the compiled, shipped teaching app is started. No arbitrary source/URL input. */
-export async function runSastFixture(signal: AbortSignal) {
+export async function runSastFixture(signal: AbortSignal, { useZap = false, dataRoot = DATA_ROOT }: { useZap?: boolean; dataRoot?: string } = {}) {
+  const engine = useZap ? await startOwnedZap(dataRoot, signal) : undefined;
+  try { return await runSample(signal, engine?.port); }
+  finally { await engine?.close(); }
+}
+async function runSample(signal: AbortSignal, zap?: ZapPort) {
   signal.throwIfAborted();
   const source = await createConfinedSourceReader({ [SAMPLE.rootId]: __dirname });
   const bytes = await source.read(SAMPLE.rootId, SAMPLE.file, signal);
@@ -29,10 +37,10 @@ export async function runSastFixture(signal: AbortSignal) {
     const origin = `http://${FIXTURE.host}:${address.port}`;
     const scope = contracts.validate('scope', { schemaVersion: CONTRACT_VERSION, sourceRootId: SAMPLE.rootId,
       origin, route: SAMPLE.route, method: SAMPLE.method, authProfileIds: [SAMPLE.profileId], allowedFields: [SAMPLE.field],
-      ttlMs: SAMPLE.ttlMs, maxTrials: SAMPLE.maxTrials, maxConcurrency: SAMPLE.maxConcurrency });
+      ttlMs: zap ? ZAP.startupMs : SAMPLE.ttlMs, maxTrials: SAMPLE.maxTrials, maxConcurrency: SAMPLE.maxConcurrency });
     const seed = (seedId: string, label: string) => ({ schemaVersion: CONTRACT_VERSION, seedId,
       values: { [SAMPLE.field]: label }, omitFields: [], rationale: 'Known teaching input' });
-    const runner = createSastBoundRunner({ contracts, registry, source, finding, scope,
+    const runner = createSastBoundRunner({ contracts, registry, source, finding, scope, ...(zap ? { zap, timeoutMs: ZAP.passiveMs } : {}),
       profiles: [{ schemaVersion: CONTRACT_VERSION, profileId: SAMPLE.profileId, origin, setup: [] }],
       controls: [{ schemaVersion: CONTRACT_VERSION, origin, route: SAMPLE.route, method: SAMPLE.method,
         seed: seed(SAMPLE.controlSeed, SAMPLE.normalLabel), expectedStatus: HTTP_STATUS.ok, expectedJson: { accepted: true } }] });

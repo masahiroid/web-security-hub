@@ -112,6 +112,21 @@ test('source changes during candidate execution invalidate its assessment', asyn
   assert.equal(result.pair.candidate.assessment.result, 'under_investigation');
 });
 
+test('source changes while passive analysis completes invalidate ZAP evidence before assessment', async t => {
+  for (const purpose of ['control', 'candidate']) await t.test(purpose, async t => {
+    const x = await setup(t);
+    const runner = createSastBoundRunner({ ...x.options, zap: { proxy: x.scope.origin, collect: async observation => {
+      if (observation.purpose === purpose) await fs.appendFile(x.file, '\n// changed during passive queue');
+      return { state: 'completed', reason: 'none', sessionId: '11111111-1111-4111-8111-111111111111', messageIds: [observation.purpose === 'control' ? '1' : '2'], alerts: [] };
+    } } });
+    const result = await runner.runPair(x.handle, x.input); assert.equal(result.state, 'source_binding_failed');
+    const affected = purpose === 'control' ? result.pair.control : result.pair.candidate;
+    assert.equal(affected.observation.reason, 'source_binding_failed'); assert.equal(affected.feedback.zap, 'incomplete');
+    assert.deepEqual([...affected.zap.messageIds], []); assert.equal(affected.assessment.result, 'under_investigation');
+    assert.equal(x.hits.length, purpose === 'control' ? 1 : 2);
+  });
+});
+
 test('a source-root grant from another catalog cannot be substituted', async t => {
   const x = await setup(t); const other = x.registry.create({ ...x.scope, sourceRootId: 'other' });
   try { assertRejectedControl(await x.runner.runPair(other, x.input), x.hits); }

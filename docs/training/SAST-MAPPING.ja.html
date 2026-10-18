@@ -1,58 +1,65 @@
-<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SASTの個別指摘とルート対応を確認する</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>SASTの個別指摘とルート対応を確認する</h1>
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAST個別検出・ローカル検証・ZAP証拠</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>SAST個別検出・ローカル検証・ZAP証拠</h1>
 <p><a href="SAST-MAPPING.html">English</a> · <a href="README.ja.html">基本ハンズオン</a></p>
-<p>これは3.0.0に向けた開発ブランチの機能です。公開済み2.0.0インストーラーには含まれません。
-ソース版で <code>npm install</code>、<code>npm start</code> を実行して利用します。</p>
-<h2>1. 教材を静的解析する</h2>
-<p>アプリで <strong>静的解析</strong> を開き、ソースディレクトリーに、この作業コピーの <code>training/sast/routes</code> の絶対パスを指定して解析します。
-教材は読み取るだけです。ファイルをNodeで起動したり、公開サーバーへ配置したりしないでください。</p>
-<p>3件の <code>SAST-DANGEROUS-EVAL</code> が表示されます。ルールIDは共通ですが、各指摘の個別finding IDは異なります。
-「ルート対応」を開くと、ソースのSHA-256、行・列、静的な候補を確認できます。</p>
-<p><img src="images/sast-mapping-ja.png" alt="個別finding IDとルート対応" /></p>
-<h2>2. 一意・複数候補・解析不能を比較する</h2>
+<p>Web Security Hub 3.0.0で利用できます。「ソース解析」の操作欄は、ソース解析・専用サンプル・許可した対象・入力値・ZAP環境の5タブに分かれています。実行中の画面からヘルプを開け、入力と結果を保持します。</p>
+<h2>1. 個別検出を比較する</h2>
+<p>ソースタブで、このリポジトリの <code>training/sast/routes</code> の絶対パスを解析します。3ファイルは実行しない教材です。Nodeで起動したり公開したりしないでください。静的解析はHTTPを送信しません。</p>
+<p><img src="images/sast-mapping-ja.png" alt="個別検出" /></p>
 <table>
 <thead>
 <tr>
 <th>ファイル</th>
-<th>表示</th>
+<th>対応付け</th>
 <th>意味</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>mapped.js</code></td>
-<td>一意</td>
-<td>ローカル補助関数から <code>POST /api/calculate</code> の登録へ対応する</td>
+<td>mapped.js</td>
+<td>一意候補</td>
+<td>ローカルhelperをPOST /api/calculateへ対応付け</td>
 </tr>
 <tr>
-<td><code>ambiguous.js</code></td>
-<td>複数候補</td>
-<td>同じ関数が <code>POST /first</code> と <code>POST /second</code> から参照される</td>
+<td>ambiguous.js</td>
+<td>曖昧</td>
+<td>共有コードがPOST /firstとPOST /secondに登録</td>
 </tr>
 <tr>
-<td><code>dynamic.js</code></td>
-<td>解析できません</td>
-<td>環境変数のルート名を推測しない</td>
+<td>dynamic.js</td>
+<td>対応不可</td>
+<td>環境依存の経路を推測しない</td>
 </tr>
 </tbody>
 </table>
-<p>「一意」は同じファイル内の静的な登録先が1件という意味です。実行時の到達、脆弱性の再現、診断許可を意味しません。静的解析自体からHTTPリクエストは実行されません。</p>
-<h2>3. 個別指摘をレポートで追跡する</h2>
-<p><img src="images/sast-mapping-detail-ja.png" alt="個別ID・ソースhash・対応ルートの詳細" /></p>
-<p>JSON・HTML・Markdown・SARIFの各レポートへ個別ID・ソースhash・対応情報を保存します。SARIFの <code>ruleId</code> は従来どおりで、個別IDは <code>partialFingerprints</code> へ追加されます。
-ファイルの内容・相対パス・指摘位置が同じなら個別IDは同じです。ソースを変更するとIDが変わるため、古い結果を新しいソースの証拠として扱わないでください。
-行・列は1始まり、列とoffsetはUTF-16、範囲の末尾は含みません。</p>
-<h2>4. 専用サンプルでソースと実行先を照合する</h2>
-<p>「静的解析」画面の <strong>「専用サンプルで照合を実行」</strong> を押します。この操作ではパス入力やターミナルは不要です。同梱サンプルだけを一時的な数値loopbackポートで起動し、上の入力欄のソースを実行することはありません。「取消」で実行を停止できます。入力値と既存のSAST結果は保持します。</p>
-<p>サンプルのコンパイル済みJavaScriptには、未使用の <code>rejectUnauthorized: false</code> オブジェクトがあります。SASTはその記述を検出しますが、実際のTLS通信には適用しません。ソース照合を学ぶための教材であり、TLSの脆弱性を再現するものではありません。</p>
-<p><img src="images/sast-binding-ja.png" alt="ソース照合と正常対照・候補の相関ID" /></p>
-<p>期待結果は、正常対照 <strong>HTTP 200</strong>、候補 <strong>HTTP 422</strong>、評価はいずれも <strong>調査中</strong> です。「ルート対応」と各試行のIDを展開してください。同じ検出・jobに対して、trial・seed・requestは別々のIDになります。認証プロファイルはanonymousです。</p>
-<p>準備通信・対象への送信前と正常な応答後に、上限付きでソースを再読取し、ルール・位置・hash・個別ID・ルートを、別途許可されたscopeと照合します。変更や読取失敗は後続送信を止め、結果を無効にします。複数候補・未対応・パラメーター付き候補からは照合済みrunnerを作りません。ただし、起動中のコードとディスク上のソースの同一性や、指摘箇所への到達を証明するものではありません。</p>
-<p>結果は画面内の表示のみで、自動保存しません。ソース版では次の同等コマンドからJSONを標準出力できます。</p>
+<p>「ルート対応」を展開します。従来のrule IDを保ち、ファイルのbytes・相対パス・検出位置から個別IDを生成します。編集するとIDも変わります。SHA-256、1始まりの行/列、UTF-16 offsetで解析時点を識別します。終端はexclusiveです。JSON/HTML/Markdown/SARIFにも記録し、SARIFはpartial fingerprintへ個別IDを追加します。</p>
+<p><img src="images/sast-mapping-detail-ja.png" alt="個別IDと位置" /></p>
+<p>一意な静的候補は、実行許可や到達の証明ではありません。対応範囲はJavaScript（.js/.cjs/.mjs）の同一ファイル内のExpress登録・literal mount・local middleware/handler・直接呼出helperです。import先、factory、条件/計算/chain登録、解析上限では一意と断定しません。他言語の指摘は残しますがルート対応は対象外です。</p>
+<h2>2. 専用サンプルを実行する</h2>
+<p>サンプルタブから実行します。パスやターミナルは不要です。同梱した信頼済みアプリだけを一時loopback portで起動します。入力したソースをプログラムとしてロードしません。取消で所有する実行を停止し、元の入力と静的結果を保持します。</p>
+<p><img src="images/sast-binding-ja.png" alt="専用サンプル結果" /></p>
+<p>期待結果は正常対照 <strong>HTTP 200</strong>、候補 <strong>422</strong>、評価は両方 <strong>調査中</strong> です。未使用の <code>rejectUnauthorized: false</code> オブジェクトをSASTが検出しますが、この値をTLS接続へ適用していません。ソース照合の演習であり、HTTP結果からTLS脆弱性を確定しません。</p>
+<p>送信前と応答後にソースを上限付きで再読取し、rule/位置/digest/個別ID/routeを別途許可したscopeと照合します。受動解析の待機後にも再確認します。変更・読取不能なら証拠を無効にし、追加送信を止めます。起動中プロセスが同じbytesをロードしたことや、指摘箇所の実行は証明しません。</p>
+<h2>3. 許可したローカルJSON APIを検証する</h2>
+<p>自分のテスト用アプリを別途起動します。ソースを解析し、対象タブで対応する指摘を選びます。一意な、未エンコードASCII literalのGET/POSTだけ実行できます。parameter templateや曖昧な経路は実行しません。originは <code>http://127.0.0.1:4300</code> のような数値loopback HTTP・明示した非既定portに限定します。外部host、HTTPS、任意の認証profileは対象外です。</p>
+<p>入力値タブで正常対照・候補のJSON object、正常時の2xx status、期待する正常JSONの項目を1つ以上指定します。GETはscalar値をqueryへ、POSTはJSONへ変換します。同梱例では正常 <code>{&quot;label&quot;:&quot;normal&quot;}</code>、候補 <code>{&quot;label&quot;:&quot;&quot;}</code>、期待JSON <code>{&quot;accepted&quot;:true}</code>、status 200です。自分のAPIに合わせて設定してください。</p>
+<p><img src="images/sast-target-settings-ja.png" alt="対象の設定" /></p>
+<p>対象への送信を明示許可して実行します。ソース選択・指摘・originを変えると許可は解除されます。正常対照を先に実行し、不一致なら候補を送りません。anonymous profileで保存Cookie・自動redirect・retryは使いません。この匿名HTTP経路は受信中の応答を64 KiBで打ち切ります。ソースは1ファイル1 MiBまで、静的解析の探索にも上限があります。</p>
+<p><img src="images/sast-target-ja.png" alt="ローカル対象の結果" /></p>
+<h2>4. 必要に応じZAPを導入する</h2>
+<p>ZAPタブから任意環境を導入します。公式ZAP/Temurin releaseから約330 MBをdownloadし、固定size/SHA-256を確認して展開します。ZAP 2.17.0とTemurin JRE 17.0.20.1+1はアプリ本体とは別の非公開アプリデータに置き、Java heapは512 MiBです。初回導入はインターネットが必要ですが、導入後のローカル検証はオフラインでも利用できます。取消時は途中の展開を除去します。「導入を確認」はreceipt/fileを再検査して修復へ進めます。配布元のlicense/noticeを保持します。</p>
+<p><img src="images/sast-zap-setup-ja.png" alt="ZAP導入" /></p>
+<p>checkboxを有効にし、サンプルまたは許可した対象を実行します。毎回専用process・private home・新しいsessionを所有し、共有ZAPを採用・初期化しません。受動解析だけでspider/active scanは行いません。queue待機は15秒までとし、取消・上限・取得不能・未完了では証拠を採用しません。APIは認証付きloopbackだけです。通常終了と親終了の監視処理が所有process/sessionを回収します。</p>
+<p><img src="images/sast-zap-ja.png" alt="試行ごとのZAP証拠" /></p>
+<p>各試行を展開し、job/trial/seed/request/profileの5ID、ZAP session/message ID、redacted alert fingerprint/plugin ID/rankを確認します。5IDとmethod/正確なURLが1つのproxy messageに一致する必要があります。同URLでも正常側の警告を候補へ流用せず、重複警告をまとめます。生のrequest/response body、Cookie、API key、絶対ソースrootはreportへ含めません。サンプルの受動header警告は未使用TLS flagと別の証拠です。<strong>受動警告はSAST指摘の確定ではなく、警告0件も安全の証明ではありません。</strong> 無効・未完了も明示します。</p>
+<h2>5. 結果を保存・参照する</h2>
+<p>API操作が結果を返すと、アプリデータの <code>artifacts/private/source-verifier/&lt;report-id&gt;/</code> へprivate JSONとescape済み・scriptなしの日英HTMLを保存します。実行結果からJSON downloadとHTMLの埋込表示を使えます。API参照は現在のアプリsessionの所有者に限定し、ディスクのreportは再起動後も残します。必要なprivate fileは自分で保管してください。静的解析reportとは別です。</p>
+<p>試行の入力payload値はsource reportへ保存しません。再現にはソースsnapshotと、正確な入力を含むprivate source-plan JSONを保管してください。認証情報・local plan・private reportをcommitしないでください。runtime計測と独立した業務oracleがないため、source検証の評価は常に <strong>調査中</strong> です。</p>
+<p>ソース版のコマンド：</p>
 <pre><code class="language-sh">npm run verifier:run -- --sast-sample
+npm run verifier:run -- --zap-install
+npm run verifier:run -- --zap-status
+npm run verifier:run -- --sast-sample --zap
+npm run verifier:run -- --source-plan /absolute/private/plan.json
 </code></pre>
-<p>この専用オプションはcampaignのオプションや任意のURL・source指定と併用できません。既存のbaseline/changed/fixedと、その非公開JSON/HTML保存機能は従来どおりです。</p>
-<h2>対応範囲と未完成の部分</h2>
-<p><code>.js</code>・<code>.cjs</code>・<code>.mjs</code>の、トップレベルのExpress生成、文字列のroute/mount、同一ファイル内のハンドラー・middleware・直接呼び出す補助関数を解析します。パラメーターを含むパスは候補のテンプレートとして表示します。
-別ファイルからのrouter/handler、factory、動的・条件付き・computed・chainの登録、解析上限などでは対応を確定しません。TypeScriptや他言語の既存SAST指摘も表示を継続しますが、ルート解析は未対応です。</p>
-<p>専用サンプルとbackend adapterでは、個別検出と許可済みの完全一致ルートを接続しています。GUIでの任意アプリ選択、起動中ソースの同一性確認、ZAPの試行別証拠との統合、3.0.0の配布確認は未完成です。</p>
+<p>source planには <code>sourceDir</code>、最新の <code>finding</code> metadata（ruleId/findingInstanceId/sourceDigest/relativePath/sourceSpan/routeMapping）、<code>origin</code>、<code>normalValues</code>、<code>candidateValues</code>、<code>expectedJson</code>、<code>expectedStatus</code>、<code>authorized: true</code>、<code>useZap</code> を指定します。GUIと同じstrict契約とscope確認を使い、campaign optionと混在できません。CLIはJSONとprivate保存先を表示し、取消はexit 130です。既存baseline/changed/fixed campaignも利用できます。</p>
+<p>任意engine：<a href="https://www.zaproxy.org/download/">ZAP</a>（Apache-2.0）、<a href="https://adoptium.net/temurin/">Temurin</a>（GPLv2 with Classpath Exception）。デスクトップ配布はソース用のAppium/WebdriverIO追加自動化依存を含めません。その追加依存chainにはextract-zipの既知advisoryが残ります。<a href="../../SECURITY.html">セキュリティ情報</a>を参照してください。</p>
 </main></html>

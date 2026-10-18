@@ -13,3 +13,10 @@ export function* staticMatches(source: string) {
       startOffset: match.index, endOffset: match.index + match[0].length };
   }
 }
+
+/** Verify one known match without rescanning unrelated rules or searching beyond its start. */
+export function matchesStaticRuleAt(source: string, ruleId: string, start: number, end: number): boolean {
+  const rule = rules.find(item => item[1] === ruleId); if (!rule) return false;
+  const regex = new RegExp(rule[0].source, rule[0].flags.replace('g', '') + 'y'); regex.lastIndex = start;
+  const match = regex.exec(source); return Boolean(match && match.index === start && start + match[0].length === end);
+}

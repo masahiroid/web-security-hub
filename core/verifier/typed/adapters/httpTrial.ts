@@ -1,17 +1,18 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { request, type APIRequestContext } from 'playwright';
+import { request } from 'playwright';
 import { CONTRACT_VERSION, HTTP_STATUS, LIMITS, TRANSPORT } from '../domain/config';
 import type { ContractsPort, Handle, Method, Observation, Profile, Reason, RegistryPort, TrialGrant, TrialRequest, Values } from '../domain/types';
 import { routeAt } from './catalog';
 import type { TrialGuard } from '../domain/sourceBinding';
+import { createAnonymousHttpContext, ResponseLimitError, type TrialContext } from './anonymousHttpContext';
 import { verifyTrialGuard } from './trialGuard';
-export interface HttpTrialOptions { registry: RegistryPort; contracts: ContractsPort; handle: Handle; input: TrialRequest; profile: Profile; purpose: Observation['purpose']; timeoutMs: number; grant: TrialGrant; guard?: TrialGuard }
+export interface HttpTrialOptions { registry: RegistryPort; contracts: ContractsPort; handle: Handle; input: TrialRequest; profile: Profile; purpose: Observation['purpose']; timeoutMs: number; grant: TrialGrant; guard?: TrialGuard; proxy?: string; anonymousWire?: boolean }
 // One responsibility: execute and close one isolated HTTP transport context.
-export async function executeHttpTrial({ registry, contracts, handle, input, profile, purpose, timeoutMs, grant, guard }: HttpTrialOptions) {
+export async function executeHttpTrial({ registry, contracts, handle, input, profile, purpose, timeoutMs, grant, guard, proxy, anonymousWire }: HttpTrialOptions) {
   const started = performance.now();
   const record: Observation = { schemaVersion: CONTRACT_VERSION, jobId: handle.jobId, trialId: grant.trialId, requestId: randomUUID(), seedId: grant.seed.seedId, authProfileId: input.authProfileId, purpose, executionKind: 'direct-http', outcome: 'error', reason: 'transport_error', status: null, durationMs: 0, dispatched: false, setupRequests: 0, redirect: 'none' };
-  let context: APIRequestContext | undefined;
+  let context: TrialContext | undefined;
   let closePromise: Promise<void> | undefined;
   let stopReason: Reason | undefined;
   let body: unknown = null;
@@ -55,7 +56,7 @@ export async function executeHttpTrial({ registry, contracts, handle, input, pro
   }
   try {
     assertRunning();
-    context = await request.newContext({ ignoreHTTPSErrors: false });
+    context = anonymousWire ? createAnonymousHttpContext(grant.scope.origin, proxy) : await request.newContext({ ignoreHTTPSErrors: false, ...(proxy ? { proxy: { server: proxy, bypass: '' } } : {}) });
     assertRunning();
     for (const step of profile.setup) {
       const response = await send(routeAt(profile.origin, step.route), step.method, step.values, {});
@@ -81,6 +82,7 @@ export async function executeHttpTrial({ registry, contracts, handle, input, pro
     }
     await response.dispose(); assertRunning();
   } catch (error: unknown) {
+    if (error instanceof ResponseLimitError) { record.status = error.status; record.reason = 'response_too_large'; }
     if (!stopReason && error instanceof Error && error.name === 'TimeoutError') stop(requestTimeoutReason);
   } finally {
     clearTimeout(timer); grant.signal.removeEventListener('abort', jobAborted);

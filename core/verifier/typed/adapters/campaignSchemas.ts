@@ -7,10 +7,16 @@ export function campaignSchemas(base: Readonly<Record<string, unknown>>, id: unk
   const count = { type: 'integer', minimum: 0, maximum: CAMPAIGN.maximumTrials };
   const runOptions = object({ schemaVersion: version, mode: { enum: FIXTURE.modes }, scenario: { enum: ['all', ...SCENARIO_IDS] }, randomSeed: { type: 'integer', minimum: 0, maximum: CAMPAIGN.maximumRandomSeed }, maxCandidates: { type: 'integer', minimum: CAMPAIGN.minimumBudget, maximum: CAMPAIGN.maximumCandidates }, maxTrials: { type: 'integer', minimum: CAMPAIGN.minimumBudget, maximum: CAMPAIGN.maximumTrials }, ttlMs: { type: 'integer', minimum: CAMPAIGN.minimumBudget, maximum: CAMPAIGN.maximumTtlMs } });
   const jobStatus = object({ schemaVersion: version, jobId: id, state: { enum: ['active', 'cancelled', 'expired'] }, trials: count, running: count, expiresAt: { type: 'integer', minimum: 0, maximum: Number.MAX_SAFE_INTEGER }, maxTrials: count, maxConcurrency: count });
-  const evidence = object({ state: { enum: ['disabled', 'verified', 'unavailable', 'source_mismatch', 'incomplete', 'error'] }, reachability: { enum: ['observed', 'not_observed', 'unavailable'] }, sourceDigest: { type: ['string', 'null'], pattern: DIGEST_PATTERN }, oracle: { enum: ['passed', 'violated', 'inconclusive'] }, events: array(serverEvent, LIMITS.feedbackEvidenceCount) });
-  const result = object({ observation: base.httpObservation, feedback: base.feedback, assessment: base.assessment, evidence });
+  const result = campaignResultSchema(base, serverEvent);
   const candidate = object({ seed: base.seed, parentSeedId: id, mutation: { enum: ['baseline', 'boundary', 'missing-field', 'unicode', 'profile'] }, authProfileId: id });
   const scenario = object({ scenarioId: { enum: SCENARIO_IDS }, method: { enum: ['GET', 'POST'] }, route: { type: 'string', maxLength: LIMITS.routeLength }, plan: array(candidate, CAMPAIGN.maximumCandidates), executions: array(object({ candidateId: id, control: result, candidate: { anyOf: [result, { type: 'null' }] } }), CAMPAIGN.maximumCandidates) });
   const report = object({ schemaVersion: version, reportId: { type: 'string', pattern: REPORT_STORAGE.uuidPattern }, createdAt: { type: 'string', maxLength: REPORT_STORAGE.timestampCharacters }, applicationVersion: { type: 'string', minLength: 1, maxLength: REPORT_STORAGE.versionCharacters }, mode: { enum: FIXTURE.modes }, sourceDigest: { type: ['string', 'null'], pattern: DIGEST_PATTERN }, executionKind: { const: 'direct-http' }, prngAlgorithm: { const: RANDOM.algorithm }, options: runOptions, state: { enum: ['completed', 'cancelled', 'expired', 'timeout', 'budget_exhausted', 'control_failed', 'source_changed', 'error'] }, scenarios: array(scenario, SCENARIO_IDS.length), totals: object({ planned: count, executed: count, trials: count, reproduced: count, observedNoIssue: count, inconclusive: count }), draft: { const: true }, vexStatus: { const: 'under_investigation' } });
   return { runOptions, jobStatus, report };
+}
+
+export function campaignResultSchema(base: Readonly<Record<string, unknown>>, serverEvent: unknown) {
+  const evidence = object({ state: { enum: ['disabled', 'verified', 'unavailable', 'source_mismatch', 'incomplete', 'error'] }, reachability: { enum: ['observed', 'not_observed', 'unavailable'] }, sourceDigest: { type: ['string', 'null'], pattern: DIGEST_PATTERN }, oracle: { enum: ['passed', 'violated', 'inconclusive'] }, events: array(serverEvent, LIMITS.feedbackEvidenceCount) });
+  const result = object({ observation: base.httpObservation, feedback: base.feedback, assessment: base.assessment, evidence });
+  Object.assign(result.properties, { zap: base.zapEvidence });
+  return result;
 }
