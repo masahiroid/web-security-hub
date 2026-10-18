@@ -4,7 +4,7 @@
 
 Compare a baseline, a deliberately changed sample, and a fixed sample using synthetic data.
 No external target, real credentials, model or API key is required.
-This feature belongs to the development branch and is not in the published 1.3.0 installers.
+Available in desktop version 2.0.0 and later.
 
 ## 1. Open the verification workspace
 

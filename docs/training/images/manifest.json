@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.3.0",
+  "appVersion": "2.0.0",
   "viewport": {
     "width": 1440,
     "height": 1000
@@ -184,25 +184,25 @@
       "lang": "ja",
       "stage": "07-baseline",
       "status": "完了 (すべてPASS)",
-      "sessionId": "session-20261017124159"
+      "sessionId": "session-20261018010427"
     },
     {
       "lang": "ja",
       "stage": "08-unchanged",
       "status": "完了 (すべてPASS)",
-      "sessionId": "session-20261017124159"
+      "sessionId": "session-20261018010427"
     },
     {
       "lang": "ja",
       "stage": "09-changed",
       "status": "完了 (差分あり / exit=1)",
-      "sessionId": "session-20261017124159"
+      "sessionId": "session-20261018010427"
     },
     {
       "lang": "ja",
       "stage": "10-fixed",
       "status": "完了 (すべてPASS)",
-      "sessionId": "session-20261017124159"
+      "sessionId": "session-20261018010427"
     },
     {
       "lang": "en",
@@ -213,39 +213,27 @@
       "lang": "en",
       "stage": "07-baseline",
       "status": "Complete (all PASS)",
-      "sessionId": "session-20261017124303"
+      "sessionId": "session-20261018010531"
     },
     {
       "lang": "en",
       "stage": "08-unchanged",
       "status": "Complete (all PASS)",
-      "sessionId": "session-20261017124303"
+      "sessionId": "session-20261018010531"
     },
     {
       "lang": "en",
       "stage": "09-changed",
       "status": "Complete (differences / exit=1)",
-      "sessionId": "session-20261017124303"
+      "sessionId": "session-20261018010531"
     },
     {
       "lang": "en",
       "stage": "10-fixed",
       "status": "Complete (all PASS)",
-      "sessionId": "session-20261017124303"
+      "sessionId": "session-20261018010531"
     }
   ],
   "browser": "151.0.7922.34",
-  "capturedAt": "2026-10-17T12:44:03.472Z",
-  "privacy": {
-    "maskedFields": [
-      "sourceDir"
-    ],
-    "refreshedAt": "2026-10-17T13:12:39.082Z",
-    "redactedLogPrefixes": [
-      "project",
-      "home",
-      "temp"
-    ],
-    "replayRefreshedAt": "2026-10-17T13:20:23.474Z"
-  }
+  "capturedAt": "2026-10-18T01:06:31.459Z"
 }

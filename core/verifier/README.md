@@ -220,10 +220,9 @@ the result totals for findings instead of interpreting exit 0 as a safe target.
 再現なし、問題を入れた版では既知の4件を再現します。JSONと日英HTMLを非公開保存し、
 HTMLを直接開いて結果・証拠を参照できます。取消・回数上限・期限切れは実行完了と区別します。
 
-The CLI is usable in this development branch. Desktop controls, in-app results/evidence/HTML and illustrated guides are available
-in development builds. Release installer validation remains within 2.0.0;
-this command does not update the published 1.3.0 installers.
-この開発ブランチではCLIによる実行と保存が利用できます。アプリ画面からの操作・結果表示・日英教材にも対応し、配布確認を同じ2.0.0工程で進めます。公開済み1.3.0のインストーラーは更新しません。
+The CLI and desktop workspace are available starting with 2.0.0, including
+in-app results, evidence, HTML reports and illustrated guides.
+2.0.0からCLIとアプリ画面の両方で実行・取消・結果/証拠/HTML表示と日英教材を利用できます。
 
 ## Application workspace / アプリ画面
 
