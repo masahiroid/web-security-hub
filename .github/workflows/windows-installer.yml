@@ -40,7 +40,7 @@ jobs:
           Copy-Item $installer.FullName $destination
           $digest = (Get-FileHash -Algorithm SHA256 $destination).Hash.ToLower()
           "$digest  $(Split-Path -Leaf $destination)" | Set-Content -Encoding ascii "$destination.sha256"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-x64-installer
           path: artifacts/release-public/*
