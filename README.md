@@ -1,6 +1,14 @@
 # Web Security Hub 
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23122939.svg)](https://doi.org/10.5281/zenodo.23122939)
+[![Release](https://img.shields.io/github/v/release/masahiroid/web-security-hub?filter=desktop-v*&label=release)](https://github.com/masahiroid/web-security-hub/releases/latest)
+[![Windows installer CI](https://github.com/masahiroid/web-security-hub/actions/workflows/windows-installer.yml/badge.svg?branch=main)](https://github.com/masahiroid/web-security-hub/actions/workflows/windows-installer.yml?query=branch%3Amain)
+[![License: Apache-2.0](https://img.shields.io/github/license/masahiroid/web-security-hub)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23122939-blue)](https://doi.org/10.5281/zenodo.23122939)
+
+[![Release asset downloads](https://img.shields.io/github/downloads/masahiroid/web-security-hub/total?label=asset%20downloads)](https://github.com/masahiroid/web-security-hub/releases)
+[![macOS Apple Silicon](https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple)](https://github.com/masahiroid/web-security-hub/releases/latest)
+[![Windows x64](https://img.shields.io/badge/Windows-x64-0078D4)](https://github.com/masahiroid/web-security-hub/releases/latest)
+[![Documentation: English / Japanese](https://img.shields.io/badge/docs-English%20%2F%20Japanese-0F766E)](docs/training/README.md)
 
 [日本語の README](README.ja.md)
 
