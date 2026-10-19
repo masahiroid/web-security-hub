@@ -3,6 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
+const MINIMUM_NODE_MAJOR = 22;
+const MINIMUM_NODE_MINOR = 19;
+function isSupportedNode(version) {
+  const [major, minor] = String(version).replace(/^v/, '').split('.').map(Number);
+  return Number.isInteger(major) && Number.isInteger(minor) && (major > MINIMUM_NODE_MAJOR || major === MINIMUM_NODE_MAJOR && minor >= MINIMUM_NODE_MINOR);
+}
 function defaultDataDir() {
   if (process.platform === 'darwin') return path.join(os.homedir(), 'Library/Application Support/Web Security Hub');
   if (process.platform === 'win32') return path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData/Local'), 'Web Security Hub');
@@ -10,7 +16,7 @@ function defaultDataDir() {
 }
 async function inspectEnvironment() {
   const { chromium } = require('playwright');
-  const checks = [{ id: 'node', ok: Number(process.versions.node.split('.')[0]) >= 22, detail: process.version }];
+  const checks = [{ id: 'node', ok: isSupportedNode(process.versions.node), detail: process.version }];
   const dataDir = process.env.WEB_SECURITY_HUB_DATA_DIR || defaultDataDir();
   try {
     fs.mkdirSync(dataDir, { recursive: true });
@@ -37,4 +43,4 @@ if (require.main === module) {
     const result = await inspectEnvironment(); console.log(JSON.stringify(result, null, 2)); process.exitCode = result.ready ? 0 : 1;
   })().catch(e => { console.error(e.message); process.exitCode = 1; });
 }
-module.exports = { defaultDataDir, inspectEnvironment, installBrowser };
+module.exports = { isSupportedNode, defaultDataDir, inspectEnvironment, installBrowser };

@@ -10,3 +10,9 @@ test('first-run desktop config uses anonymous templates and preserves private lo
   ensureDesktopConfig(dir);assert.equal(fs.readFileSync(config,'utf8'),'private-local-identity');assert.equal(fs.readFileSync(entitlements,'utf8'),'private-local-entitlements');
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('source environment rejects Node 22 versions below the mobile toolkit minimum', () => {
+ const {isSupportedNode}=require('../desktop/environment');
+ for(const version of ['20.19.0','22.0.0','22.18.9','invalid'])assert.equal(isSupportedNode(version),false,version);
+ for(const version of ['22.19.0','22.23.3','24.0.0','v24.21.0'])assert.equal(isSupportedNode(version),true,version);
+});

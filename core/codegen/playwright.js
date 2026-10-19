@@ -124,7 +124,7 @@ function normalizeSelectorForPlayback(selector) {
   if (!selector) return selector;
   if (!selector.startsWith('#')) return selector;
   const id = selector.slice(1);
-  if (!/[\[\]]/.test(id)) return selector;
+  if (!/[[\]]/.test(id)) return selector;
   const escaped = id.replace(/["\\]/g, '\\$&');
   return `[id="${escaped}"]`;
 }

@@ -220,7 +220,7 @@ test('cancellation during profile initialization closes setup and never dispatch
   let received;
   const started = new Promise(resolve => { received = resolve; });
   const routes = [];
-  const origin = await serve(t, (req, res) => { routes.push(req.url); received(); });
+  const origin = await serve(t, (req, _res) => { routes.push(req.url); received(); });
   const { registry, handle, runner, input } = setup(t, origin);
   const pending = runner.run(handle, input());
   await within(started);

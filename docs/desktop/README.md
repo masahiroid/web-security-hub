@@ -8,7 +8,7 @@ Open the packaged macOS `.app`. Node.js is included. The start screen checks wri
 
 For source distributions, double-click `start.command` on macOS or `start.bat` on Windows. On Linux, run executable `start.sh`; whether a double-click runs it depends on the file manager's executable-file settings.
 
-The source launcher checks Node.js 22+ and npm. If absent, it downloads the pinned official runtime, verifies the committed SHA-256 and installs it under `.runtime/`. Locked dependencies are prepared automatically. It requires no administrator privileges and does not replace global Node.js. Initial progress/errors appear in a terminal; browser installation appears on the start screen. The Windows PowerShell execution-policy option applies only to that launcher process, not system policy.
+The source launcher checks Node.js 22.19.0+ and npm. If absent, it downloads the pinned official runtime, verifies the committed SHA-256 and installs it under `.runtime/`. Locked dependencies are prepared automatically. It requires no administrator privileges and does not replace global Node.js. Initial progress/errors appear in a terminal; browser installation appears on the start screen. The Windows PowerShell execution-policy option applies only to that launcher process, not system policy.
 
 Use the **Desktop app guide** on Home for command-free exercises. The in-app illustrated course also replaces startup, mode switches and reset commands with buttons. **Start hands-on environment** prepares bilingual training sites. Buttons switch Baseline / Changed / Fixed modes and reset state. SAST fixture links open the analysis screen with source paths already filled in.
 

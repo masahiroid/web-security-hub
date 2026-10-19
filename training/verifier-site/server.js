@@ -87,7 +87,7 @@ function createFixture({ instrumentation = true, evidenceCapacity, initialMode =
     trace(req, POINTS.boundary, boundaryOracle(participants, label, valid), null);
     res.status(valid ? HTTP_STATUS.ok : HTTP_STATUS.invalidInput).json({ accepted: valid });
   });
-  app.use((err, req, res, next) => res.status(HTTP_STATUS.badRequest).json({ error: 'Invalid fixture request' }));
+  app.use((err, req, res, _next) => res.status(HTTP_STATUS.badRequest).json({ error: 'Invalid fixture request' }));
   return { app, controlToken, sourceDigest, readEvidence: correlation => ledger.read(correlation), currentSourceDigest: signal => sourceFingerprint(SOURCE_FILES, signal) };
 }
 if (require.main === module) createFixture().app.listen(FIXTURE.port, FIXTURE.host, () => console.log(`Verifier fixture: http://${FIXTURE.host}:${FIXTURE.port} (synthetic data only)`));

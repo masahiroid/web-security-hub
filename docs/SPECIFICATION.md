@@ -42,7 +42,7 @@
 
 ## 3. Non-functional requirements
 
-- Requires Node.js 22 or later.
+- Requires Node.js 22.19.0 or later.
 - The UI is served by a local Express server.
 - Long-running generation and replay report progress with SSE.
 - Crawl limits are at most 100 pages and depth 10.

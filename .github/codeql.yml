@@ -1,0 +1,6 @@
+name: Web Security Hub production analysis
+paths-ignore:
+  - training/sast
+  - training/verifier-site
+  - core/verifier/typed/adapters/sastFixtureApp.ts
+  - test

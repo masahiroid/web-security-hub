@@ -19,7 +19,7 @@ Please include the version, your OS, the steps to reproduce, and what you expect
 ## Requirements for acceptable contributions
 
 - Use only targets you own or are explicitly authorized to test in examples, fixtures and documentation.
-- `npm test` passes.
+- `npm run lint`, `npm run typecheck`, `npm test`, both dependency audits and `npm run release:check` pass. Lint warnings are errors; fix findings instead of adding blanket suppressions.
 - New features and bug fixes add or update tests under `test/` that cover the changed behavior and its failure cases.
 - Follow the existing code style and structure (see `docs/ARCHITECTURE.md`).
 - Update the relevant documentation under `docs/` and the README when behavior changes. Keep English and Japanese documents consistent where both exist.
@@ -30,9 +30,21 @@ Please include the version, your OS, the steps to reproduce, and what you expect
 ## Development setup
 
 ```bash
-npm install
+npm ci --ignore-scripts
+npx playwright install chromium
+npm run lint
+npm run typecheck
 npm test
+npm audit --audit-level=moderate
+npm audit --audit-level=moderate --prefix desktop/runtime
+npm run release:check
 ```
+
+Use Node.js 22.19.0 or later and npm. `npm run build:verifier` builds the strict TypeScript verifier and UI; it uses the FLOSS TypeScript compiler. The source application can be built and tested with FLOSS tools; optional native installer packaging additionally needs the platform prerequisites in `docs/desktop/README.md`. Signing/notarization are distribution steps, not required to build the source application.
+
+`npm test` uses the FLOSS Node.js test runner and `node:assert/strict`. Assertions remain enabled during tests. Add tests for major features, boundary/invalid inputs, authorization and cancellation; add a regression test when fixing a bug. Existing tests exercise scenarios, mobile command dispatch, replay credentials, verifier scope/capabilities, HTTP transport, evidence correlation and installer privacy. Most-branch coverage has not been measured; passing tests do not claim full coverage or real-device acceptance. The WebdriverIO loopback protocol test does not replace Appium device testing.
+
+The Quality and security workflow runs on pushes, pull requests and weekly; CodeQL analyzes JavaScript/TypeScript with security queries. Intentional vulnerable training fixtures are excluded from production static analysis. Release workflows run lint, type checking, tests, release-content checks and dependency audits. Before a major release, review CodeQL and secret-scanning alerts, run these checks on the exact release commit, triage every confirmed exploitable medium-or-higher finding and document fixed public CVE/GHSA identifiers in `CHANGELOG.md`. Publish human-readable release notes, a unique `desktop-vMAJOR.MINOR.PATCH` tag and HTTPS downloads; follow SemVer for compatibility changes. Critical vulnerabilities take immediate priority.
 
 See `docs/OPERATIONS.md` and `docs/USER_MANUAL.md` for running the application.
 
@@ -42,4 +54,4 @@ See `docs/OPERATIONS.md` and `docs/USER_MANUAL.md` for running the application.
 
 バグ報告・機能要望は GitHub Issues へお願いします（脆弱性は SECURITY.md に従い非公開で報告してください）。Pull Request は `main` から作成したブランチで、1つの目的に絞って作成してください。
 
-受け入れ条件：`npm test` が通ること。新機能やバグ修正には、対応するテストを `test/` に追加すること。ドキュメント（`docs/`、README）と `CHANGELOG.md` を必要に応じて更新すること。許可された対象のみを例や fixture に使うこと。秘密情報・非公開レポート・署名設定をコミットしないこと。コントリビュートは Apache-2.0 ライセンスで受け入れられます。
+受け入れ条件：lint・型検査・テスト・両方の依存監査・release:checkが通ること。上記コマンドを実行し、警告も修正してください。新機能やバグ修正には、対応するテストを `test/` に追加すること。ドキュメント（`docs/`、README）と `CHANGELOG.md` を必要に応じて更新すること。許可された対象のみを例や fixture に使うこと。秘密情報・非公開レポート・署名設定をコミットしないこと。コントリビュートは Apache-2.0 ライセンスで受け入れられます。

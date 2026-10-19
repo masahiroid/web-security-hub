@@ -11,7 +11,7 @@ EXPECTED="$(awk -F '"' -v key="$PLATFORM-$ARCH" '$2==key {print $4;exit}' deskto
 PRIVATE="$ROOT/.runtime/node-v$VERSION-$PLATFORM-$ARCH"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 NODE="$(command -v node || true)"
-if [ "${WSH_FORCE_PRIVATE_NODE:-0}" = "1" ] || [ -z "$NODE" ] || ! "$NODE" -e 'process.exit(+process.versions.node.split(".")[0]>=22?0:1)' || ! command -v npm >/dev/null 2>&1; then
+if [ "${WSH_FORCE_PRIVATE_NODE:-0}" = "1" ] || [ -z "$NODE" ] || ! "$NODE" -e 'const [major,minor]=process.versions.node.split(".").map(Number);process.exit(major>22||(major===22&&minor>=19)?0:1)' || ! command -v npm >/dev/null 2>&1; then
   if [ ! -x "$PRIVATE/bin/node" ]; then
     echo "Preparing private Node.js $VERSION / 専用 Node.js を準備しています…"
     mkdir -p "$ROOT/.runtime"
