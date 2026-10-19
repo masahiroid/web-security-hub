@@ -108,7 +108,7 @@
   "delivery_unsigned_status": "Met",
   "delivery_unsigned_justification": "Release files/checksums are delivered via HTTPS, and managed tool checksums are committed in source obtained via HTTPS. No checksum retrieved over plain HTTP is trusted for software delivery.",
   "vulnerabilities_fixed_60_days_status": "Met",
-  "vulnerabilities_fixed_60_days_justification": "Current source and desktop-runtime npm audits report 0 known advisories as of 2026-10-19. The vulnerable optional WebdriverIO dependency path was removed. No project security advisories are recorded; https://github.com/masahiroid/web-security-hub/blob/main/SECURITY.md requires timely fixes for confirmed medium-or-higher exploitable issues. This statement describes current reviewed source, not a guarantee about every previously distributed artifact.",
+  "vulnerabilities_fixed_60_days_justification": "Current source and desktop-runtime npm audits report 0 known advisories as of 2026-10-19. The vulnerable optional WebdriverIO dependency path was removed. No project security advisories are recorded; https://github.com/masahiroid/web-security-hub/blob/main/SECURITY.md requires timely fixes for confirmed medium-or-higher exploitable issues. This statement describes current reviewed source, not a guarantee about every previously distributed artifact. The Linux-only glib 0.18.5 VariantStrIter advisory (GHSA-wrw7-89jp-8q8g / RUSTSEC-2024-0429) is fixed in the current source by the exact two-line upstream PR #1343 backport through a Cargo path patch. The optimized Rust regression test passes; original upstream provenance/license and patch removal conditions are documented in src-tauri/vendor/glib-0.18.5/PATCH.md. Unpatched historical copies are still affected.",
   "vulnerabilities_critical_fixed_status": "Met",
   "vulnerabilities_critical_fixed_justification": "No open critical dependency or project advisory was found in the 2026-10-19 review. https://github.com/masahiroid/web-security-hub/blob/main/SECURITY.md prioritizes critical reports immediately and requires mitigation while preparing a fix.",
   "no_leaked_credentials_status": "Met",
@@ -118,7 +118,7 @@
   "static_analysis_common_vulnerabilities_status": "Met",
   "static_analysis_common_vulnerabilities_justification": "ESLint checks eval, implied eval, Function construction, child-process misuse, insecure random/Buffer usage and possible timing attacks. CodeQL security-extended analyzes JavaScript/TypeScript. Intentional vulnerable training fixtures are excluded from production scans.",
   "static_analysis_fixed_status": "Met",
-  "static_analysis_fixed_justification": "Lint and type checks pass. https://github.com/masahiroid/web-security-hub/blob/main/CONTRIBUTING.md requires review/fixing of confirmed exploitable medium-or-higher static findings before a release; releases run the checks and may not suppress findings simply to obtain a badge.",
+  "static_analysis_fixed_justification": "Lint and type checks pass. https://github.com/masahiroid/web-security-hub/blob/main/CONTRIBUTING.md requires review/fixing of confirmed exploitable medium-or-higher static findings before a release; releases run the checks and may not suppress findings simply to obtain a badge. CodeQL security-extended analysis of PR #7 completed successfully with zero results (GitHub analysis 1981626047).",
   "static_analysis_often_status": "Met",
   "static_analysis_often_justification": "https://github.com/masahiroid/web-security-hub/blob/main/.github/workflows/ci.yml runs ESLint on every relevant branch push and all PRs; CodeQL runs on main/develop pushes, PRs and weekly.",
   "dynamic_analysis_status": "Met",
@@ -126,7 +126,7 @@
   "dynamic_analysis_unsafe_status": "Unmet",
   "dynamic_analysis_unsafe_justification": "The Rust desktop shell contains small unsafe libc process-termination FFI blocks. AddressSanitizer/Valgrind coverage has not been established for those blocks; memory-safe JavaScript/TypeScript and loopback tests do not establish that coverage. This is a suggested criterion.",
   "dynamic_analysis_enable_assertions_status": "Met",
-  "dynamic_analysis_enable_assertions_justification": "The Node.js suite uses node:assert/strict with assertions enabled; 140 tests passed in the local 2026-10-19 review, including negative inputs and authorization/cancellation assertions.",
+  "dynamic_analysis_enable_assertions_justification": "The Node.js suite uses node:assert/strict with assertions enabled; 141 tests passed in the local 2026-10-19 review, including negative inputs and authorization/cancellation assertions.",
   "dynamic_analysis_fixed_status": "Met",
-  "dynamic_analysis_fixed_justification": "All 140 automated tests pass in the local review. CONTRIBUTING.md requires timely fixes for confirmed exploitable medium-or-higher issues found by runtime analysis and passing tests before release; untested hardware/fuzzing coverage is not claimed."
+  "dynamic_analysis_fixed_justification": "All 141 automated tests pass in the local review. CONTRIBUTING.md requires timely fixes for confirmed exploitable medium-or-higher issues found by runtime analysis and passing tests before release; untested hardware/fuzzing coverage is not claimed."
 }

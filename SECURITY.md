@@ -11,6 +11,8 @@ npm audit --audit-level=moderate
 npm audit --audit-level=moderate --prefix desktop/runtime
 ```
 
+The Linux GTK3/Tauri graph also requires `glib` 0.18.5, affected by GHSA-wrw7-89jp-8q8g / RUSTSEC-2024-0429. Current source backports the upstream `VariantStrIter` mutable-out-pointer fix via a Cargo path patch; see [patch provenance and removal conditions](src-tauri/vendor/glib-0.18.5/PATCH.md). An optimized Rust regression test runs in CI. The upstream version number is retained for API compatibility, so a version-only advisory scan can still flag it; the corrected source is what addresses the issue. The registry copy and historical unpatched Linux builds remain affected. This patch does not replace existing installer assets.
+
 References: [extract-zip symlink traversal](https://github.com/advisories/GHSA-jmr9-qjv8-65gv), [extract-zip directory traversal](https://github.com/advisories/GHSA-7pqw-9j4j-h8q3).
 
 日本語：許可された対象のみで実施してください。ソース版の WebdriverIO を10.1.0へ更新し、既知の extract-zip 脆弱性を含む依存経路を除去しました。既存の3.0.0ソース版は更新が必要です。配布済みインストーラーはこの変更で差し替えていません。監査結果はその時点の既知情報に基づきます。内部資料・秘密情報・実署名設定は公開しません。

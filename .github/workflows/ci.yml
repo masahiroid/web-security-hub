@@ -31,3 +31,14 @@ jobs:
       - run: npm audit --audit-level=moderate
       - run: npm audit --audit-level=moderate --prefix desktop/runtime
       - run: npm run release:check
+  glib-backport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - run: sudo apt-get update && sudo apt-get install -y libglib2.0-dev
+      - name: Verify optimized upstream soundness backport
+        run: cargo test --release --manifest-path src-tauri/vendor/glib-0.18.5/Cargo.toml --test variant_iter_soundness
