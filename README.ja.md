@@ -5,6 +5,10 @@
 [![License: Apache-2.0](https://img.shields.io/github/license/masahiroid/web-security-hub)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23122939-blue)](https://doi.org/10.5281/zenodo.23122939)
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15681/badge)](https://www.bestpractices.dev/projects/15681)
+[![Website: TIP](https://img.shields.io/badge/website-TIP-0F766E)](https://tip.co.jp/web-security-hub/)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-2563EB)](CONTRIBUTING.md)
+
 [![Release asset downloads](https://img.shields.io/github/downloads/masahiroid/web-security-hub/total?label=asset%20downloads)](https://github.com/masahiroid/web-security-hub/releases)
 [![macOS Apple Silicon](https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple)](https://github.com/masahiroid/web-security-hub/releases/latest)
 [![Windows x64](https://img.shields.io/badge/Windows-x64-0078D4)](https://github.com/masahiroid/web-security-hub/releases/latest)
