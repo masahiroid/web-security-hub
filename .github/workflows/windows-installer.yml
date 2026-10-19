@@ -2,7 +2,7 @@ name: Windows installer
 on:
   push:
     branches: [develop, main, 'feature/**']
-    paths-ignore: ['docs/**', '*.md']
+    paths-ignore: ['docs/**', '*.md', '.bestpractices.json']
   workflow_dispatch:
 permissions:
   contents: read

@@ -40,5 +40,9 @@ jobs:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@stable
       - run: sudo apt-get update && sudo apt-get install -y libglib2.0-dev
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit@0.22.2
+      - run: cargo audit --file src-tauri/Cargo.lock
       - name: Verify optimized upstream soundness backport
         run: cargo test --release --manifest-path src-tauri/vendor/glib-0.18.5/Cargo.toml --test variant_iter_soundness

@@ -44,6 +44,8 @@ Use Node.js 22.19.0 or later and npm. `npm run build:verifier` builds the strict
 
 `npm test` uses the FLOSS Node.js test runner and `node:assert/strict`. Assertions remain enabled during tests. Add tests for major features, boundary/invalid inputs, authorization and cancellation; add a regression test when fixing a bug. Existing tests exercise scenarios, mobile command dispatch, replay credentials, verifier scope/capabilities, HTTP transport, evidence correlation and installer privacy. Most-branch coverage has not been measured; passing tests do not claim full coverage or real-device acceptance. The WebdriverIO loopback protocol test does not replace Appium device testing.
 
+The Rust dependency graph is also audited with `cargo audit --file src-tauri/Cargo.lock`. The Linux CI verifies the optimized glib soundness backport; its upstream provenance and replacement conditions are in `src-tauri/vendor/glib-0.18.5/PATCH.md`.
+
 The Quality and security workflow runs on pushes, pull requests and weekly; CodeQL analyzes JavaScript/TypeScript with security queries. Intentional vulnerable training fixtures are excluded from production static analysis. Release workflows run lint, type checking, tests, release-content checks and dependency audits. Before a major release, review CodeQL and secret-scanning alerts, run these checks on the exact release commit, triage every confirmed exploitable medium-or-higher finding and document fixed public CVE/GHSA identifiers in `CHANGELOG.md`. Publish human-readable release notes, a unique `desktop-vMAJOR.MINOR.PATCH` tag and HTTPS downloads; follow SemVer for compatibility changes. Critical vulnerabilities take immediate priority.
 
 See `docs/OPERATIONS.md` and `docs/USER_MANUAL.md` for running the application.
