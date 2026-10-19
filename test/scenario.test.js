@@ -2,7 +2,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
-const path = require('path');
 
 const { siteDir, writeSiteConfig, writeEnvFile } = require('../core/siteConfig');
 const { resolveVariables, listSecretVariableNames, interpolate, interpolateDeep } = require('../core/scenario/variables');

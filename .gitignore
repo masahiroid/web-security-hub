@@ -61,3 +61,7 @@ src-tauri/tauri.local.*.json
 # JavaScript emitted from the incremental verifier TypeScript sources.
 /core/verifier/generated/
 /public/generated/
+
+# Standalone checks of the vendored upstream soundness patch.
+/src-tauri/vendor/**/target/
+/src-tauri/vendor/**/Cargo.lock

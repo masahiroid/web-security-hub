@@ -53,7 +53,7 @@ async function createHost({ port = 0 } = {}) {
         sample.set('trainingHubUrl', origin + '/welcome');
         const candidate = sample.listen(4180, '127.0.0.1');
         try { await once(candidate, 'listening'); sampleServer = candidate; }
-        catch (e) { candidate.close(); throw new Error(`Training port 4180 is in use. Close the other training server and retry. (${e.code})`); }
+        catch (e) { candidate.close(); throw new Error(`Training port 4180 is in use. Close the other training server and retry. (${e.code})`, { cause: e }); }
       }
       require('../scripts/training').setup({ reset: Boolean(req.body?.resetConfig) });
       if (mode) {

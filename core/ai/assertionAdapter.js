@@ -75,7 +75,7 @@ async function assertWithClaudeCode({ description, page, locale = 'ja' }) {
     // stdout (e.g. its configured model being unavailable) — surface that
     // message instead of the generic "Command failed" shell error.
     const claudeError = extractClaudeErrorMessage(error.stdout);
-    throw new Error(claudeError || error.message);
+    throw new Error(claudeError || error.message, { cause: error });
   }
   return parseVerdict(stdout, snapshot);
 }

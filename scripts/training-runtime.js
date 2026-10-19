@@ -13,7 +13,7 @@ async function startServers() {
     }
   } catch (error) {
     await Promise.all(servers.map(s => new Promise(resolve => s.close(resolve))));
-    throw new Error(`Training automation requires free ports 4173 and 4180: ${error.message}`);
+    throw new Error(`Training automation requires free ports 4173 and 4180: ${error.message}`, { cause: error });
   }
   return async () => Promise.all(servers.map(s => new Promise(resolve => s.close(resolve))));
 }

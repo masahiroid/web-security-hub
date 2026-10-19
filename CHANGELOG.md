@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Backport the upstream glib VariantStrIter soundness fix (GHSA-wrw7-89jp-8q8g / RUSTSEC-2024-0429) into the Linux-only GTK3 dependency using a documented Cargo path patch. An optimized forward/reverse string-iteration regression test exercises the corrected out-pointer.
+
+- Update the source-only mobile toolkit to WebdriverIO 10.1.0, removing the vulnerable extract-zip dependency path (CVE-2026-56876 / GHSA-jmr9-qjv8-65gv and GHSA-7pqw-9j4j-h8q3). Source checkouts need Node.js 22.19.0 or later; existing desktop installer assets are unchanged. A loopback W3C session regression test verifies session creation and deletion; hardware acceptance remains separate.
+- Add strict ESLint checks, push/PR/weekly quality and CodeQL analysis, dependency updates and release gates. Preserve original causes in wrapped errors.
+- Publish the private vulnerability reporting process and clarify security, testing and cryptography practices.
+
 ## 3.0.0
 
 - Individual SAST finding identities, source digests/spans and bounded file-local Express route attribution; ambiguous/unsupported routes stay explicit.

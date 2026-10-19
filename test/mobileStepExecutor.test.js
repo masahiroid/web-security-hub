@@ -68,3 +68,37 @@ test('buildCapabilities builds UiAutomator2 capabilities for Android with an app
 test('buildCapabilities rejects an unsupported platform', () => {
   assert.throws(() => buildCapabilities({ platform: 'windows' }), /unsupported mobile platform/);
 });
+
+test('WebdriverIO opens and closes a W3C Appium session over loopback', async t => {
+  const http = require('node:http');
+  const { remote } = require('webdriverio');
+  const requests = [];
+  const capabilities = buildCapabilities({ platform: 'ios', deviceName: 'Fixture simulator', platformVersion: '18.0', bundleId: 'org.example.fixture' });
+  const server = http.createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = chunks.length ? JSON.parse(Buffer.concat(chunks).toString()) : undefined;
+    requests.push({ method: req.method, url: req.url, body });
+    res.setHeader('content-type', 'application/json');
+    if (req.method === 'POST' && req.url === '/session') {
+      res.end(JSON.stringify({ value: { sessionId: 'fixture-session', capabilities } }));
+    } else if (req.method === 'DELETE' && req.url === '/session/fixture-session') {
+      res.end(JSON.stringify({ value: null }));
+    } else {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ value: { error: 'unknown command', message: 'Unexpected fixture request' } }));
+    }
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const driver = await remote({ hostname: '127.0.0.1', port: server.address().port, path: '/', capabilities, logLevel: 'silent', connectionRetryCount: 0 });
+  try {
+    assert.equal(driver.sessionId, 'fixture-session');
+    assert.equal(driver.isIOS, true);
+    assert.equal(requests[0].body.capabilities.alwaysMatch['appium:bundleId'], 'org.example.fixture');
+    assert.equal(requests[0].body.capabilities.alwaysMatch['appium:automationName'], 'XCUITest');
+  } finally {
+    await driver.deleteSession();
+  }
+  assert.deepEqual(requests.map(({ method, url }) => `${method} ${url}`), ['POST /session', 'DELETE /session/fixture-session']);
+});
