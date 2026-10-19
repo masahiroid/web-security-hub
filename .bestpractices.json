@@ -128,5 +128,9 @@
   "dynamic_analysis_enable_assertions_status": "Met",
   "dynamic_analysis_enable_assertions_justification": "The Node.js suite uses node:assert/strict with assertions enabled; 141 tests passed in the local 2026-10-19 review, including negative inputs and authorization/cancellation assertions.",
   "dynamic_analysis_fixed_status": "Met",
-  "dynamic_analysis_fixed_justification": "All 141 automated tests pass in the local review. CONTRIBUTING.md requires timely fixes for confirmed exploitable medium-or-higher issues found by runtime analysis and passing tests before release; untested hardware/fuzzing coverage is not claimed."
+  "dynamic_analysis_fixed_justification": "All 141 automated tests pass in the local review. CONTRIBUTING.md requires timely fixes for confirmed exploitable medium-or-higher issues found by runtime analysis and passing tests before release; untested hardware/fuzzing coverage is not claimed.",
+  "know_secure_design_status": "Met",
+  "know_secure_design_justification": "The primary developer (a professional systems engineer) applies secure-design principles visible in the code and docs: the tool runs locally, tests only authorized targets, verifies downloaded tools with pinned releases and SHA-256 checks, and CI runs npm audit (https://github.com/masahiroid/web-security-hub/tree/main/.github/workflows).",
+  "know_common_errors_status": "Met",
+  "know_common_errors_justification": "The primary developer knows common vulnerability classes for web security tooling and desktop apps (injection, unsafe handling of untrusted input, vulnerable dependencies, tampered downloads) and counters them with authorization-only testing, pinned and checksum-verified downloads, tests in test/, and npm audit in CI."
 }
