@@ -10,10 +10,10 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22.23.3'
       - run: npm ci --ignore-scripts
@@ -40,7 +40,7 @@ jobs:
           Copy-Item $installer.FullName $destination
           $digest = (Get-FileHash -Algorithm SHA256 $destination).Hash.ToLower()
           "$digest  $(Split-Path -Leaf $destination)" | Set-Content -Encoding ascii "$destination.sha256"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-x64-installer
           path: artifacts/release-public/*

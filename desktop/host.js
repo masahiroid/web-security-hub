@@ -9,6 +9,8 @@ process.env.WEB_SECURITY_HUB_DATA_DIR ||= defaultDataDir();
 process.env.WEB_SECURITY_HUB_MANAGED = '1';
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH && process.env.WEB_SECURITY_HUB_PACKAGED === '1') process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(process.env.WEB_SECURITY_HUB_DATA_DIR, 'browsers');
 const express = require('express');
+const { rateLimit } = require('express-rate-limit');
+const { FILE_SERVING_LIMITS } = require('../server/lib/fileServingPolicy');
 async function createHost({ port = 0 } = {}) {
   const app = express(); const token = crypto.randomBytes(32).toString('hex');
   const cookieName = `wsh_${token.slice(0, 12)}`;
@@ -27,7 +29,7 @@ async function createHost({ port = 0 } = {}) {
   });
   app.use(express.json({ limit: '5mb' }));
   app.use('/desktop', express.static(path.join(__dirname, 'welcome')));
-  app.get('/welcome', (req, res) => res.sendFile(path.join(__dirname, 'welcome/index.html')));
+  app.get('/welcome', rateLimit(FILE_SERVING_LIMITS), (req, res) => res.sendFile('index.html', { root: path.join(__dirname, 'welcome') }));
   app.get('/api/desktop/state', async (req, res) => {
     try { if (!state) state = await inspectEnvironment(); res.json({ ...state, busy, log, installError, sampleRunning: Boolean(sampleServer) }); }
     catch (e) { res.status(500).json({ error: e.message }); }

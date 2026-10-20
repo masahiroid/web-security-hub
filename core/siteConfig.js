@@ -10,7 +10,7 @@ function sitesDir() {
 
 function siteDir(siteId) {
   if (!/^[a-zA-Z0-9_-]+$/.test(siteId)) throw new Error(`invalid site id: ${siteId}`);
-  return path.join(SITES_DIR, siteId);
+  return path.join(SITES_DIR, path.basename(siteId));
 }
 
 function listSites() {
