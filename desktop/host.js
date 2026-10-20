@@ -27,7 +27,7 @@ async function createHost({ port = 0 } = {}) {
   });
   app.use(express.json({ limit: '5mb' }));
   app.use('/desktop', express.static(path.join(__dirname, 'welcome')));
-  app.get('/welcome', (req, res) => res.sendFile(path.join(__dirname, 'welcome/index.html')));
+  app.get('/welcome', (req, res) => res.sendFile('index.html', { root: path.join(__dirname, 'welcome') }));
   app.get('/api/desktop/state', async (req, res) => {
     try { if (!state) state = await inspectEnvironment(); res.json({ ...state, busy, log, installError, sampleRunning: Boolean(sampleServer) }); }
     catch (e) { res.status(500).json({ error: e.message }); }
