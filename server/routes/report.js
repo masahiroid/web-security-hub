@@ -31,7 +31,7 @@ router.get('/sites/:id/sessions/:sessionId/{*filePath}', rateLimit(FILE_SERVING_
   try {
     const sessionId = req.params.sessionId;
     if (!/^[a-zA-Z0-9_-]+$/.test(sessionId)) return res.status(400).json({ error: 'invalid session id' });
-    const base = path.join(sessionsDir(req.params.id), sessionId);
+    const base = path.join(sessionsDir(req.params.id), path.basename(sessionId));
     const rel = req.params.filePath?.join('/') || 'report.html';
     const target = path.normalize(path.join(base, rel));
     if (!target.startsWith(`${path.normalize(base)}${path.sep}`)) {
