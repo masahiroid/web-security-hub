@@ -24,6 +24,9 @@ test('Express 5 serves default reports and nested assets through all session rou
   ];
   for (const fixture of fixtures) {
     await fs.mkdir(path.join(fixture.directory, 'screenshots'), { recursive: true });
+    await fs.writeFile(path.join(path.dirname(fixture.directory), 'outside.html'), 'private outside content');
+    await fs.mkdir(fixture.directory + '-other', { recursive: true });
+    await fs.writeFile(path.join(fixture.directory + '-other', 'secret.txt'), 'private sibling content');
     await fs.writeFile(path.join(fixture.directory, fixture.report), `report:${fixture.route}`);
     await fs.writeFile(path.join(fixture.directory, 'screenshots', 'image.txt'), 'nested asset');
   }
@@ -46,5 +49,17 @@ test('Express 5 serves default reports and nested assets through all session rou
     assert.equal(asset.status, 200);
     assert.equal(await asset.text(), 'nested asset');
     assert.equal((await fetch(origin + fixture.route + 'missing.html')).status, 404);
+    assert.equal((await fetch(origin + fixture.route.replace('session-1', '..%2fother'))).status, 400);
+    assert([400, 404].includes((await fetch(origin + fixture.route + '..%2foutside.html')).status));
+    assert([400, 404].includes((await fetch(origin + fixture.route + '..%2fsession-1-other%2fsecret.txt')).status));
   }
+  const { FILE_SERVING_LIMITS } = require('../server/lib/fileServingPolicy');
+  let limited;
+  for (let index = 0; index <= FILE_SERVING_LIMITS.limit; index++) {
+    const response = await fetch(origin + fixtures[0].route);
+    await response.text();
+    if (response.status === 429) { limited = response; break; }
+  }
+  assert.equal(limited?.status, 429);
+  assert(limited.headers.has('retry-after'));
 });

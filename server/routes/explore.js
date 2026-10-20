@@ -1,5 +1,7 @@
 'use strict';
 const express = require('express');
+const { rateLimit } = require('express-rate-limit');
+const { FILE_SERVING_LIMITS } = require('../lib/fileServingPolicy');
 const fs = require('fs');
 const path = require('path');
 const { openSse } = require('../lib/sse');
@@ -36,9 +38,11 @@ router.get('/sites/:id/explore-sessions', (req, res) => {
   }
 });
 
-router.get('/sites/:id/explore-sessions/:sessionId/{*filePath}', (req, res) => {
+router.get('/sites/:id/explore-sessions/:sessionId/{*filePath}', rateLimit(FILE_SERVING_LIMITS), (req, res) => {
   try {
-    const base = path.join(exploreSessionsDir(req.params.id), req.params.sessionId);
+    const sessionId = req.params.sessionId;
+    if (!/^[a-zA-Z0-9_-]+$/.test(sessionId)) return res.status(400).json({ error: 'invalid session id' });
+    const base = path.join(exploreSessionsDir(req.params.id), sessionId);
     const target = path.normalize(path.join(base, req.params.filePath?.join('/') || 'explore-report.html'));
     if (!target.startsWith(`${path.normalize(base)}${path.sep}`) || !fs.existsSync(target)) {
       res.status(404).json({ error: 'not found' });
