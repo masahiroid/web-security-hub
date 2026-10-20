@@ -40,7 +40,7 @@ jobs:
       - run: npm run release:check
       # Preview only. Apple credentials stay on the maintainer's Mac.
       - run: npm run desktop:build -- -- --locked
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: desktop-${{ matrix.name }}-unsigned-preview
           retention-days: 3
