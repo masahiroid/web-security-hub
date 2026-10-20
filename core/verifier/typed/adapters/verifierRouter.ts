@@ -41,7 +41,10 @@ export function createVerifierRouter({ applicationVersion, dataRoot }: { applica
   router.use(VERIFIER_API.sastSample, sastSample.router);
   router.use('/zap-runtime', zapRuntime.router);
   const owner = (res: express.Response): string => String(res.locals.verifierOwner);
-  const jobId = (req: express.Request): string => req.params.jobId ?? '';
+  const jobId = (req: express.Request): string => {
+    const value: unknown = req.params.jobId;
+    return typeof value === 'string' ? value : '';
+  };
   router.post(VERIFIER_API.jobs, express.json({ limit: LIMITS.jsonPayloadBytes }), (req, res) => {
     let options;
     try { options = contracts.validate('runOptions', req.body as unknown); } catch { return void res.status(HTTP_STATUS.badRequest).json({ error: 'invalid_options' }); }

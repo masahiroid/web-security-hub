@@ -36,15 +36,15 @@ router.get('/sites/:id/explore-sessions', (req, res) => {
   }
 });
 
-router.get('/sites/:id/explore-sessions/:sessionId/*', (req, res) => {
+router.get('/sites/:id/explore-sessions/:sessionId/{*filePath}', (req, res) => {
   try {
     const base = path.join(exploreSessionsDir(req.params.id), req.params.sessionId);
-    const target = path.normalize(path.join(base, req.params[0] || 'explore-report.html'));
-    if (!target.startsWith(path.normalize(base)) || !fs.existsSync(target)) {
+    const target = path.normalize(path.join(base, req.params.filePath?.join('/') || 'explore-report.html'));
+    if (!target.startsWith(`${path.normalize(base)}${path.sep}`) || !fs.existsSync(target)) {
       res.status(404).json({ error: 'not found' });
       return;
     }
-    res.sendFile(target);
+    res.sendFile(path.relative(base, target), { root: base });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
