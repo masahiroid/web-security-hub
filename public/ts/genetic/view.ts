@@ -34,7 +34,7 @@ function renderCompare(report: JsonObject): void {
   head([label('methodCol'), label('modeCol'), label('runs'), label('rate'), label('median'), label('points'), label('duplicates'), label('elapsed'), label('tokens')]);
   for (const raw of array(report.summaries)) {
     const summary = object(raw);
-    addRow([methodName(summary.method), label(String(summary.mode)), summary.runs, `${String(summary.reproduced)} / ${String(summary.runs)}`, fixed(summary.medianTrialsToFirstViolation, 0),
+    addRow([methodName(summary.method), label(String(summary.mode)), `${String(summary.validRuns)} / ${String(summary.runs)}`, summary.validRuns === 0 ? geneticText('unavailable') : `${String(summary.reproduced)} / ${String(summary.validRuns)}`, fixed(summary.medianTrialsToFirstViolation, 0),
       fixed(summary.meanSemanticPoints, 1), fixed(summary.meanDuplicates, 1), fixed(summary.meanElapsedMs, 0), summary.totalTokens], summary, summary.mode === 'fixed' && Number(summary.reproduced) > 0);
   }
   get('geneticEvidence').textContent = JSON.stringify(report.runs, null, 2);

@@ -12,8 +12,10 @@ export interface ComparisonPorts {
   run(options: GeneticFixtureOptions, signal: AbortSignal): Promise<GeneticCampaignReport>;
   /** Optional: called after each finished campaign. */
   progress?(done: number, planned: number): void;
+  /** Waits for the cooldown; rejects when aborted. */
+  pause(milliseconds: number, signal: AbortSignal): Promise<void>;
 }
-function measure(report: GeneticCampaignReport, method: ComparisonMethod, seed: number, elapsedMs: number): ComparisonRun {
+function measure(report: GeneticCampaignReport, method: ComparisonMethod, seed: number, elapsedMs: number, attempts: number): ComparisonRun {
   const generations = report.search?.generations ?? [];
   const individuals = generations.flatMap(generation => generation.individuals);
   const space = report.search?.genomeSpace ?? [];
@@ -21,7 +23,7 @@ function measure(report: GeneticCampaignReport, method: ComparisonMethod, seed: 
   const points = new Set(report.executions.flatMap(execution => execution.pair.candidate?.evidence.events.map(event => event.point) ?? []));
   const proposals = report.search?.proposals ?? [];
   return Object.freeze({ method, mode: report.options.mode, randomSeed: seed, reproduced: report.reproduction.state === 'reproduced',
-    reproduction: report.reproduction.state, stop: report.state, trials: report.trials,
+    reproduction: report.reproduction.state, stop: report.state, valid: COMPARISON.validStops.some(stop => stop === report.state), attempts, trials: report.trials,
     trialsToFirstViolation: firstIndex < 0 ? null : (firstIndex + 1) * GENETIC_LIMITS.trialsPerPair,
     semanticPoints: points.size, duplicates: individuals.length - new Set(individuals.map(entry => genomeKey(entry.individual.seed, space))).size,
     elapsedMs, tokens: proposals.reduce((sum, entry) => sum + entry.tokens, 0), cost: proposals.reduce((sum, entry) => sum + entry.cost, 0) });
@@ -39,10 +41,11 @@ export function summarize(runs: readonly ComparisonRun[]): readonly ComparisonSu
   return Object.freeze([...groups.values()].map((group): ComparisonSummary => {
     const first = group[0];
     if (!first) throw Error('Empty comparison group');
-    const reproduced = group.filter(run => run.reproduced);
-    return Object.freeze({ method: first.method, mode: first.mode, runs: group.length, reproduced: reproduced.length, reproductionRate: reproduced.length / group.length,
+    const valid = group.filter(run => run.valid);
+    const reproduced = valid.filter(run => run.reproduced);
+    return Object.freeze({ method: first.method, mode: first.mode, runs: group.length, validRuns: valid.length, reproduced: reproduced.length, reproductionRate: valid.length ? reproduced.length / valid.length : null,
       medianTrialsToFirstViolation: median(reproduced.flatMap(run => run.trialsToFirstViolation === null ? [] : [run.trialsToFirstViolation])),
-      meanSemanticPoints: mean(group.map(run => run.semanticPoints)), meanDuplicates: mean(group.map(run => run.duplicates)), meanElapsedMs: mean(group.map(run => run.elapsedMs)),
+      meanSemanticPoints: mean(valid.map(run => run.semanticPoints)), meanDuplicates: mean(valid.map(run => run.duplicates)), meanElapsedMs: mean(valid.map(run => run.elapsedMs)),
       totalTokens: group.reduce((sum, run) => sum + run.tokens, 0), totalCost: group.reduce((sum, run) => sum + run.cost, 0),
       stops: Object.freeze(group.reduce<Record<string, number>>((counts, run) => ({ ...counts, [run.stop]: (counts[run.stop] ?? 0) + 1 }), {})) });
   }));
@@ -68,11 +71,18 @@ export async function runGeneticComparison(ports: ComparisonPorts, options: Comp
   let completed = true;
   for (const step of plan) {
     if (signal.aborted) { completed = false; break; }
-    const started = ports.now();
-    const report = await ports.run({ mode: step.mode, method: step.method === 'rules' ? 'rules' : 'ga', settings: { ...options.settings, randomSeed: step.seed },
-      llm: step.method === 'ga_llm' ? options.llm : { ...options.llm, mode: 'disabled', endpoint: null, sendPermission: false, apiKeyEnv: null }, }, signal);
-    if (report.state === 'cancelled') { completed = false; break; }
-    runs.push(measure(report, step.method, step.seed, ports.now() - started));
+    let measured: ComparisonRun | undefined;
+    for (let attempt = 1; attempt <= 1 + COMPARISON.retries; attempt++) {
+      const started = ports.now();
+      const report = await ports.run({ mode: step.mode, method: step.method === 'rules' ? 'rules' : 'ga', settings: { ...options.settings, randomSeed: step.seed },
+        llm: step.method === 'ga_llm' ? options.llm : { ...options.llm, mode: 'disabled', endpoint: null, sendPermission: false, apiKeyEnv: null } }, signal);
+      if (report.state === 'cancelled') { completed = false; break; }
+      measured = measure(report, step.method, step.seed, ports.now() - started, attempt);
+      if (measured.valid || attempt > COMPARISON.retries) break;
+      try { await ports.pause(COMPARISON.cooldownMs, signal); } catch { completed = false; break; }
+    }
+    if (!completed || !measured) break;
+    runs.push(measured);
     ports.progress?.(runs.length, plan.length);
   }
   return Object.freeze({ schemaVersion: COMPARISON.schemaVersion, comparisonId: ports.comparisonId(), createdAt: new Date(ports.now()).toISOString(),

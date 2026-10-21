@@ -21,6 +21,7 @@ When a candidate looks like a violation, it is re-executed in a separate session
 Each row of the table is one generation: the best score, the number of distinct candidates and how many came from a model.
 Click a row, or focus it and press Enter, to see every candidate of that generation (operator, parents, values, score) under **Details**.
 The score only ranks candidates for the next generation. It is never a verdict.
+A candidate is never executed twice. The best candidates of a generation are carried into the next one as parents with their existing observations instead of being re-run, so every request tests something new.
 
 ## 3. Confirm that baseline and fixed are not reproduced
 
@@ -42,6 +43,7 @@ Select **Compare 3 methods**. The workspace runs, under the same HTTP trial limi
 
 Read the table as measurements, not as a ranking: reproduction rate (independent re-execution confirmed the violation), trials until the first reproduction, measured points reached, duplicate candidates, time and tokens.
 A reproduction on the fixed sample would be a false positive; the table highlights it.
+A run that ended because the environment failed (for example the operating system ran out of local ports during many back-to-back runs) is retried once after a cooldown; if it is still invalid it is excluded from the rates and counted as *valid / total runs*.
 With the default of 192 trials the GA found the violation in few or none of the six seeds, so raise the trial limit and compare again. The result depends on the seeds and limit; no method is guaranteed to win.
 
 ## 5. Model candidates (optional)

@@ -28,19 +28,28 @@ export function individual(id: string, generation: number, seed: Seed, operator:
   return Object.freeze({ id, generation, operator, parentIds: Object.freeze([...parents]),
     seed: makeGenome(id, space.map(gene => seed.values[gene.field]), space) });
 }
-export interface Population { readonly individuals: readonly Individual[]; readonly uniqueGenomes: number; readonly sufficient: boolean }
-/** Invalid observations cannot become parents. Immigrants recover bounded diversity. */
-export function nextPopulation(previous: readonly EvaluatedIndividual[], generation: number, settings: GeneticSettings, space: GenomeSpace, random: Random): Population {
+export interface Population {
+  /** Genomes never evaluated before (absent from the evaluated set); the next generation's only requests. */
+  readonly individuals: readonly Individual[];
+  /** Best eligible parents kept with their existing observations; they are not re-executed. */
+  readonly carried: readonly EvaluatedIndividual[];
+  readonly uniqueGenomes: number; readonly sufficient: boolean;
+}
+/**
+ * Invalid observations cannot become parents. Elites are carried forward with their observed fitness instead of
+ * being executed again, and no genome in `evaluated` is proposed twice, so every request is new information.
+ * Immigrants recover bounded diversity.
+ */
+export function nextPopulation(previous: readonly EvaluatedIndividual[], generation: number, settings: GeneticSettings, space: GenomeSpace, random: Random, evaluated: ReadonlySet<string> = new Set()): Population {
   const pool = previous.filter(entry => entry.fitness.eligible && Number.isFinite(entry.fitness.score)).sort(rank);
   const result: Individual[] = [];
-  const keys = new Set<string>();
+  const keys = new Set<string>(evaluated);
   const add = (candidate: Individual): boolean => {
     const key = genomeKey(candidate.seed, space);
     if (keys.has(key)) return false;
     keys.add(key); result.push(candidate); return true;
   };
   const id = () => `ga-${generation}-${result.length}`;
-  for (const entry of pool.slice(0, settings.elite)) add(individual(id(), generation, entry.individual.seed, 'elite', [entry.individual.id], space));
   const attempts = settings.population * GENOME_LIMITS.attemptsPerIndividual;
   const breedAttempts = Math.floor(attempts / 2);
   for (let attempt = 0; result.length < settings.population && attempt < attempts; attempt++) {
@@ -62,7 +71,7 @@ export function nextPopulation(previous: readonly EvaluatedIndividual[], generat
     }
     add(candidate);
   }
-  return Object.freeze({ individuals: Object.freeze(result), uniqueGenomes: keys.size,
+  return Object.freeze({ individuals: Object.freeze(result), carried: Object.freeze(pool.slice(0, settings.elite)), uniqueGenomes: result.length,
     // A finite vocabulary may produce a smaller, entirely unique population.
     sufficient: result.length >= Math.max(GENETIC_LIMITS.minimumPopulation, Math.ceil(settings.population * settings.minimumDiversity)) });
 }

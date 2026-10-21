@@ -30,7 +30,7 @@ export function createRulesSearch(port: GeneticEvaluationPort, now: () => number
     const flush = () => {
       if (!entries.length) return;
       const eligible = entries.filter(entry => entry.fitness.eligible);
-      generations.push(Object.freeze({ index: generations.length, individuals: Object.freeze(entries), bestScore: eligible.length ? Math.max(...eligible.map(entry => entry.fitness.score)) : null,
+      generations.push(Object.freeze({ index: generations.length, carriedIds: Object.freeze([]), individuals: Object.freeze(entries), bestScore: eligible.length ? Math.max(...eligible.map(entry => entry.fitness.score)) : null,
         uniqueGenomes: new Set(entries.map(entry => genomeKey(entry.individual.seed, space))).size }));
       entries = [];
     };

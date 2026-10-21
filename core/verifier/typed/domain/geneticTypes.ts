@@ -44,6 +44,8 @@ export type GeneticStop = 'generation_limit' | 'trial_budget' | 'deadline' | 'ca
   'stagnation' | 'diversity_exhausted' | 'control_failed' | 'source_changed' | 'timeout' | 'unverified_evidence' | 'zap_incomplete' | 'error';
 export interface Generation {
   readonly index: number;
+  /** Ids of earlier individuals kept as parents without being executed again. */
+  readonly carriedIds: readonly string[];
   readonly individuals: readonly EvaluatedIndividual[];
   readonly uniqueGenomes: number;
   readonly bestScore: number | null;

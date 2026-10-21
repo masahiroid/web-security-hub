@@ -12,7 +12,8 @@ When a candidate looks like a violation, it is re-executed in a separate session
 <p><img src="images/genetic-run-en.png" alt="Search result for the deliberately changed sample" /></p>
 <p>Each row of the table is one generation: the best score, the number of distinct candidates and how many came from a model.
 Click a row, or focus it and press Enter, to see every candidate of that generation (operator, parents, values, score) under <strong>Details</strong>.
-The score only ranks candidates for the next generation. It is never a verdict.</p>
+The score only ranks candidates for the next generation. It is never a verdict.
+A candidate is never executed twice. The best candidates of a generation are carried into the next one as parents with their existing observations instead of being re-run, so every request tests something new.</p>
 <h2>3. Confirm that baseline and fixed are not reproduced</h2>
 <p>Run <strong>Baseline</strong> and <strong>Fixed</strong> with the same settings. The result must read <strong>Nothing to reproduce</strong>.
 The search also stops for an explained reason when a limit is reached, when it is cancelled, when the normal control fails or when the sample source changes.
@@ -44,6 +45,7 @@ Finite trials that find no violation do not prove safety.</p>
 <p><img src="images/genetic-compare-en.png" alt="Comparison of three methods" /></p>
 <p>Read the table as measurements, not as a ranking: reproduction rate (independent re-execution confirmed the violation), trials until the first reproduction, measured points reached, duplicate candidates, time and tokens.
 A reproduction on the fixed sample would be a false positive; the table highlights it.
+A run that ended because the environment failed (for example the operating system ran out of local ports during many back-to-back runs) is retried once after a cooldown; if it is still invalid it is excluded from the rates and counted as <em>valid / total runs</em>.
 With the default of 192 trials the GA found the violation in few or none of the six seeds, so raise the trial limit and compare again. The result depends on the seeds and limit; no method is guaranteed to win.</p>
 <h2>5. Model candidates (optional)</h2>
 <ul>
