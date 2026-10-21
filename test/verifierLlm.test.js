@@ -8,7 +8,7 @@ const { defaultLlmSettings } = require('../core/verifier/generated/domain/llmCon
 const { validateLlmSettings } = require('../core/verifier/generated/domain/llmSettings');
 const { parseProposals, redactFeedback } = require('../core/verifier/generated/domain/llmProposal');
 const { createLlmProposer } = require('../core/verifier/generated/application/llmProposer');
-const { createLocalProvider } = require('../core/verifier/generated/adapters/llmProviders');
+const { createLocalProvider, createRemoteProvider } = require('../core/verifier/generated/adapters/llmProviders');
 const { createGeneticFixtureService } = require('../core/verifier/generated/adapters/geneticFixtureService');
 const { defaultGeneticFixtureSettings, compoundSpace } = require('../core/verifier/generated/domain/geneticFixtureConfig');
 const { individual } = require('../core/verifier/generated/domain/geneticEvolution');
@@ -171,4 +171,63 @@ test('CLI exposes the model option with validation', () => {
   assert.throws(() => parseCommand(['--genetic-fixture', '--llm', 'local']));
   assert.throws(() => parseCommand(['--genetic-fixture', '--llm', 'local', '--llm-model', 'm', '--llm-endpoint', 'https://api.example.com']));
   assert.throws(() => parseCommand(['--genetic-fixture', '--llm', 'remote']));
+});
+
+const remote = changes => ({ ...defaultLlmSettings(), mode: 'remote', model: 'm', endpoint: 'https://api.example.com/', sendPermission: true, apiKeyEnv: 'LLM_API_KEY',
+  maxCost: 1, pricing: { inputPerMillion: 1, outputPerMillion: 2 }, ...changes });
+
+test('remote sending needs explicit permission, https, a key variable name and a cost ceiling', () => {
+  assert.equal(validateLlmSettings(remote()).endpoint, 'https://api.example.com');
+  for (const changes of [{ sendPermission: false }, { endpoint: 'http://api.example.com/' }, { endpoint: 'https://u:p@api.example.com/' }, { endpoint: 'https://api.example.com/x' },
+    { apiKeyEnv: null }, { apiKeyEnv: 'sk-live-secret' }, { apiKeyEnv: 'lower' }, { maxCost: 0 }, { pricing: { inputPerMillion: -1, outputPerMillion: 0 } }])
+    assert.throws(() => validateLlmSettings(remote(changes)), undefined, JSON.stringify(changes));
+  assert.throws(() => validateLlmSettings({ ...defaultLlmSettings(), sendPermission: true }));
+  assert.throws(() => validateLlmSettings({ ...defaultLlmSettings(), apiKeyEnv: 'LLM_API_KEY' }));
+});
+
+test('remote provider sends the key only as a bearer header and records neither key nor output', async () => {
+  const seen = [];
+  const fetcher = async (url, init) => { seen.push({ url: String(url), init }); return new Response(JSON.stringify({ choices: [{ message: { content: text([{ values: { n: 1 } }]) }, finish_reason: 'stop' }], usage: { prompt_tokens: 100, completion_tokens: 50 } })); };
+  const provider = createRemoteProvider('https://api.example.com', 'm', 'TOPSECRET', fetcher);
+  const done = await provider.complete(request());
+  assert.equal(done.completionTokens, 50);
+  assert.equal(seen[0].url, 'https://api.example.com/v1/chat/completions');
+  assert.equal(seen[0].init.headers.authorization, 'Bearer TOPSECRET');
+  assert.ok(!seen[0].init.body.includes('TOPSECRET'));
+  assert.throws(() => createRemoteProvider('https://api.example.com', 'm', ''));
+  assert.throws(() => createRemoteProvider('http://api.example.com', 'm', 'k'));
+  const result = await runCampaign(remote({ maxCost: 100 }), { env: { LLM_API_KEY: 'TOPSECRET' }, llmProvider: provider });
+  assert.ok(!JSON.stringify(result.report).includes('TOPSECRET'));
+  assert.ok(result.report.search.proposals.some(p => p.cost > 0));
+  await assert.rejects(() => runCampaign(remote(), { env: {} }), /API key/);
+});
+
+test('cost ceiling stops model calls before they are made', async () => {
+  let calls = 0;
+  const provider = { async complete() { calls++; return { text: text([{ values: { n: 1 } }]), promptTokens: 1000, completionTokens: 1000 }; } };
+  // 1M-token prices: each call costs 3000 tokens-ish; the second call would exceed the ceiling.
+  const settings = remote({ pricing: { inputPerMillion: 1000, outputPerMillion: 1000 }, maxCost: 2.1, maxResponseTokens: 100 });
+  const proposer = createLlmProposer(provider, settings, space);
+  assert.equal((await proposer.propose(ctx)).record.outcome, 'proposed');
+  const second = await proposer.propose(ctx);
+  assert.deepEqual([second.record.rejection, calls], ['cost_budget', 1]);
+  const tight = createLlmProposer(provider, remote({ maxCost: 0.0001, pricing: { inputPerMillion: 1000, outputPerMillion: 1000 } }), space);
+  assert.equal((await tight.propose(ctx)).record.rejection, 'cost_budget');
+  assert.equal(calls, 1);
+});
+
+test('CLI remote options are validated', () => {
+  const base = ['--genetic-fixture', '--llm', 'remote', '--llm-endpoint', 'https://api.example.com', '--llm-model', 'm', '--llm-api-key-env', 'LLM_API_KEY', '--llm-max-cost', '2'];
+  assert.throws(() => parseCommand(base));
+  const ok = parseCommand([...base, '--llm-send-permission', '--llm-input-price', '1.5']);
+  assert.equal(ok.options.llm.sendPermission, true); assert.equal(ok.options.llm.pricing.inputPerMillion, 1.5);
+  assert.throws(() => parseCommand([...base, '--llm-send-permission', '--llm-max-cost', 'abc']));
+});
+
+// Opt-in: WSH_LLM_ENDPOINT=http://127.0.0.1:PORT WSH_LLM_MODEL=name npm test (real runtime, e.g. llama.cpp server).
+test('real loopback runtime obeys the strict schema', { skip: !process.env.WSH_LLM_ENDPOINT }, async () => {
+  const result = await runCampaign({ ...defaultLlmSettings(), mode: 'local', endpoint: process.env.WSH_LLM_ENDPOINT, model: process.env.WSH_LLM_MODEL || 'local',
+    candidateRatio: 0.5, maxCalls: 4, timeoutMs: 120_000 }, {}, 'changed');
+  assert.ok(result.report.search.proposals.some(p => p.outcome === 'proposed'));
+  assert.ok(result.report.trials <= result.report.options.settings.maxTrials);
 });

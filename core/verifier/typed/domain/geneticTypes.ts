@@ -58,7 +58,7 @@ export interface GeneticEvaluationPort {
 export interface LlmProposalRecord {
   readonly generation: number;
   readonly outcome: 'proposed' | 'fallback' | 'skipped';
-  readonly attempts: number; readonly accepted: number; readonly tokens: number;
+  readonly attempts: number; readonly accepted: number; readonly tokens: number; readonly cost: number;
   readonly rejection: LlmRejection | null;
 }
 export interface GeneticProposer {

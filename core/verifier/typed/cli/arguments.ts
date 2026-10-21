@@ -18,8 +18,10 @@ npm run verifier:run -- [--mode baseline|changed|fixed] [--scenario all|boundary
   --ttl-ms N              Total run time budget / 全体の時間上限
   --genetic-fixture      Owned compound GA sample + independent replay (no LLM)
                          専用の複合条件GAサンプルと独立再現（LLM不要）
-  --llm mock|local        Optional candidate supplier (default off) / 任意のLLM候補供給
+  --llm mock|local|remote       Optional candidate supplier (default off) / 任意のLLM候補供給
   --llm-endpoint URL      Numeric loopback origin for --llm local / loopback限定
+  --llm-send-permission   Required with --llm remote (https; needs --llm-api-key-env NAME and --llm-max-cost)
+                         remote送信の明示許可。キーは環境変数名で指定
   --llm-model NAME        Model name for --llm local
   --sast-sample [--zap]   Source/scope sample, optional owned passive ZAP
                          ソース照合サンプル。--zapで専用ZAPを使用
@@ -37,16 +39,23 @@ function integer(value: string | undefined, fallback: number): number {
   if (value === undefined) return fallback;
   if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))) throw Error('Expected integer'); return Number(value);
 }
+function decimal(value: string | undefined): number {
+  if (value === undefined) return 0;
+  if (!/^\d+(\.\d+)?$/.test(value)) throw Error('Expected decimal'); return Number(value);
+}
 export function parseCommand(argv: readonly string[]): Command {
   const { values } = parseArgs({ args: [...argv], strict: true, allowPositionals: false, options: { help: { type: 'boolean' },
-    'genetic-fixture': { type: 'boolean' }, llm: { type: 'string' }, 'llm-endpoint': { type: 'string' }, 'llm-model': { type: 'string' }, 'sast-sample': { type: 'boolean' }, zap: { type: 'boolean' }, 'zap-install': { type: 'boolean' }, 'zap-status': { type: 'boolean' }, 'source-plan': { type: 'string' },
+    'genetic-fixture': { type: 'boolean' }, llm: { type: 'string' }, 'llm-endpoint': { type: 'string' }, 'llm-model': { type: 'string' }, 'llm-send-permission': { type: 'boolean' }, 'llm-api-key-env': { type: 'string' },
+    'llm-max-cost': { type: 'string' }, 'llm-input-price': { type: 'string' }, 'llm-output-price': { type: 'string' }, 'sast-sample': { type: 'boolean' }, zap: { type: 'boolean' }, 'zap-install': { type: 'boolean' }, 'zap-status': { type: 'boolean' }, 'source-plan': { type: 'string' },
     mode: { type: 'string' }, scenario: { type: 'string' }, 'random-seed': { type: 'string' }, 'max-candidates': { type: 'string' }, 'max-trials': { type: 'string' }, 'ttl-ms': { type: 'string' } } });
   if (values.help) return { kind: 'help' };
   const keys = Object.keys(values);
   if (values['genetic-fixture']) {
-    if (keys.some(key => !['genetic-fixture', 'mode', 'random-seed', 'max-trials', 'ttl-ms', 'llm', 'llm-endpoint', 'llm-model'].includes(key))) throw Error('Combined genetic options');
+    if (keys.some(key => !['genetic-fixture', 'mode', 'random-seed', 'max-trials', 'ttl-ms', 'llm', 'llm-endpoint', 'llm-model', 'llm-send-permission', 'llm-api-key-env', 'llm-max-cost', 'llm-input-price', 'llm-output-price'].includes(key))) throw Error('Combined genetic options');
     const defaults = defaultGeneticFixtureSettings();
-    const llm = { ...defaultLlmSettings(), mode: values.llm ?? 'disabled', endpoint: values['llm-endpoint'] ?? null, model: values['llm-model'] ?? '' };
+    const llm = { ...defaultLlmSettings(), mode: values.llm ?? 'disabled', endpoint: values['llm-endpoint'] ?? null, model: values['llm-model'] ?? '',
+      sendPermission: values['llm-send-permission'] === true, apiKeyEnv: values['llm-api-key-env'] ?? null, maxCost: decimal(values['llm-max-cost']),
+      pricing: { inputPerMillion: decimal(values['llm-input-price']), outputPerMillion: decimal(values['llm-output-price']) } };
     return { kind: 'genetic', options: validateGeneticFixtureOptions({ mode: values.mode ?? 'baseline', llm, settings: { ...defaults,
       randomSeed: integer(values['random-seed'], defaults.randomSeed), maxTrials: integer(values['max-trials'], defaults.maxTrials),
       ttlMs: integer(values['ttl-ms'], defaults.ttlMs) } }) };
