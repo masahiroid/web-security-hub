@@ -23,10 +23,10 @@ Web Security Hub is a locally run web-security assessment and form-regression te
 
 | Platform | Installer | Status |
 |---|---|---|
-| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v3.0.0/Web-Security-Hub_3.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
-| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v3.0.0/Web-Security-Hub_3.0.0_windows_x64_setup.exe) | Unsigned |
+| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v4.0.0/Web-Security-Hub_4.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
+| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v4.0.0/Web-Security-Hub_4.0.0_windows_x64_setup.exe) | Unsigned |
 
-[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v3.0.0). Use the source edition on Intel Macs or Linux. Windows installer operation was verified in a Windows CI environment.
+[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v4.0.0). Use the source edition on Intel Macs or Linux. Windows installer operation was verified in a Windows CI environment.
 
 ## Desktop and double-click startup
 
@@ -114,6 +114,10 @@ Copyright 2024–2026 Masahiro NAKATSUGAWA.
 Web Security Hub is distributed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for copyright and attribution information.
 
 Development branch: [SAST finding IDs and static route candidates](docs/training/SAST-MAPPING.md) are available in the source edition. The GUI and CLI include a dedicated source/scope binding sample; arbitrary-application execution and ZAP integration remain pending; this feature is not included in the published 2.0.0 installers.
+
+## 4.0.0 genetic search
+
+Search a synthetic sample whose violation needs three conditions at once. The genetic algorithm selects, recombines and mutates candidates over generations, never executes the same candidate twice, and counts a result only after an independent re-execution in a separate session. An optional language model can supply part of the candidates; it is off by default, the search works without it, and the GUI supports only models on this machine (127.0.0.1). Compare fixed rules, the genetic algorithm and the algorithm with a model under the same trial limit and pre-fixed seeds. Read [the illustrated guide](docs/training/GENETIC.md). Results are measurements, not a ranking: no method is guaranteed to find a violation, and finite trials that find none do not prove safety. Model connections were verified against a llama.cpp server on loopback only; remote services are available from the command line only and were not exercised against a real service.
 
 ## 3.0.0 source verification
 

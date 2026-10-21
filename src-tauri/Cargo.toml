@@ -1,6 +1,6 @@
 [package]
 name = "web-security-hub-desktop"
-version = "3.0.0"
+version = "4.0.0"
 description = "Web Security Hub desktop launcher"
 authors = ["Masahiro NAKATSUGAWA"]
 license = "Apache-2.0"

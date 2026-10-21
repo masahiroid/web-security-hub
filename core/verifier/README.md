@@ -253,6 +253,10 @@ Expressルート候補を追加しています。共有ハンドラーは複数�
 専用サンプルは画面/CLIからソースと許可済みの完全一致ルートを照合して試行できます。任意アプリの選択・起動中コードの同一性確認・ZAPは未完成で、公開済み2.0.0の配布版には含まれません。
 [ソース版の画像付きガイド](../../docs/training/SAST-MAPPING.ja.md)を参照してください。
 
+## 4.0.0 genetic search
+
+`npm run verifier:run -- --genetic-fixture [--mode baseline|changed|fixed] [--method rules|ga] [--llm mock|local|remote ...]` searches the owned compound sample; `--genetic-compare` compares fixed rules, GA and GA with a model on pre-fixed seeds. Results are private JSON/HTML under `DATA_ROOT/artifacts/private`. See [the guide](../../docs/training/GENETIC.md).
+
 ## 3.0.0 source and passive evidence
 
 `typed/domain` defines immutable source/ZAP contracts and correlation rules, `typed/application` composes source-guarded trials, and `typed/adapters` owns bounded HTTP, filesystem, API, installation and process lifecycles. `typed/cli/arguments.ts` validates CLI inputs before side effects. Generated JavaScript is not tracked.
