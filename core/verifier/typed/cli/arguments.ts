@@ -1,3 +1,6 @@
+import { defaultGeneticFixtureSettings } from '../domain/geneticFixtureConfig';
+import { validateGeneticFixtureOptions } from '../adapters/geneticFixtureOptions';
+import type { GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
 import { parseArgs } from 'node:util';
 import { lstatSync, readFileSync } from 'node:fs';
 import { LIMITS } from '../domain/config';
@@ -12,6 +15,8 @@ npm run verifier:run -- [--mode baseline|changed|fixed] [--scenario all|boundary
   --max-candidates N      Per-scenario limit / 各シナリオの候補上限
   --max-trials N          Includes controls / 正常対照を含む試行上限
   --ttl-ms N              Total run time budget / 全体の時間上限
+  --genetic-fixture      Owned compound GA sample + independent replay (no LLM)
+                         専用の複合条件GAサンプルと独立再現（LLM不要）
   --sast-sample [--zap]   Source/scope sample, optional owned passive ZAP
                          ソース照合サンプル。--zapで専用ZAPを使用
   --source-plan FILE     Explicit authorized local target plan (JSON)
@@ -23,17 +28,24 @@ Campaigns use owned fixtures. Source plans allow numeric loopback HTTP only, ano
 campaignは専用サンプル、source planは数値loopback HTTP・anonymousだけに対応します。
 `;
 export type Command = { readonly kind: 'help' | 'install' | 'status' } | { readonly kind: 'sample'; readonly useZap: boolean } |
-  { readonly kind: 'source'; readonly input: SourceTrialOptions } | { readonly kind: 'campaign'; readonly options: RunOptions };
+  { readonly kind: 'source'; readonly input: SourceTrialOptions } | { readonly kind: 'campaign'; readonly options: RunOptions } | { readonly kind: 'genetic'; readonly options: GeneticFixtureOptions };
 function integer(value: string | undefined, fallback: number): number {
   if (value === undefined) return fallback;
   if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))) throw Error('Expected integer'); return Number(value);
 }
 export function parseCommand(argv: readonly string[]): Command {
   const { values } = parseArgs({ args: [...argv], strict: true, allowPositionals: false, options: { help: { type: 'boolean' },
-    'sast-sample': { type: 'boolean' }, zap: { type: 'boolean' }, 'zap-install': { type: 'boolean' }, 'zap-status': { type: 'boolean' }, 'source-plan': { type: 'string' },
+    'genetic-fixture': { type: 'boolean' }, 'sast-sample': { type: 'boolean' }, zap: { type: 'boolean' }, 'zap-install': { type: 'boolean' }, 'zap-status': { type: 'boolean' }, 'source-plan': { type: 'string' },
     mode: { type: 'string' }, scenario: { type: 'string' }, 'random-seed': { type: 'string' }, 'max-candidates': { type: 'string' }, 'max-trials': { type: 'string' }, 'ttl-ms': { type: 'string' } } });
   if (values.help) return { kind: 'help' };
   const keys = Object.keys(values);
+  if (values['genetic-fixture']) {
+    if (keys.some(key => !['genetic-fixture', 'mode', 'random-seed', 'max-trials', 'ttl-ms'].includes(key))) throw Error('Combined genetic options');
+    const defaults = defaultGeneticFixtureSettings();
+    return { kind: 'genetic', options: validateGeneticFixtureOptions({ mode: values.mode ?? 'baseline', settings: { ...defaults,
+      randomSeed: integer(values['random-seed'], defaults.randomSeed), maxTrials: integer(values['max-trials'], defaults.maxTrials),
+      ttlMs: integer(values['ttl-ms'], defaults.ttlMs) } }) };
+  }
   if (values['sast-sample']) {
     if (keys.some(key => !['sast-sample', 'zap'].includes(key))) throw Error('Combined options');
     return { kind: 'sample', useZap: values.zap === true };

@@ -1,4 +1,5 @@
-import type { Seed } from './types';
+import type { EvidencePoint, Result, Seed } from './types';
+import type { GenomeSpace } from './geneticGenome';
 
 /** Transport, URL, authentication and permissions belong to the trusted runner. */
 export interface Individual {
@@ -39,10 +40,27 @@ export interface Fitness {
 }
 export interface EvaluatedIndividual { readonly individual: Individual; readonly fitness: Fitness }
 export type GeneticStop = 'generation_limit' | 'trial_budget' | 'deadline' | 'cancelled' |
-  'stagnation' | 'diversity_exhausted' | 'control_failed' | 'source_changed' | 'error';
+  'stagnation' | 'diversity_exhausted' | 'control_failed' | 'source_changed' | 'timeout' | 'unverified_evidence' | 'zap_incomplete' | 'error';
 export interface Generation {
   readonly index: number;
   readonly individuals: readonly EvaluatedIndividual[];
   readonly uniqueGenomes: number;
   readonly bestScore: number | null;
+}
+
+
+export interface GeneticEvaluationPort {
+  /** At most one normal-control/candidate pair. Adapter honors fixed scope and cancellation. */
+  evaluate(individual: Individual, context: Readonly<{ signal: AbortSignal; deadline: number }>): Promise<Result>;
+}
+/** Exact private inputs and immutable search decisions. */
+export interface GeneticSearchReport {
+  readonly genomeSpace: GenomeSpace;
+  readonly settings: GeneticSettings;
+  readonly randomAlgorithm: 'lcg32-v1';
+  /** Measured semantic points, not general code/branch coverage. */
+  readonly coveragePoints: readonly EvidencePoint[];
+  readonly generations: readonly Generation[];
+  readonly reservedTrials: number;
+  readonly stop: GeneticStop;
 }

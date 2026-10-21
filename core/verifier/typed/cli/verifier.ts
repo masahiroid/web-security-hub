@@ -1,3 +1,4 @@
+import { createGeneticFixtureService } from '../adapters/geneticFixtureService';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -25,6 +26,11 @@ export async function main(argv: readonly string[]): Promise<number> {
     }
     const metadata: unknown = JSON.parse(readFileSync(join(PROJECT_ROOT, 'package.json'), 'utf8'));
     if (!metadata || typeof metadata !== 'object' || !('version' in metadata) || typeof metadata.version !== 'string') throw Error('Missing application version');
+    if (command.kind === 'genetic') {
+      const { report, saved } = await createGeneticFixtureService({ applicationVersion: metadata.version }).run(command.options, { signal: controller.signal });
+      process.stdout.write(JSON.stringify({ state: report.state, reproduction: report.reproduction.state, trials: report.trials, generations: report.search?.generations.length ?? 0, ...saved }) + '\n');
+      return report.state === 'cancelled' ? CLI_EXIT.interrupted : ['generation_limit', 'stagnation'].includes(report.state) ? CLI_EXIT.success : CLI_EXIT.incomplete;
+    }
     if (command.kind === 'source' || command.kind === 'sample') {
       const result = command.kind === 'sample' ? await runSastFixture(controller.signal, { useZap: command.useZap }) : await runSourceTarget(command.input, DATA_ROOT, controller.signal);
       const report = validate('sourceReport', { ...result, schemaVersion: CONTRACT_VERSION, reportId: randomUUID(), createdAt: new Date().toISOString(), applicationVersion: metadata.version });
