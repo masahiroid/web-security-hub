@@ -36,7 +36,7 @@ export async function runGeneticCampaign(ports: GeneticCampaignPorts, options: G
     const remaining = Math.floor(deadline - ports.now());
     if (remaining <= 0) { state = interrupted() ?? 'deadline'; }
     else {
-      search = await createGeneticSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints)({
+      search = await createGeneticSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, ports.proposer)({
         settings: { ...options.settings, maxTrials: searchBudget, ttlMs: remaining }, space: compoundSpace,
         initial: compoundInitial(options.settings.population), signal: combined,
       });

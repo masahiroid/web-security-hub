@@ -7,7 +7,7 @@ import { geneticRandom, individual, nextPopulation } from '../domain/geneticEvol
 import { evaluateGeneticFitness } from '../domain/geneticFitness';
 import { genomeKey, validateGenome, validateGenomeSpace } from '../domain/geneticGenome';
 import type { GenomeSpace } from '../domain/geneticGenome';
-import type { Generation, GeneticStop, GeneticEvaluationPort, GeneticSearchReport } from '../domain/geneticTypes';
+import type { Generation, GeneticStop, GeneticEvaluationPort, GeneticProposer, GeneticSearchReport, LlmProposalRecord } from '../domain/geneticTypes';
 import type { EvidencePoint, Result, Seed } from '../domain/types';
 
 export type { GeneticEvaluationPort, GeneticSearchReport } from '../domain/geneticTypes';
@@ -17,7 +17,7 @@ export interface GeneticSearchRequest {
   readonly initial: readonly Seed[];
   readonly signal: AbortSignal;
 }
-export function createGeneticSearch(port: GeneticEvaluationPort, now: () => number = Date.now, measuredPoints: readonly EvidencePoint[] = []) {
+export function createGeneticSearch(port: GeneticEvaluationPort, now: () => number = Date.now, measuredPoints: readonly EvidencePoint[] = [], proposer?: GeneticProposer) {
   return async (request: GeneticSearchRequest): Promise<GeneticSearchReport> => {
     const settings = validateGeneticSettings(request.settings);
     if (measuredPoints.some(point => !Object.values(POINTS).includes(point)) || new Set(measuredPoints).size !== measuredPoints.length) throw Error('Invalid semantic coverage points');
@@ -29,6 +29,7 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
     if (new Set(population.map(entry => genomeKey(entry.seed, space))).size !== population.length) throw Error('Duplicate initial genomes');
     const random = geneticRandom(settings.randomSeed);
     const generations: Generation[] = [];
+    const proposals: LlmProposalRecord[] = [];
     const seen = new Set<string>();
     let reservedTrials = 0;
     let best = -Infinity;
@@ -39,7 +40,7 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
     const signal = AbortSignal.any([request.signal, expiry.signal]);
     const interrupted = (): GeneticStop | null => request.signal.aborted ? 'cancelled' : expiry.signal.aborted || now() >= deadline ? 'deadline' : null;
     const report = (stop: GeneticStop): GeneticSearchReport => Object.freeze({ settings, genomeSpace: space, coveragePoints, randomAlgorithm: 'lcg32-v1',
-      generations: Object.freeze(generations), reservedTrials, stop });
+      generations: Object.freeze(generations), reservedTrials, proposals: Object.freeze(proposals), stop });
     try {
       for (let index = 0; index < settings.generations; index++) {
         const entries: Generation['individuals'][number][] = [];
@@ -78,6 +79,16 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
         const next = nextPopulation(entries, index + 1, settings, space, random);
         if (!next.sufficient) return report('diversity_exhausted');
         population = [...next.individuals];
+        if (proposer) {
+          const capacity = settings.population - settings.elite;
+          const proposal = await proposer.propose({ generation: index + 1, capacity, evaluated: entries, signal });
+          proposals.push(proposal.record);
+          const llm = proposal.seeds.map((seed, offset) => individual(`llm-${index + 1}-${offset}`, index + 1, seed, 'llm', [], space));
+          // Model candidates replace GA-bred tail members only; elites and the total HTTP budget are unchanged.
+          const merged = [...population.slice(0, settings.elite), ...llm, ...population.slice(settings.elite)];
+          const unique = new Set<string>();
+          population = merged.filter(entry => { const key = genomeKey(entry.seed, space); return !unique.has(key) && !!unique.add(key); }).slice(0, settings.population);
+        }
       }
       return report('generation_limit');
     } catch {

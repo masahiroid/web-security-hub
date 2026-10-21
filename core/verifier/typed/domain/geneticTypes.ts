@@ -1,12 +1,13 @@
 import type { EvidencePoint, Result, Seed } from './types';
 import type { GenomeSpace } from './geneticGenome';
+import type { LlmRejection } from './llmTypes';
 
 /** Transport, URL, authentication and permissions belong to the trusted runner. */
 export interface Individual {
   readonly id: string;
   readonly generation: number;
   readonly parentIds: readonly string[];
-  readonly operator: 'initial' | 'elite' | 'crossover' | 'mutation' | 'immigrant';
+  readonly operator: 'initial' | 'elite' | 'crossover' | 'mutation' | 'immigrant' | 'llm';
   readonly seed: Seed;
 }
 export interface GeneticSettings {
@@ -53,6 +54,18 @@ export interface GeneticEvaluationPort {
   /** At most one normal-control/candidate pair. Adapter honors fixed scope and cancellation. */
   evaluate(individual: Individual, context: Readonly<{ signal: AbortSignal; deadline: number }>): Promise<Result>;
 }
+/** One model-assisted slice of a generation; contains counts and stable codes, never model output. */
+export interface LlmProposalRecord {
+  readonly generation: number;
+  readonly outcome: 'proposed' | 'fallback' | 'skipped';
+  readonly attempts: number; readonly accepted: number; readonly tokens: number;
+  readonly rejection: LlmRejection | null;
+}
+export interface GeneticProposer {
+  /** Never throws for model faults; a fallback record means the GA continues unchanged. */
+  propose(context: Readonly<{ generation: number; capacity: number; evaluated: readonly EvaluatedIndividual[]; signal: AbortSignal }>):
+    Promise<Readonly<{ seeds: readonly Seed[]; record: LlmProposalRecord }>>;
+}
 /** Exact private inputs and immutable search decisions. */
 export interface GeneticSearchReport {
   readonly genomeSpace: GenomeSpace;
@@ -62,5 +75,6 @@ export interface GeneticSearchReport {
   readonly coveragePoints: readonly EvidencePoint[];
   readonly generations: readonly Generation[];
   readonly reservedTrials: number;
+  readonly proposals: readonly LlmProposalRecord[];
   readonly stop: GeneticStop;
 }
