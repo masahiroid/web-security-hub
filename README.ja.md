@@ -23,10 +23,10 @@ OWASP のリスク分類を基準にした、ローカル実行の Web セキュ
 
 | OS | インストーラー | 状態 |
 |---|---|---|
-| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v3.0.0/Web-Security-Hub_3.0.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
-| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v3.0.0/Web-Security-Hub_3.0.0_windows_x64_setup.exe) | 未署名 |
+| macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v4.0.0/Web-Security-Hub_4.0.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
+| Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v4.0.0/Web-Security-Hub_4.0.0_windows_x64_setup.exe) | 未署名 |
 
-[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v3.0.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版は Windows の CI 環境でインストール後の操作を確認しています。
+[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v4.0.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版は Windows の CI 環境でインストール後の操作を確認しています。
 
 ## デスクトップ版・ダブルクリック起動
 
@@ -110,6 +110,10 @@ Copyright 2024–2026 Masahiro NAKATSUGAWA.
 Web Security Hub は [Apache License 2.0](LICENSE) の下で配布します。著作権および帰属情報は [NOTICE](NOTICE) を参照してください。
 
 開発ブランチでは、ソース版で[個別SAST検出IDと静的ルート候補](docs/training/SAST-MAPPING.ja.md)を確認できます。専用サンプルでは画面とCLIからソース・実行scopeを照合できます。任意アプリへの実行接続・ZAP連携は未完成で、公開済み2.0.0の配布版には含まれません。
+
+## 4.0.0 遺伝的探索
+
+3つの条件が同時にそろったときだけ違反になる架空のサンプルを探索します。遺伝的アルゴリズムが候補の選択・交叉・突然変異を世代ごとに行い、同じ候補を2回実行せず、別のセッションで独立に再実行して確認できたものだけを結果として数えます。任意の言語モデルで候補の一部を補えますが、初期状態では使わず、モデルなしでも探索は完結します。GUIで使えるのはこの端末のモデル（127.0.0.1）だけです。固定ルール・遺伝的アルゴリズム・モデル併用を、同じ試行上限と事前に固定したseedで比較できます。[画像付きガイド](docs/training/GENETIC.ja.md)を参照してください。結果は順位ではなく測定値です。どの方式も違反の発見を保証せず、有限の試行で見つからなくても安全の証明にはなりません。モデル接続はloopback上のllama.cppサーバーでのみ確認しており、外部サービスへの送信はコマンドラインだけで、実サービスでは試していません。
 
 ## 3.0.0のソース検証
 
