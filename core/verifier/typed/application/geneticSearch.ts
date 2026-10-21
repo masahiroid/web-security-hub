@@ -1,3 +1,5 @@
+import { GeneticEvaluationError } from '../domain/geneticCampaignTypes';
+import { POINTS } from '../domain/config';
 import { awaitGeneticEvaluation } from './geneticEvaluation';
 import { validateGeneticSettings } from '../domain/geneticSettings';
 import { GENETIC_LIMITS } from '../domain/geneticConfig';
@@ -5,32 +7,21 @@ import { geneticRandom, individual, nextPopulation } from '../domain/geneticEvol
 import { evaluateGeneticFitness } from '../domain/geneticFitness';
 import { genomeKey, validateGenome, validateGenomeSpace } from '../domain/geneticGenome';
 import type { GenomeSpace } from '../domain/geneticGenome';
-import type { Generation, GeneticStop, Individual } from '../domain/geneticTypes';
-import type { Result, Seed } from '../domain/types';
+import type { Generation, GeneticStop, GeneticEvaluationPort, GeneticSearchReport } from '../domain/geneticTypes';
+import type { EvidencePoint, Result, Seed } from '../domain/types';
 
-export interface GeneticEvaluationPort {
-  /** One normal-control/candidate pair at most. Adapter must honor signal/deadline and fixed scope. */
-  evaluate(individual: Individual, context: Readonly<{ signal: AbortSignal; deadline: number }>): Promise<Result>;
-}
+export type { GeneticEvaluationPort, GeneticSearchReport } from '../domain/geneticTypes';
 export interface GeneticSearchRequest {
   readonly settings: unknown;
   readonly space: GenomeSpace;
   readonly initial: readonly Seed[];
   readonly signal: AbortSignal;
 }
-/** Contains exact private inputs; never publish this object as public feedback. */
-export interface GeneticSearchReport {
-  readonly genomeSpace: GenomeSpace;
-  readonly settings: ReturnType<typeof validateGeneticSettings>;
-  readonly randomAlgorithm: 'lcg32-v1';
-  readonly generations: readonly Generation[];
-  /** Reserved HTTP trial capacity; includes a control for every evaluation, even if adapter sends less. */
-  readonly reservedTrials: number;
-  readonly stop: GeneticStop;
-}
-export function createGeneticSearch(port: GeneticEvaluationPort, now: () => number = Date.now) {
+export function createGeneticSearch(port: GeneticEvaluationPort, now: () => number = Date.now, measuredPoints: readonly EvidencePoint[] = []) {
   return async (request: GeneticSearchRequest): Promise<GeneticSearchReport> => {
     const settings = validateGeneticSettings(request.settings);
+    if (measuredPoints.some(point => !Object.values(POINTS).includes(point)) || new Set(measuredPoints).size !== measuredPoints.length) throw Error('Invalid semantic coverage points');
+    const coveragePoints = Object.freeze([...measuredPoints]);
     const space = validateGenomeSpace(request.space);
     if (request.initial.length !== settings.population) throw Error('Initial population must match settings');
     request.initial.forEach(seed => validateGenome(seed, space));
@@ -47,7 +38,7 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
     const timer = setTimeout(() => expiry.abort(), settings.ttlMs);
     const signal = AbortSignal.any([request.signal, expiry.signal]);
     const interrupted = (): GeneticStop | null => request.signal.aborted ? 'cancelled' : expiry.signal.aborted || now() >= deadline ? 'deadline' : null;
-    const report = (stop: GeneticStop): GeneticSearchReport => Object.freeze({ settings, genomeSpace: space, randomAlgorithm: 'lcg32-v1',
+    const report = (stop: GeneticStop): GeneticSearchReport => Object.freeze({ settings, genomeSpace: space, coveragePoints, randomAlgorithm: 'lcg32-v1',
       generations: Object.freeze(generations), reservedTrials, stop });
     try {
       for (let index = 0; index < settings.generations; index++) {
@@ -60,14 +51,18 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
           reservedTrials += GENETIC_LIMITS.trialsPerPair;
           let result: Result;
           try { result = await awaitGeneticEvaluation(() => port.evaluate(candidate, { signal, deadline }), signal); }
-          catch { stop = interrupted() ?? 'error'; break; }
+          catch (error: unknown) { stop = interrupted() ?? (error instanceof GeneticEvaluationError ? error.stop : 'error'); break; }
           stop = interrupted();
           if (stop) break;
-          if (result.observation.seedId !== candidate.seed.seedId) { stop = 'error'; break; }
-          const fitness = evaluateGeneticFitness(result, seen, settings.weights);
+          if (result.feedback.controlPassed && result.observation.seedId !== candidate.seed.seedId) { stop = 'error'; break; }
+          const fitness = evaluateGeneticFitness(result, seen, settings.weights, coveragePoints);
           entries.push(Object.freeze({ individual: candidate, fitness }));
-          if (!result.feedback.controlPassed) { stop = 'control_failed'; break; }
           if (result.evidence.state === 'source_mismatch') { stop = 'source_changed'; break; }
+          if (result.observation.outcome === 'timeout') { stop = 'timeout'; break; }
+          if (!result.feedback.controlPassed) { stop = 'control_failed'; break; }
+          if (result.observation.outcome !== 'completed') { stop = 'error'; break; }
+          if (result.feedback.zap === 'incomplete') { stop = 'zap_incomplete'; break; }
+          if (!fitness.eligible) { stop = 'unverified_evidence'; break; }
         }
         const eligible = entries.filter(entry => entry.fitness.eligible);
         const bestScore = eligible.length ? Math.max(...eligible.map(entry => entry.fitness.score)) : null;

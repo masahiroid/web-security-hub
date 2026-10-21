@@ -1,5 +1,5 @@
 import type { Fitness, GeneticSettings, Metric } from './geneticTypes';
-import type { Result } from './types';
+import type { EvidencePoint, Result } from './types';
 import { CORRELATION_FIELDS } from './zap';
 
 const unavailable: Metric = Object.freeze({ state: 'unavailable', value: null });
@@ -9,7 +9,7 @@ function rejected(reason: Fitness['reason']): Fitness {
     coverage: unavailable, novelty: unavailable, zap: unavailable, noveltyKeys: Object.freeze([]) });
 }
 /** Validated, correlated evidence provides search priority, never a verdict. */
-export function evaluateGeneticFitness(result: Result, seen: ReadonlySet<string>, weights: GeneticSettings['weights']): Fitness {
+export function evaluateGeneticFitness(result: Result, seen: ReadonlySet<string>, weights: GeneticSettings['weights'], coveragePoints: readonly EvidencePoint[] = []): Fitness {
   const { observation, feedback, evidence } = result;
   if (!feedback.controlPassed) return rejected('invalid_control');
   if (observation.outcome !== 'completed' || feedback.outcome !== 'completed' || !observation.dispatched || feedback.seedId !== observation.seedId) return rejected('invalid_observation');
@@ -26,8 +26,9 @@ export function evaluateGeneticFitness(result: Result, seen: ReadonlySet<string>
     noveltyKeys.push(...newAlerts);
     zap = observed(newAlerts.length);
   }
+  const coverage = coveragePoints.length ? observed(coveragePoints.filter(point => keys.has(`point:${point}`)).length / coveragePoints.length) : unavailable;
   const novelty = observed(noveltyKeys.filter(key => key.startsWith('point:')).length);
   return Object.freeze({ eligible: true, reason: 'valid_observation',
-    score: (reachability.value ?? 0) * weights.reachability + novelty.value * weights.novelty + (zap.value ?? 0) * weights.zap,
-    reachability, coverage: unavailable, novelty, zap, noveltyKeys: Object.freeze(noveltyKeys.sort()) });
+    score: ((reachability.value ?? 0) + (coverage.value ?? 0)) * weights.reachability + novelty.value * weights.novelty + (zap.value ?? 0) * weights.zap,
+    reachability, coverage, novelty, zap, noveltyKeys: Object.freeze(noveltyKeys.sort()) });
 }
