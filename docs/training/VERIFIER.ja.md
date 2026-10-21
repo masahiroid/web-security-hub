@@ -1,6 +1,6 @@
 # サンプル検証ハンズオン
 
-[English](VERIFIER.md) · [基本ハンズオン](README.ja.md)
+[English](VERIFIER.md) · [基本ハンズオン](README.ja.md) · [遺伝的探索](GENETIC.ja.md)
 
 このコースでは、架空のサンプルで「正常版→問題を入れた版→修正版」を比較します。
 外部サイトへの接続、実データ、モデルやAPIキーの設定は不要です。

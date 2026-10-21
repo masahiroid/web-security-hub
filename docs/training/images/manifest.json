@@ -354,6 +354,42 @@
         "width": 1440,
         "height": 1200
       }
+    },
+    {
+      "lang": "ja",
+      "step": "genetic-run",
+      "file": "docs/training/images/genetic-run-ja.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
+    },
+    {
+      "lang": "ja",
+      "step": "genetic-compare",
+      "file": "docs/training/images/genetic-compare-ja.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
+    },
+    {
+      "lang": "en",
+      "step": "genetic-run",
+      "file": "docs/training/images/genetic-run-en.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
+    },
+    {
+      "lang": "en",
+      "step": "genetic-compare",
+      "file": "docs/training/images/genetic-compare-en.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
     }
   ],
   "runs": [

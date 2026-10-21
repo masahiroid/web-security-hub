@@ -1,5 +1,5 @@
 import { LLM_LIMITS } from '../domain/llmConfig';
-import { validateLoopbackEndpoint } from '../domain/llmSettings';
+import { validateLoopbackEndpoint, validateRemoteEndpoint } from '../domain/llmSettings';
 import { LlmError } from '../domain/llmTypes';
 import type { LlmCompletion, LlmProvider, LlmRequest } from '../domain/llmTypes';
 import type { Scalar } from '../domain/types';
@@ -40,12 +40,19 @@ const record = (value: unknown): Record<string, unknown> | null => value && type
 const count = (value: unknown): number | null => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null;
 /** OpenAI-compatible chat endpoint on numeric loopback (e.g. llama.cpp server). Sends only the prompt; no credentials. */
 export function createLocalProvider(endpoint: string, model: string, fetcher: typeof fetch = fetch): LlmProvider {
-  const url = new URL(LLM_LIMITS.chatPath, validateLoopbackEndpoint(endpoint));
+  return createChatProvider(new URL(LLM_LIMITS.chatPath, validateLoopbackEndpoint(endpoint)), model, {}, fetcher);
+}
+/** Same wire format for an explicitly permitted https origin; the key is supplied by the caller and never recorded. */
+export function createRemoteProvider(endpoint: string, model: string, apiKey: string, fetcher: typeof fetch = fetch): LlmProvider {
+  if (!apiKey) throw Error('Missing LLM API key');
+  return createChatProvider(new URL(LLM_LIMITS.chatPath, validateRemoteEndpoint(endpoint)), model, { authorization: `Bearer ${apiKey}` }, fetcher);
+}
+function createChatProvider(url: URL, model: string, credentials: Readonly<Record<string, string>>, fetcher: typeof fetch): LlmProvider {
   return {
     async complete(request: LlmRequest): Promise<LlmCompletion> {
       let body: string;
       try {
-        const response = await fetcher(url, { method: 'POST', redirect: 'error', signal: request.signal, headers: { 'content-type': 'application/json' },
+        const response = await fetcher(url, { method: 'POST', redirect: 'error', signal: request.signal, headers: { 'content-type': 'application/json', ...credentials },
           body: JSON.stringify({ model, temperature: 0, max_tokens: request.maxTokens, stream: false,
             messages: [{ role: 'system', content: request.system }, { role: 'user', content: request.prompt }],
             response_format: { type: 'json_schema', json_schema: { name: 'candidates', strict: true, schema: request.schema } } }) });

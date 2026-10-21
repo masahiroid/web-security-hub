@@ -1,13 +1,13 @@
 import { GeneticEvaluationError } from '../domain/geneticCampaignTypes';
 import { POINTS } from '../domain/config';
-import { awaitGeneticEvaluation } from './geneticEvaluation';
+import { awaitGeneticEvaluation, evaluationStop } from './geneticEvaluation';
 import { validateGeneticSettings } from '../domain/geneticSettings';
 import { GENETIC_LIMITS } from '../domain/geneticConfig';
 import { geneticRandom, individual, nextPopulation } from '../domain/geneticEvolution';
 import { evaluateGeneticFitness } from '../domain/geneticFitness';
 import { genomeKey, validateGenome, validateGenomeSpace } from '../domain/geneticGenome';
 import type { GenomeSpace } from '../domain/geneticGenome';
-import type { Generation, GeneticStop, GeneticEvaluationPort, GeneticProposer, GeneticSearchReport, LlmProposalRecord } from '../domain/geneticTypes';
+import type { EvaluatedIndividual, Generation, GeneticStop, GeneticEvaluationPort, GeneticProposer, GeneticSearchReport, LlmProposalRecord } from '../domain/geneticTypes';
 import type { EvidencePoint, Result, Seed } from '../domain/types';
 
 export type { GeneticEvaluationPort, GeneticSearchReport } from '../domain/geneticTypes';
@@ -32,6 +32,8 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
     const proposals: LlmProposalRecord[] = [];
     const seen = new Set<string>();
     let reservedTrials = 0;
+    let carried: readonly EvaluatedIndividual[] = [];
+    const evaluatedKeys = new Set<string>();
     let best = -Infinity;
     let stagnant = 0;
     const deadline = now() + settings.ttlMs;
@@ -58,16 +60,13 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
           if (result.feedback.controlPassed && result.observation.seedId !== candidate.seed.seedId) { stop = 'error'; break; }
           const fitness = evaluateGeneticFitness(result, seen, settings.weights, coveragePoints);
           entries.push(Object.freeze({ individual: candidate, fitness }));
-          if (result.evidence.state === 'source_mismatch') { stop = 'source_changed'; break; }
-          if (result.observation.outcome === 'timeout') { stop = 'timeout'; break; }
-          if (!result.feedback.controlPassed) { stop = 'control_failed'; break; }
-          if (result.observation.outcome !== 'completed') { stop = 'error'; break; }
-          if (result.feedback.zap === 'incomplete') { stop = 'zap_incomplete'; break; }
-          if (!fitness.eligible) { stop = 'unverified_evidence'; break; }
+          evaluatedKeys.add(genomeKey(candidate.seed, space));
+          stop = evaluationStop(result, fitness);
+          if (stop) break;
         }
         const eligible = entries.filter(entry => entry.fitness.eligible);
         const bestScore = eligible.length ? Math.max(...eligible.map(entry => entry.fitness.score)) : null;
-        if (entries.length) generations.push(Object.freeze({ index, individuals: Object.freeze(entries),
+        if (entries.length) generations.push(Object.freeze({ index, carriedIds: Object.freeze(carried.map(entry => entry.individual.id)), individuals: Object.freeze(entries),
           uniqueGenomes: new Set(entries.map(entry => genomeKey(entry.individual.seed, space))).size, bestScore }));
         if (stop) return report(stop);
         // All members of a generation see the same novelty baseline, avoiding order bias.
@@ -76,18 +75,19 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
         if (index + 1 === settings.generations) return report('generation_limit');
         if (stagnant >= settings.stagnationGenerations) return report('stagnation');
         if (reservedTrials + GENETIC_LIMITS.trialsPerPair > settings.maxTrials) return report('trial_budget');
-        const next = nextPopulation(entries, index + 1, settings, space, random);
+        const pool = [...carried, ...entries];
+        const next = nextPopulation(pool, index + 1, settings, space, random, evaluatedKeys);
         if (!next.sufficient) return report('diversity_exhausted');
+        carried = next.carried;
         population = [...next.individuals];
         if (proposer) {
           const capacity = settings.population - settings.elite;
-          const proposal = await proposer.propose({ generation: index + 1, capacity, evaluated: entries, signal });
+          const proposal = await proposer.propose({ generation: index + 1, capacity, evaluated: pool, signal });
           proposals.push(proposal.record);
           const llm = proposal.seeds.map((seed, offset) => individual(`llm-${index + 1}-${offset}`, index + 1, seed, 'llm', [], space));
-          // Model candidates replace GA-bred tail members only; elites and the total HTTP budget are unchanged.
-          const merged = [...population.slice(0, settings.elite), ...llm, ...population.slice(settings.elite)];
-          const unique = new Set<string>();
-          population = merged.filter(entry => { const key = genomeKey(entry.seed, space); return !unique.has(key) && !!unique.add(key); }).slice(0, settings.population);
+          // Model candidates replace GA-bred members only; they must be new genomes and the trial budget is unchanged.
+          const unique = new Set(evaluatedKeys);
+          population = [...llm, ...population].filter(entry => { const key = genomeKey(entry.seed, space); return !unique.has(key) && !!unique.add(key); }).slice(0, settings.population);
         }
       }
       return report('generation_limit');

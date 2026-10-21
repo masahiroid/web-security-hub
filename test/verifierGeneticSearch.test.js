@@ -151,3 +151,19 @@ test('a later transport error retains completed members of the partial generatio
   assert.equal(report.generations[0].individuals.length, 1);
   assert.equal(report.reservedTrials, 4);
 });
+
+test('evaluated genomes are never proposed again and elites are carried with their observations', async () => {
+  const config = settings({ crossoverRate: 1, mutationRate: 1, elite: 2 });
+  const done = new Set(evaluated.map(entry => genomeKey(entry.individual.seed, space)));
+  const next = nextPopulation(evaluated, 1, config, space, geneticRandom(7), done);
+  assert.equal(next.individuals.length, 4);
+  assert(next.individuals.every(entry => !done.has(genomeKey(entry.seed, space))));
+  assert.deepEqual(next.carried.map(entry => entry.individual.id), ['initial-3', 'initial-2']);
+  assert(next.individuals.every(entry => entry.operator !== 'elite'));
+  const seen = new Set();
+  let calls = 0;
+  const report = await createGeneticSearch({ evaluate: async candidate => { calls++; seen.add(genomeKey(candidate.seed, space)); return response(candidate); } })(request({ settings: settings({ generations: 4, stagnationGenerations: 4, elite: 2 }) }));
+  assert.equal(seen.size, calls);
+  assert.equal(report.generations.length, 4);
+  assert(report.generations.slice(1).every(generation => generation.carriedIds.length === 2));
+});

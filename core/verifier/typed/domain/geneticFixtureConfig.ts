@@ -11,8 +11,11 @@ export const GENETIC_FIXTURE = Object.freeze({
   fields: ['x', 'y', 'z'] as const, maximumValue: 15,
   challenge: Object.freeze({ x: 7, y: 11, z: 13 }),
   coveragePoints: Object.freeze([POINTS.boundary, POINTS.confirm, POINTS.commit]),
+  comparisonDirectory: Object.freeze(['artifacts', 'private', 'genetic-comparison']),
   reportDirectory: Object.freeze(['artifacts', 'private', 'genetic-verifier']),
   reportVersion: 1, reproductionTrials: 2,
+  /** Fixed-rule baseline vocabulary: boundary and power-of-two values, deliberately without the challenge. */
+  ruleValues: Object.freeze([0, 1, 2, 4, 8, 15]),
   sourceSegments: ['core', 'verifier', 'generated'] as const,
 });
 export const compoundSpace: GenomeSpace = Object.freeze(GENETIC_FIXTURE.fields.map(field => Object.freeze({

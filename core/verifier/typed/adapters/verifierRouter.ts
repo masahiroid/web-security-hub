@@ -8,6 +8,7 @@ import { CAMPAIGN } from '../domain/campaignConfig';
 import { HTTP_STATUS, LIMITS, TRANSPORT } from '../domain/config';
 import { createSastSampleRoute } from './sastSampleRoute';
 import { createZapRuntimeRoute } from './zapRuntimeRoute';
+import { createGeneticRoute } from './geneticRoute';
 import { DATA_ROOT } from '../../../paths';
 export const VERIFIER_API = Object.freeze({ base: '/api/verifier', session: '/session', sastSample: '/sast-sample', jobs: '/jobs', job: '/jobs/:jobId', cancel: '/jobs/:jobId/cancel', html: '/jobs/:jobId/report.html', cookie: 'wsh_verifier', tokenBytes: 32, cookieSuffixBytes: 8, sessions: 32, sessionTtlMs: 1_800_000 });
 const remoteLoopback = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
@@ -16,6 +17,7 @@ export function createVerifierRouter({ applicationVersion, dataRoot }: { applica
   const jobs = createVerificationJobs(createFixtureVerificationService({ applicationVersion, ...(dataRoot === undefined ? {} : { dataRoot }) }), randomUUID);
   const sastSample = createSastSampleRoute({ dataRoot: dataRoot ?? DATA_ROOT, applicationVersion });
   const zapRuntime = createZapRuntimeRoute(dataRoot ?? DATA_ROOT);
+  const genetic = createGeneticRoute({ dataRoot: dataRoot ?? DATA_ROOT, applicationVersion });
   const sessions = new Map<string, number>();
   const cookieName = `${VERIFIER_API.cookie}_${randomBytes(VERIFIER_API.cookieSuffixBytes).toString('hex')}`;
   router.use((req, res, next) => {
@@ -40,6 +42,7 @@ export function createVerifierRouter({ applicationVersion, dataRoot }: { applica
   router.use((req, res, next) => { const token = cookie(req); if (!token || (sessions.get(token) ?? 0) <= Date.now()) return void res.sendStatus(HTTP_STATUS.unauthorized); res.locals.verifierOwner = token; next(); });
   router.use(VERIFIER_API.sastSample, sastSample.router);
   router.use('/zap-runtime', zapRuntime.router);
+  router.use('/genetic', genetic.router);
   const owner = (res: express.Response): string => String(res.locals.verifierOwner);
   const jobId = (req: express.Request): string => {
     const value: unknown = req.params.jobId;
@@ -62,5 +65,5 @@ export function createVerifierRouter({ applicationVersion, dataRoot }: { applica
     } catch { res.sendStatus(HTTP_STATUS.notFound); }
   });
   router.use((_error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => { res.status(HTTP_STATUS.badRequest).json({ error: 'invalid_request' }); });
-  return { router, close: async () => { await Promise.all([jobs.close(), sastSample.close(), zapRuntime.close()]); } };
+  return { router, close: async () => { await Promise.all([jobs.close(), sastSample.close(), zapRuntime.close(), genetic.close()]); } };
 }

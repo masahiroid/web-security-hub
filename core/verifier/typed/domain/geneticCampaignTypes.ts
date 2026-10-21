@@ -2,7 +2,8 @@ import type { GeneticSettings, GeneticStop, GeneticSearchReport, GeneticEvaluati
 import type { LlmSettings } from './llmTypes';
 import type { Pair, Mode } from './campaignTypes';
 import type { Seed } from './types';
-export interface GeneticFixtureOptions { readonly mode: Mode; readonly settings: GeneticSettings; readonly llm: LlmSettings }
+export type SearchMethod = 'rules' | 'ga';
+export interface GeneticFixtureOptions { readonly mode: Mode; readonly method: SearchMethod; readonly settings: GeneticSettings; readonly llm: LlmSettings }
 export interface GeneticExecution { readonly individualId: string; readonly pair: Pair }
 export interface GeneticSession extends GeneticEvaluationPort {
   readonly sourceDigest: string;

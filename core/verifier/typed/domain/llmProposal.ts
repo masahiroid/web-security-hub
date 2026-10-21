@@ -8,9 +8,11 @@ import type { Scalar, Seed } from './types';
 
 export const LLM_SYSTEM_PROMPT = 'You propose test inputs as JSON only. Use only the listed fields and allowed values. Output nothing else.';
 /** Strict response schema; unknown fields are never accepted. */
-export function proposalSchema(maxProposals: number): Readonly<Record<string, unknown>> {
+export function proposalSchema(maxProposals: number, space: GenomeSpace): Readonly<Record<string, unknown>> {
+  const values = { type: 'object', additionalProperties: false, required: space.filter(gene => !gene.optional).map(gene => gene.field),
+    properties: Object.fromEntries(space.map(gene => [gene.field, { enum: gene.values }])) };
   return Object.freeze({ type: 'object', additionalProperties: false, required: ['candidates'], properties: { candidates: {
-    type: 'array', maxItems: maxProposals, items: { type: 'object', additionalProperties: false, required: ['values'], properties: { values: { type: 'object' } } } } } });
+    type: 'array', maxItems: maxProposals, items: { type: 'object', additionalProperties: false, required: ['values'], properties: { values } } } } });
 }
 /** Keeps only typed gene values and aggregate numbers: no ids, URLs, headers, evidence or profiles. */
 export function redactFeedback(evaluated: readonly EvaluatedIndividual[]): readonly LlmFeedback[] {
