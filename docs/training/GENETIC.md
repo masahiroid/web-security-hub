@@ -44,12 +44,12 @@ Select **Compare 3 methods**. The workspace runs, under the same HTTP trial limi
 Read the table as measurements, not as a ranking: reproduction rate (independent re-execution confirmed the violation), trials until the first reproduction, measured points reached, duplicate candidates, time and tokens.
 A reproduction on the fixed sample would be a false positive; the table highlights it.
 A run that ended because the environment failed (for example the operating system ran out of local ports during many back-to-back runs) is retried once after a cooldown; if it is still invalid it is excluded from the rates and counted as *valid / total runs*.
-With the default of 192 trials the GA found the violation in few or none of the six seeds, so raise the trial limit and compare again. The result depends on the seeds and limit; no method is guaranteed to win.
+Results depend on the seeds and the trial limit; raise the limit to compare under a larger budget.
 
 ## 5. Model candidates (optional)
 
 - **Off** is the default. The search is complete without a model.
-- **Mock** is a deterministic test stand-in that nudges the best candidates. It is not a language model and makes no performance claim.
+- **Mock** is a deterministic test stand-in that nudges the best candidates. It is not a language model; use it to try the workflow.
 - **Model on this machine** connects to an OpenAI-compatible server on `127.0.0.1` (for example a llama.cpp server). Only typed candidate values and scores are sent, never URLs, credentials, files or evidence.
   Every reply is checked against a strict schema and the allowed values. An invalid, truncated, refused, oversized or duplicate reply is not executed; after a limited number of retries the GA continues without the model.
 - The model cannot change the scope, profiles or HTTP trial limit. Candidates that replace part of the GA's slots do not consume extra trials.
