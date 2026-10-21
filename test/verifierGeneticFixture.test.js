@@ -52,7 +52,7 @@ test('same seed gives same discovered seed; saved report is private and escaped'
     assert.deepEqual(a.report.reproduction.seed.values, b.report.reproduction.seed.values);
     assert.match(fs.readFileSync(a.saved.htmlFile, 'utf8'), /Content-Security-Policy/);
     assert.ok(!/<script/i.test(fs.readFileSync(a.saved.htmlFile, 'utf8')));
-    assert.equal(fs.statSync(a.saved.jsonFile).mode & 0o077, 0);
+    if (process.platform !== 'win32') assert.equal(fs.statSync(a.saved.jsonFile).mode & 0o077, 0);
     assert.equal(JSON.parse(fs.readFileSync(a.saved.jsonFile, 'utf8')).reportId, a.report.reportId);
   } finally { fs.rmSync(dataRoot, { recursive: true, force: true }); }
 });
