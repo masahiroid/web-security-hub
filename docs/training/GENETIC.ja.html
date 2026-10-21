@@ -1,0 +1,66 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>遺伝的探索ハンズオン</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>遺伝的探索ハンズオン</h1>
+<p><a href="GENETIC.html">English</a> · <a href="VERIFIER.ja.html">サンプル検証</a> · <a href="README.ja.html">基本コース</a></p>
+<p>3つの条件が同時にそろったときだけ違反になる架空のサンプルを、世代を重ねて探索します。
+外部サイト、実際の認証情報、APIキーは不要です。言語モデルは任意で、初期状態では使いません。</p>
+<h2>1. 画面を開く</h2>
+<p>左のナビゲーションで <strong>探索（GA）</strong> を選びます。設定と使い方は左、結果と詳細は右に表示されます。
+サンプルはこの画面専用で、サイト管理で選んだサイトとは無関係です。</p>
+<h2>2. 問題を入れた版を1回探索する</h2>
+<p><strong>1回探索</strong>、<strong>問題を入れた版</strong>、<strong>遺伝的アルゴリズム</strong>、モデル候補 <strong>使わない</strong> を選び、<strong>実行</strong> を押します。
+候補を作り、それぞれを独立した正常対照つきで実行し、良い候補を残して交叉・突然変異を行い、これを繰り返します。
+違反らしい候補が見つかると、別のセッションで再実行します。この独立した再実行で確認できたものだけが <strong>独立再現</strong> と表示されます。</p>
+<p><img src="images/genetic-run-ja.png" alt="問題を入れた版の探索結果" /></p>
+<p>表の1行が1世代です。最良スコア、異なる候補の数、モデル由来の候補数を表示します。
+行をクリック（またはフォーカスしてEnter）すると、その世代の全候補（演算、親、値、スコア）を <strong>詳細</strong> に表示します。
+スコアは次の世代の候補を選ぶための順位付けで、違反の判定ではありません。</p>
+<h2>3. 正常版・修正版で再現しないことを確認する</h2>
+<p>同じ設定で <strong>正常版</strong> と <strong>修正版</strong> を実行します。結果は <strong>再現の対象なし</strong> になります。
+探索は、上限への到達、取消、正常対照の失敗、サンプルのソース変更のときも、理由を表示して止まります。
+有限の試行で違反が見つからないことは、安全の証明ではありません。</p>
+<h2>4. 3方式を比較する</h2>
+<p><strong>3方式を比較</strong> を選びます。同じHTTP試行上限と、事前に固定したseedで、問題を入れた版と修正版に対して次を実行します。</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定ルール</td>
+<td>境界値と2の累乗の固定リストを順に試します。結果から学習しません</td>
+</tr>
+<tr>
+<td>GA</td>
+<td>到達と新規性の観測を使い、選択・交叉・突然変異で候補を改善します</td>
+</tr>
+<tr>
+<td>GA＋モデル</td>
+<td>同じGAの候補枠の一部をモデルに任せます。モデル候補を「使わない」以外にすると実行されます</td>
+</tr>
+</tbody>
+</table>
+<p><img src="images/genetic-compare-ja.png" alt="3方式の比較" /></p>
+<p>表は順位ではなく測定値として読みます。再現率（独立した再実行で違反を確認できた割合）、最初の再現までの試行、到達した計測点、重複した候補、時間、tokenを表示します。
+修正版で再現した場合は誤検知であり、表で強調されます。
+既定の192試行では、6つのseedのうちGAが違反を見つけた回数は少ないか0でした。試行上限を増やして再比較してください。結果はseedと上限に依存し、どの方式が常に優れるとは言えません。</p>
+<h2>5. モデル候補（任意）</h2>
+<ul>
+<li><strong>使わない</strong> が初期値です。モデルなしでも探索は完結します。</li>
+<li><strong>モック</strong> は、最良の候補の近傍を返す決定的な検証用の代役です。言語モデルではなく、性能の主張はしません。</li>
+<li><strong>この端末のモデル</strong> は、<code>127.0.0.1</code> のOpenAI互換サーバー（例：llama.cppのserver）に接続します。送るのは型付きの候補値とスコアだけで、URL・認証情報・ファイル・証拠は送りません。
+応答は厳密なスキーマと許可された値で検査します。不正・途中切れ・拒否・過大・重複の応答は実行せず、限られた回数の再試行後はモデルなしでGAを続けます。</li>
+<li>モデルはスコープ、プロファイル、HTTP試行上限を変更できません。GAの枠を置き換えた候補は、追加の試行を使いません。</li>
+<li>外部サービスへの送信は、この画面では提供しません。コマンドラインで、明示の許可フラグ、キーの環境変数名、費用上限が必要です。</li>
+</ul>
+<h2>6. 取消と保存</h2>
+<p><strong>取消</strong> で実行中の探索や比較を止めます。取り消した比較は未完了と表示します。結果はJSONとHTMLでアプリの非公開データ領域に保存します。保存した結果には架空とはいえ正確な入力が含まれるため、公開しないでください。</p>
+<h2>コマンドラインで同じ探索を実行する</h2>
+<pre><code class="language-sh">npm run verifier:run -- --genetic-fixture --mode changed
+npm run verifier:run -- --genetic-fixture --mode changed --method rules
+npm run verifier:run -- --genetic-fixture --mode changed --llm mock
+npm run verifier:run -- --genetic-compare --llm mock
+</code></pre>
+<p>コマンドラインの利用にはソースの依存関係が必要です。通常のアプリ操作にコマンドは不要です。</p>
+</main></html>

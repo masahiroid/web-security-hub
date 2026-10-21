@@ -44,6 +44,7 @@
     "prestart": "npm run build:verifier",
     "prelaunch": "npm run build:verifier",
     "verifier:verify-ui": "node scripts/verify-verifier-ui.js",
+    "verifier:verify-genetic-ui": "node scripts/verify-genetic-ui.js",
     "preverifier:verify-ui": "npm run build:verifier",
     "sast:verify-ui": "node scripts/verify-sast-mapping-ui.js",
     "presast:verify-ui": "npm run build:verifier",

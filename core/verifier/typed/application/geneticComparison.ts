@@ -10,6 +10,8 @@ export interface ComparisonPorts {
   comparisonId(): string;
   /** Runs one complete campaign on a fresh fixture; the budget lives in options.settings. */
   run(options: GeneticFixtureOptions, signal: AbortSignal): Promise<GeneticCampaignReport>;
+  /** Optional: called after each finished campaign. */
+  progress?(done: number, planned: number): void;
 }
 function measure(report: GeneticCampaignReport, method: ComparisonMethod, seed: number, elapsedMs: number): ComparisonRun {
   const generations = report.search?.generations ?? [];
@@ -71,6 +73,7 @@ export async function runGeneticComparison(ports: ComparisonPorts, options: Comp
       llm: step.method === 'ga_llm' ? options.llm : { ...options.llm, mode: 'disabled', endpoint: null, sendPermission: false, apiKeyEnv: null }, }, signal);
     if (report.state === 'cancelled') { completed = false; break; }
     runs.push(measure(report, step.method, step.seed, ports.now() - started));
+    ports.progress?.(runs.length, plan.length);
   }
   return Object.freeze({ schemaVersion: COMPARISON.schemaVersion, comparisonId: ports.comparisonId(), createdAt: new Date(ports.now()).toISOString(),
     maxTrials: options.settings.maxTrials, seeds, llmMode: options.llm.mode, runs: Object.freeze(runs), summaries: summarize(runs), completed });

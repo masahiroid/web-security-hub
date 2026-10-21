@@ -33,9 +33,9 @@ export function createGeneticFixtureService({ applicationVersion, dataRoot = DAT
   };
   return {
     /** Fixed rules, GA and GA+model under one budget and a pre-fixed seed set; only the aggregate is saved. */
-    async compare(input: unknown, { signal = new AbortController().signal }: { signal?: AbortSignal } = {}) {
+    async compare(input: unknown, { signal = new AbortController().signal, progress }: { signal?: AbortSignal; progress?: (done: number, planned: number) => void } = {}) {
       const options = validateComparisonOptions(input);
-      const report = await runGeneticComparison({ now: Date.now, comparisonId: randomUUID,
+      const report = await runGeneticComparison({ now: Date.now, comparisonId: randomUUID, ...(progress ? { progress } : {}),
         run: (campaign, nextSignal) => runGeneticCampaign(campaignPorts(campaign), campaign, nextSignal) }, options, signal);
       return Object.freeze({ report, saved: await store.saveComparison(report) });
     },

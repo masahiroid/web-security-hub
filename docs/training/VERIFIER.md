@@ -1,6 +1,6 @@
 # Sample verification hands-on
 
-[日本語](VERIFIER.ja.md) · [Basic course](README.md)
+[日本語](VERIFIER.ja.md) · [Basic course](README.md) · [Genetic search](GENETIC.md)
 
 Compare a baseline, a deliberately changed sample, and a fixed sample using synthetic data.
 No external target, real credentials, model or API key is required.
