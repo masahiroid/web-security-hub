@@ -7,6 +7,10 @@ import { createGeneticReportStore } from './geneticReportStore';
 import { createLlmProposer } from '../application/llmProposer';
 import { compoundSpace } from '../domain/geneticFixtureConfig';
 import { createLocalProvider, createMockProvider, createRemoteProvider } from './llmProviders';
+import { runGeneticComparison } from '../application/geneticComparison';
+import { validateComparisonOptions } from './geneticComparisonOptions';
+import type { GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
+import type { Mode } from '../domain/campaignTypes';
 import type { FixtureFactory } from './fixtureRuntime';
 import type { LlmProvider, LlmSettings } from '../domain/llmTypes';
 
@@ -20,14 +24,24 @@ export function createGeneticFixtureService({ applicationVersion, dataRoot = DAT
   applicationVersion: string; dataRoot?: string; factory?: FixtureFactory; timeoutMs?: number; llmProvider?: LlmProvider; env?: NodeJS.ProcessEnv;
 }) {
   const store = createGeneticReportStore(dataRoot);
+  const campaignPorts = (options: GeneticFixtureOptions) => {
+    // The model is consulted only when this campaign enables it, even if a provider was injected.
+    const provider = options.llm.mode === 'disabled' ? undefined : llmProvider ?? providerFor(options.llm, env);
+    return { applicationVersion, now: Date.now, reportId: randomUUID, ...(provider && options.method === 'ga' ? { proposer: createLlmProposer(provider, options.llm, compoundSpace) } : {}),
+      start: (mode: Mode, nextSignal: AbortSignal, deadline: number, maxTrials: number) => startGeneticHttpSession(mode, nextSignal, deadline, maxTrials,
+        { ...(factory ? { factory } : {}), ...(timeoutMs === undefined ? {} : { timeoutMs }) }) };
+  };
   return {
+    /** Fixed rules, GA and GA+model under one budget and a pre-fixed seed set; only the aggregate is saved. */
+    async compare(input: unknown, { signal = new AbortController().signal }: { signal?: AbortSignal } = {}) {
+      const options = validateComparisonOptions(input);
+      const report = await runGeneticComparison({ now: Date.now, comparisonId: randomUUID,
+        run: (campaign, nextSignal) => runGeneticCampaign(campaignPorts(campaign), campaign, nextSignal) }, options, signal);
+      return Object.freeze({ report, saved: await store.saveComparison(report) });
+    },
     async run(input: unknown, { signal = new AbortController().signal }: { signal?: AbortSignal } = {}) {
       const options = validateGeneticFixtureOptions(input);
-      const provider = llmProvider ?? providerFor(options.llm, env);
-      const report = await runGeneticCampaign({ applicationVersion, ...(provider ? { proposer: createLlmProposer(provider, options.llm, compoundSpace) } : {}), now: Date.now, reportId: randomUUID,
-        start: (mode, nextSignal, deadline, maxTrials) => startGeneticHttpSession(mode, nextSignal, deadline, maxTrials,
-          { ...(factory ? { factory } : {}), ...(timeoutMs === undefined ? {} : { timeoutMs }) }),
-      }, options, signal);
+      const report = await runGeneticCampaign(campaignPorts(options), options, signal);
       return Object.freeze({ report, saved: await store.save(report) });
     },
   };

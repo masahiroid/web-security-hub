@@ -1,6 +1,6 @@
 import { GeneticEvaluationError } from '../domain/geneticCampaignTypes';
 import { POINTS } from '../domain/config';
-import { awaitGeneticEvaluation } from './geneticEvaluation';
+import { awaitGeneticEvaluation, evaluationStop } from './geneticEvaluation';
 import { validateGeneticSettings } from '../domain/geneticSettings';
 import { GENETIC_LIMITS } from '../domain/geneticConfig';
 import { geneticRandom, individual, nextPopulation } from '../domain/geneticEvolution';
@@ -58,12 +58,8 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
           if (result.feedback.controlPassed && result.observation.seedId !== candidate.seed.seedId) { stop = 'error'; break; }
           const fitness = evaluateGeneticFitness(result, seen, settings.weights, coveragePoints);
           entries.push(Object.freeze({ individual: candidate, fitness }));
-          if (result.evidence.state === 'source_mismatch') { stop = 'source_changed'; break; }
-          if (result.observation.outcome === 'timeout') { stop = 'timeout'; break; }
-          if (!result.feedback.controlPassed) { stop = 'control_failed'; break; }
-          if (result.observation.outcome !== 'completed') { stop = 'error'; break; }
-          if (result.feedback.zap === 'incomplete') { stop = 'zap_incomplete'; break; }
-          if (!fitness.eligible) { stop = 'unverified_evidence'; break; }
+          stop = evaluationStop(result, fitness);
+          if (stop) break;
         }
         const eligible = entries.filter(entry => entry.fitness.eligible);
         const bestScore = eligible.length ? Math.max(...eligible.map(entry => entry.fitness.score)) : null;

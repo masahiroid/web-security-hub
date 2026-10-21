@@ -26,6 +26,11 @@ export async function main(argv: readonly string[]): Promise<number> {
     }
     const metadata: unknown = JSON.parse(readFileSync(join(PROJECT_ROOT, 'package.json'), 'utf8'));
     if (!metadata || typeof metadata !== 'object' || !('version' in metadata) || typeof metadata.version !== 'string') throw Error('Missing application version');
+    if (command.kind === 'compare') {
+      const { report, saved } = await createGeneticFixtureService({ applicationVersion: metadata.version }).compare(command.options, { signal: controller.signal });
+      process.stdout.write(JSON.stringify({ completed: report.completed, summaries: report.summaries, ...saved }) + '\n');
+      return report.completed ? CLI_EXIT.success : CLI_EXIT.interrupted;
+    }
     if (command.kind === 'genetic') {
       const { report, saved } = await createGeneticFixtureService({ applicationVersion: metadata.version }).run(command.options, { signal: controller.signal });
       process.stdout.write(JSON.stringify({ state: report.state, reproduction: report.reproduction.state, trials: report.trials, generations: report.search?.generations.length ?? 0, ...saved }) + '\n');

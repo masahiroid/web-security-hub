@@ -1,5 +1,6 @@
 import { GeneticEvaluationError } from '../domain/geneticCampaignTypes';
 import { createGeneticSearch } from './geneticSearch';
+import { createRulesSearch } from './rulesSearch';
 import { compoundInitial, compoundSpace, GENETIC_FIXTURE } from '../domain/geneticFixtureConfig';
 import { compoundOracle } from '../domain/compoundOracle';
 import { individual } from '../domain/geneticEvolution';
@@ -36,10 +37,11 @@ export async function runGeneticCampaign(ports: GeneticCampaignPorts, options: G
     const remaining = Math.floor(deadline - ports.now());
     if (remaining <= 0) { state = interrupted() ?? 'deadline'; }
     else {
-      search = await createGeneticSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, ports.proposer)({
-        settings: { ...options.settings, maxTrials: searchBudget, ttlMs: remaining }, space: compoundSpace,
-        initial: compoundInitial(options.settings.population), signal: combined,
-      });
+      const settings = { ...options.settings, maxTrials: searchBudget, ttlMs: remaining };
+      search = options.method === 'rules'
+        ? await createRulesSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, GENETIC_FIXTURE.ruleValues)({ settings, space: compoundSpace, signal: combined })
+        : await createGeneticSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, ports.proposer)({
+          settings, space: compoundSpace, initial: compoundInitial(options.settings.population), signal: combined });
       state = search.stop;
     }
     await session.close();
