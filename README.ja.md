@@ -18,7 +18,6 @@
 
 OWASP のリスク分類を基準にした、ローカル実行の Web セキュリティ診断・フォーム回帰テストツールです。テストケースの値生成はルールベースで行います。表示中の SAST 結果を明示許可のうえでレビューする任意のAIレビューアダプターを備えますが、テストケース生成やスキャン本体では使用しません。
 
-
 ## アプリのダウンロード
 
 | OS | インストーラー | 状態 |
@@ -26,7 +25,7 @@ OWASP のリスク分類を基準にした、ローカル実行の Web セキュ
 | macOS / Apple Silicon | [DMG をダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v4.0.0/Web-Security-Hub_4.0.0_macos_arm64.dmg) | Developer ID 署名・Apple 公証済み |
 | Windows / x64 | [セットアップをダウンロード](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v4.0.0/Web-Security-Hub_4.0.0_windows_x64_setup.exe) | 未署名 |
 
-[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v4.0.0)。macOS Intel / Linux はソース版をご利用ください。Windows 版は Windows の CI 環境でインストール後の操作を確認しています。
+[配布ファイルと SHA-256](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v4.0.0)。macOS Intel / Linux はソース版をご利用ください。
 
 ## デスクトップ版・ダブルクリック起動
 
@@ -60,14 +59,14 @@ npm start
 - **Playwright シナリオ記録** — 設定済みログイン後にローカルの可視ブラウザーを開き、許可済みの操作をテストケース生成・再実行・DAST で共用する確認可能な保存シナリオへ変換します。パスワードは記録せず、その他の入力値も明示選択が必要です。
 - **静的解析 (SAST)** — 指定したローカルソースツリーを解析し、動的コード実行、コマンド実行 API、SQL 文字列連結、秘密情報、TLS 検証無効化の兆候を検出します。`node_modules`、`.git`、ビルド成果物は除外します。
 - **フォーム・回帰テストケース作成** — 同じ巡回・ログインシナリオからフォームを発見し、HTML 制約に基づく正常・境界・異常値をペアワイズで組み合わせます。Playwright spec、YAML、HTML レポートを出力します。
-- **テストケース管理の基盤** — `site.config.json` の標準変数と `.env`（`SECRET_<NAME>`）のシークレット変数をシナリオステップ内で `{{NAME}}` トークンとして利用できます。`sites/<id>/shared-steps.json` に保存する共有ステップ群は `useSharedStep` ステップから参照でき、`sites/<id>/data/<name>.csv` のデータセットを指定するとシナリオを行ごとに繰り返すデータ駆動テストが行えます。サイトの整理用に `folder` / `labels` メタデータも追加しました。`core/scenario/*` と `/api/sites/:id/{variables,shared-steps,data-sets}` から利用できますが、UI 側の組み込みは未着手です。
+- **テストケース管理の基盤** — `site.config.json` の標準変数と `.env`（`SECRET_<NAME>`）のシークレット変数をシナリオステップ内で `{{NAME}}` トークンとして利用できます。`sites/<id>/shared-steps.json` に保存する共有ステップ群は `useSharedStep` ステップから参照でき、`sites/<id>/data/<name>.csv` のデータセットを指定するとシナリオを行ごとに繰り返すデータ駆動テストが行えます。サイトの整理用に `folder` / `labels` メタデータも追加しました。`core/scenario/*` と `/api/sites/:id/{variables,shared-steps,data-sets}` から利用できます。
 - **シナリオステップの拡張** — `back`/`forward`/`reload` によるナビゲーション、`uncheck`、`setFile`（`sites/<id>/fixtures/` 配下に限定したアップロード）、`download`（`sites/<id>/downloads/` へ保存）に加え、`branch`（要素の有無・表示・テキストによるif/else分岐）と `loop`（指定回数の繰り返し）に対応しました。`core/scenario/siteScenario.js` で検証し、DAST シナリオ再生とテストケース生成の両方が共通の `core/scenario/stepExecutor.js` を通じて実行するため挙動が一致します。生成される `generated.spec.ts` にも同じロジックをインライン化しています。
 - **クロスブラウザ・端末エミュレーション** — `site.config.json` の `browser.engine` で Chromium/Firefox/WebKit を切り替え（`npm install` で3エンジンとも導入）、`browser.device` で Playwright のデバイス定義（例: `"iPhone 14"`）によるビューポート/UA エミュレーションを適用できます。`browser.clientCert` でクライアント証明書も設定可能（パスフレーズは `.env` の `SECRET_CLIENT_CERT_PASSPHRASE`）。
 - **認証セッションの保存（SSO・Google認証アプリ向け）** — `core/scenario/authSession.js` が可視ブラウザーを開き、人間が手動でログインします（Google等サードパーティの認証画面自体は意図的に自動操作しません）。ログイン後のCookie/localStorageを`sites/<id>/auth/storageState.json`に保存し、以降のクロール・探索はログイン済み状態から開始できます。ルート: `POST /api/auth-session/{start,stop,cancel}`。
 - **探索的クロール** — `core/crawler/explorer.js` が同一オリジンのリンクを辿りつつ、フォーム外にある「破壊的操作らしくない」コントロール（ボタン・タブ・ドロップダウン等）を1つずつ独立した使い捨てタブでクリックし、状態が積み重ならないようにしながらスクリーンショットで画面遷移を地図化します。`<form>`内の要素、および送信/削除/ログアウト/購入等の日英キーワードにラベルが一致する要素はクリックせず「スキップ」として報告します（フォーム送信は一切行いません）。既存のフォームテスト・セキュリティ診断パイプラインの代替ではなく、網羅的な画面探索の補助です。実行: `GET /api/sites/:id/explore/run`（SSE）。結果: `/api/sites/:id/explore-sessions/:sessionId/explore-report.html`。
 - **セルフヒーリング（ロケータ自動修復）** — `core/scenario/locatorStrategy.js` が、記録された各click/fill/check/selectステップに構造的な「修復ヒント」（tag・id・data-testid・name・role・aria-label・placeholder・text・class。値そのものは含まない）を保存します。実行時（`core/scenario/stepExecutor.js`）、主セレクタが数秒以内に見つからない場合、修復ヒントから導いたセレクタ候補を順に試し、それでも見つからなければ同じタグを持つ現在のページ上の要素を修復ヒントとの一致度でスコアリングして最も近いものを採用します。修復は無言では行わず、修復の都度 `🩹 セレクタ自動修復 <旧> -> <新>` をログ出力し、`healEvents`配列に記録します。どのセレクタが実際に効かなくなったかを実行結果（将来的にはレポート）で可視化し、テストが記録内容から静かにズレていくのを防ぎます。
 - **AIアサーション（任意機能）** — `aiAssert`シナリオステップは、自然言語のアサーションをページのテキストスナップショット（表示テキストと操作要素のアクセシブルネーム／role）と照合します。`core/ai/assertionAdapter.js`の任意の外部AI CLIアダプターを使うため、設定されたAIサービスへページのテキストが送信される場合があります。既定では無効で、サイト単位で`site.config.json`の`ai.assertionsEnabled: true`を設定します。他のステップ種別は決定論的な処理です。アサーション失敗時は理由を添えてステップを失敗とし、結果をログと`aiAssertions`配列に記録します。
-- **モバイル（iOS/Android）対応 — Appium経由** — `site.config.json`の`platform: "ios"|"android"`と`mobile`ブロック（`deviceName`・`platformVersion`・`app`または`bundleId`）を設定すると、Playwrightパイプラインの代わりに`core/mobile/*`が使われます。`appiumServer.js`がローカルのAppiumサーバーを起動し（このプロジェクト自身の`node_modules/.bin/appium`を使うため別途グローバルインストール不要）、`mobileSession.js`がWebdriverIOセッションをそこへ確立します（iOSはXCUITest、AndroidはUiAutomator2——ホスト側にXcodeまたはAndroid SDK＋起動中のシミュレータ/エミュレータ/実機は別途必要）。`mobileStepExecutor.js`が`mobileScenario.steps`で定義するWebdriverIOネイティブの小さめのステップ言語（`tap`・`fill`・`wait`・`waitForSelector`・`swipe`・`screenshot`・`loop`）を実行します。実行: `GET /api/sites/:id/mobile/run`（SSE）。このセッションで実機のiOS 27 Simulator（iPhone 17）に対してエンドツーエンドで検証済みです（サーバー起動→シミュレータ起動→WebDriverAgentハンドシェイク→セッション作成→ステップ実行→クリーンな終了まで）。Web版のステップ言語より意図的に小さいスコープです——セルフヒーリング・AIアサーション・条件分岐は未対応、Androidはこのセッションではエミュレータが用意できず未検証です（ドライバ・Capability構築のコードのみ）。
+- **モバイル（iOS/Android）対応 — Appium経由** — `site.config.json`の`platform: "ios"|"android"`と`mobile`ブロック（`deviceName`・`platformVersion`・`app`または`bundleId`）を設定すると、Playwrightパイプラインの代わりに`core/mobile/*`が使われます。`appiumServer.js`がローカルのAppiumサーバーを起動し（このプロジェクト自身の`node_modules/.bin/appium`を使うため別途グローバルインストール不要）、`mobileSession.js`がWebdriverIOセッションをそこへ確立します（iOSはXCUITest、AndroidはUiAutomator2——ホスト側にXcodeまたはAndroid SDK＋起動中のシミュレータ/エミュレータ/実機は別途必要）。`mobileStepExecutor.js`が`mobileScenario.steps`で定義するWebdriverIOネイティブの小さめのステップ言語（`tap`・`fill`・`wait`・`waitForSelector`・`swipe`・`screenshot`・`loop`）を実行します。実行: `GET /api/sites/:id/mobile/run`（SSE）。
 
 各検出結果には重要度、OWASP 分類、根拠、修正案を表示します。自動検出はレビューの補助であり、脆弱性の確定や安全性の保証ではありません。
 
@@ -77,9 +76,30 @@ CLI で許可済みの対象をパッシブ診断する場合:
 npm run dynamic-scan -- https://staging.example.com/
 ```
 
-## ローカルサンプル検証（2.0.0）
+## 検証機能
 
-専用サンプルの一括検証と非公開JSON／HTMLレポートの保存が使えます。ソースの依存関係を導入後、`npm run verifier:run -- --mode changed`で実行できます。正常版・修正版、実行上限・取消については[検証機能ガイド](core/verifier/README.md)を参照してください。アプリの「サンプル検証」画面からも実行・取消・証拠確認・HTMLレポート表示ができます。[画像付きハンズオン](docs/training/VERIFIER.ja.md)を用意しています。2.0.0からの機能です。
+いずれも、内蔵サンプルまたは明示的に許可したローカル対象に対して実行し、結果は非公開のJSONとHTMLとしてこの端末に保存します。日英の画像付きガイドがあります。
+
+### 遺伝的探索
+
+3つの条件が同時にそろったときだけ違反になる架空のサンプルを探索します。候補の選択・交叉・突然変異を世代ごとに繰り返し、同じ候補は2回実行しません。別のセッションで独立に再実行して確認できたものだけを結果として数えます。固定ルール、遺伝的アルゴリズム、言語モデルを併用した方式を、同じ試行上限と固定したseedで比較できます。言語モデルは任意で、初期状態では使いません。デスクトップ版で使えるのはこの端末（127.0.0.1）で動くモデルだけです。外部サービスへの送信はコマンドラインからのみで、明示の許可フラグ、APIキーを保持する環境変数名、費用の上限が必要です。[画像付きガイド](docs/training/GENETIC.ja.md)を参照してください。
+
+```sh
+npm run verifier:run -- --genetic-fixture --mode changed
+npm run verifier:run -- --genetic-compare
+```
+
+### ソース検証
+
+SAST個別検出の解析、内蔵のソース・scope照合サンプル、明示許可したローカルJSON APIの検証に対応します。デスクトップ版からZAPを導入し、受動的な証拠を収集することもできます。[画像付きガイド](docs/training/SAST-MAPPING.ja.md)を参照してください。
+
+### サンプル検証
+
+内蔵サンプルの正常版・問題を入れた版・修正版を比較し、所有権、確認手順、入力境界を検証します。実行上限、取消、証拠の確認、HTMLレポートに対応します。[画像付きガイド](docs/training/VERIFIER.ja.md)と[検証機能ガイド](core/verifier/README.md)を参照してください。
+
+```sh
+npm run verifier:run -- --mode changed
+```
 
 ## ZAP との統合
 
@@ -101,20 +121,10 @@ docker compose -f docker-compose.zap.yml up -d
 
 ## 安全な運用
 
-診断対象は必ず自組織または明示的に許可を得た環境に限定してください。パッシブ診断はフォーム送信や侵入試行を行いませんが、テストケース実行と ZAP Active Scan は対象へリクエストを送信します。認証回避や DoS を目的とした検査は含みません。本番環境で実行する前に、ステージング環境で巡回範囲とページ数を小さく設定して影響を確認してください。
+診断対象は必ず自組織または明示的に許可を得た環境に限定してください。パッシブ診断はフォーム送信や侵入試行を行いませんが、テストケース実行と ZAP Active Scan は対象へリクエストを送信します。認証回避や DoS を目的とした検査は含みません。本番環境で実行する前に、ステージング環境で巡回範囲とページ数を小さく設定して影響を確認してください。 検出結果はレビューの手がかりです。何も検出されなくても、対象が安全であることの証明にはなりません。
 
 ## ライセンスと著作権
 
 Copyright 2024–2026 Masahiro NAKATSUGAWA.
 
 Web Security Hub は [Apache License 2.0](LICENSE) の下で配布します。著作権および帰属情報は [NOTICE](NOTICE) を参照してください。
-
-開発ブランチでは、ソース版で[個別SAST検出IDと静的ルート候補](docs/training/SAST-MAPPING.ja.md)を確認できます。専用サンプルでは画面とCLIからソース・実行scopeを照合できます。任意アプリへの実行接続・ZAP連携は未完成で、公開済み2.0.0の配布版には含まれません。
-
-## 4.0.0 遺伝的探索
-
-3つの条件が同時にそろったときだけ違反になる架空のサンプルを探索します。遺伝的アルゴリズムが候補の選択・交叉・突然変異を世代ごとに行い、同じ候補を2回実行せず、別のセッションで独立に再実行して確認できたものだけを結果として数えます。任意の言語モデルで候補の一部を補えますが、初期状態では使わず、モデルなしでも探索は完結します。GUIで使えるのはこの端末のモデル（127.0.0.1）だけです。固定ルール・遺伝的アルゴリズム・モデル併用を、同じ試行上限と事前に固定したseedで比較できます。[画像付きガイド](docs/training/GENETIC.ja.md)を参照してください。結果は順位ではなく測定値です。どの方式も違反の発見を保証せず、有限の試行で見つからなくても安全の証明にはなりません。モデル接続はloopback上のllama.cppサーバーでのみ確認しており、外部サービスへの送信はコマンドラインだけで、実サービスでは試していません。
-
-## 3.0.0のソース検証
-
-SAST個別検出の解析、専用サンプル、明示許可したローカルJSON APIの検証、GUIからの任意ZAP導入に対応します。[画像付き操作ガイド](docs/training/SAST-MAPPING.ja.md)にprivate JSON/HTMLの参照方法と制限を記載しています。ソースだけの評価は調査中のままです。[依存関係の範囲](SECURITY.md)。

@@ -11,7 +11,7 @@
 - Publish the private vulnerability reporting process and clarify security, testing and cryptography practices.
 
 - Genetic search over a synthetic compound-condition sample: typed genomes, tournament selection, crossover, mutation, carried elites, diversity and stagnation limits, deterministic replay from seed, and independent re-execution in a separate session before a violation is reported. A candidate is never executed twice.
-- Optional language-model candidate supply (off by default): strict per-gene response schema, bounded retries with explicit fallback, call/token/cost budgets, redacted feedback, local loopback runtime verified with llama.cpp. Remote sending needs explicit command-line permission and was not exercised against a real service.
+- Optional language-model candidate supply (off by default): strict per-gene response schema, bounded retries with explicit fallback, call/token/cost budgets, redacted feedback, loopback-local runtimes such as llama.cpp. Remote sending needs explicit command-line permission, an API-key environment variable name and a cost ceiling.
 - "Search (GA)" workspace and CLI (`--genetic-fixture`, `--genetic-compare`): comparison of fixed rules, GA and GA with model under one HTTP trial budget and pre-fixed seeds, with reproduction rate, trials to first reproduction, measured points, duplicates, time and tokens. Environment-failed runs are retried and excluded from rates.
 - Bilingual illustrated hands-on guide for genetic search. Existing sample verification, source verification and CLI remain available.
 
