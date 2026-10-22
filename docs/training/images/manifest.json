@@ -390,6 +390,24 @@
         "width": 1280,
         "height": 768
       }
+    },
+    {
+      "lang": "ja",
+      "step": "vex",
+      "file": "docs/training/images/vex-ja.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
+    },
+    {
+      "lang": "en",
+      "step": "vex",
+      "file": "docs/training/images/vex-en.png",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      }
     }
   ],
   "runs": [

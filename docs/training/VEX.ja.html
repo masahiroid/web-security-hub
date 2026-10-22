@@ -1,0 +1,46 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenVEX ハンズオン</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>OpenVEX ハンズオン</h1>
+<p><a href="VEX.html">English</a> · <a href="GENETIC.ja.html">遺伝的探索</a> · <a href="README.ja.html">基本ハンズオン</a></p>
+<p>検証の結果を OpenVEX（v0.2.0）の文書にします。証拠が状態を提案し、名前のあるレビュー担当者が決め、承認したドラフトだけを書き出します。
+外部には送信せず、ドラフトと出力はこの端末の非公開領域に保存します。</p>
+<h2>1. 先に検証を実行する</h2>
+<p>サンプル検証または遺伝的探索を実行します。保存された結果が、VEX 画面に<strong>証拠</strong>として表示され、それぞれ「再現」「再現せず」「判定不能」と示されます。取り消した実行、timeout した実行、途中で止まった実行は、「再現せず」ではなく「判定不能」です。ソースだけの結果は常に「判定不能」です。</p>
+<h2>2. ドラフトを作る</h2>
+<p>左のナビゲーションで <strong>VEX</strong> を選び、<strong>ドラフト</strong>で作成者（必要なら役割）を入力して <strong>作成</strong> を押します。</p>
+<h2>3. ステートメントを追加する</h2>
+<p><strong>ステートメント</strong>を開きます。脆弱性ID（CVE や GHSA の ID、または独自のID）、製品ID（<code>pkg:npm/example-shop@1.2.3</code> のようなパッケージURL。SHA-256 も任意で指定できます）を入力し、根拠にする検証結果を選びます。<strong>証拠から状態を提案</strong>は、選んだ結果に再現したものがあるときだけ「影響あり（affected）」を提案し、それ以外は「調査中」を提案します。</p>
+<p><img src="images/vex-ja.png" alt="エクスポート後の VEX 画面" /></p>
+<table>
+<thead>
+<tr>
+<th>状態</th>
+<th>必要なもの</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>調査中（under_investigation）</td>
+<td>追加の入力は不要です。再現しなかった・判定不能な結果が支えられるのはこの状態です</td>
+</tr>
+<tr>
+<td>影響あり（affected）</td>
+<td>対応方針。根拠が「証拠」の場合は、選んだ証拠に再現した結果も必要です</td>
+</tr>
+<tr>
+<td>影響なし（not_affected）</td>
+<td>理由（justification）と、根拠「レビュー担当者の判断」</td>
+</tr>
+<tr>
+<td>修正済み（fixed）</td>
+<td>根拠「レビュー担当者の判断」</td>
+</tr>
+</tbody>
+</table>
+<p>再現しなかったことは「影響なし」や「修正済み」の根拠になりません。そのため、この2つは証拠を根拠にできません。ご自身の判断として記録すると、レビュー担当者が主張した内容であるという注記つきで書き出されます。一覧の行を選ぶと編集でき、<strong>削除</strong>もできます。</p>
+<h2>4. 承認する</h2>
+<p>承認者の名前を入力して <strong>承認</strong> を押します。承認時に証拠を読み直し、結果が変わっていたり削除されていたりすると承認できません。承認したドラフトは編集できません。</p>
+<h2>5. エクスポートする</h2>
+<p><strong>エクスポート</strong>で OpenVEX の JSON を <strong>OpenVEX</strong> に表示し、<strong>JSONを保存</strong>でダウンロードします。文書には固定の ID、版、作成者、時刻、ステートメントごとの項目が入ります。</p>
+<h2>6. 改訂する</h2>
+<p>承認済みの文書を変更するときは <strong>改訂版を作る</strong> を押します。改訂版は文書 ID を保ったまま版を上げます。編集し、もう一度承認してからエクスポートします。</p>
+<p>有限の検証で何も見つからなくても、製品が安全であることの証明にはなりません。そのため、検証だけで「影響なし」が作られることはありません。</p>
+</main></html>
