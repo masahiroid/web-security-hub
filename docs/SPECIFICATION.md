@@ -286,7 +286,7 @@ Trial limits include normal-control trials.
 
 ## 9. Non-functional requirements
 
-- Environments: installers for macOS (Apple Silicon) and Windows (x64). The source edition needs Node.js 22 or later on macOS, Windows or Linux.
+- Environments: installers for macOS (Apple Silicon) and Windows (x64). The source edition needs Node.js 22.19.0 or later on macOS, Windows or Linux. The installers bundle Node.js.
 - All execution is local. Communication goes only to assessment targets, external services the user configured, and official download sources for installations the user starts (browser, ZAP, Java).
 - Long operations show progress and can be cancelled. Results ended by cancellation, deadline or limit are saved separately from completed ones.
 - The interface fits a fixed size of 960×648 or larger; long results scroll inside their area.
