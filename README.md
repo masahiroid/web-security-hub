@@ -80,6 +80,10 @@ npm run dynamic-scan -- https://staging.example.com/
 
 Each workspace runs against a built-in sample or an explicitly authorized local target, keeps results as private JSON and HTML on your machine, and has an illustrated guide in English and Japanese.
 
+### OpenVEX
+
+Turn verification results into an [OpenVEX](https://openvex.dev/) v0.2.0 document. Evidence suggests a status, a named reviewer decides, and only an approved draft is exported. A verification that finds nothing never produces "not affected" on its own; that status and "fixed" are recorded as the reviewer's decision with a justification. Drafts and exports stay on your machine. See the [illustrated guide](docs/training/VEX.md).
+
 ### Genetic search
 
 Search a synthetic sample whose violation needs three conditions at once. Candidates are selected, recombined and mutated over generations; the same candidate is never executed twice, and a result counts only after an independent re-execution in a separate session. Fixed rules, the genetic algorithm and the algorithm with a language model can be compared under the same trial limit and fixed seeds. A language model is optional and off by default. The desktop app uses only models running on this machine (127.0.0.1); sending to a remote service is available from the command line only and requires an explicit permission flag, the name of an environment variable holding the API key, and a cost ceiling. See the [illustrated guide](docs/training/GENETIC.md).

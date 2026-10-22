@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenVEX hands-on</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>OpenVEX hands-on</h1>
+<p><a href="VEX.ja.html">日本語</a> · <a href="GENETIC.html">Genetic search</a> · <a href="README.html">Basic course</a></p>
+<p>Turn verification results into an OpenVEX (v0.2.0) document. Evidence suggests a status, a named reviewer decides, and only an approved draft is exported.
+Nothing is sent off this machine; drafts and exports stay in private local storage.</p>
+<h2>1. Run a verification first</h2>
+<p>Run a sample verification or a genetic search. Their saved results appear as <strong>evidence</strong> in the VEX workspace, each marked <em>Reproduced</em>, <em>Not reproduced</em> or <em>Inconclusive</em>. A run that was cancelled, timed out or stopped early is <em>Inconclusive</em>, never <em>Not reproduced</em>. Source-only results are always <em>Inconclusive</em>.</p>
+<h2>2. Create a draft</h2>
+<p>Choose <strong>VEX</strong> in the left navigation, enter the author (and optionally a role) under <strong>Draft</strong>, and choose <strong>Create</strong>.</p>
+<h2>3. Add statements</h2>
+<p>Open <strong>Statement</strong>. Enter the vulnerability ID (for example a CVE or GHSA ID, or your own ID), the product ID (a package URL such as <code>pkg:npm/example-shop@1.2.3</code>, optionally with its SHA-256), and choose the verification results that support the statement. <strong>Suggest status from evidence</strong> proposes <em>affected</em> only when a selected result reproduced; otherwise it proposes <em>under investigation</em>.</p>
+<p><img src="images/vex-en.png" alt="VEX workspace after export" /></p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>What it needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Under investigation</td>
+<td>Nothing else. This is what non-reproduction or inconclusive results can support</td>
+</tr>
+<tr>
+<td>Affected</td>
+<td>An action statement. Basis <em>Evidence</em> also needs a reproduced result among the selected evidence</td>
+</tr>
+<tr>
+<td>Not affected</td>
+<td>A justification, and the basis <em>Reviewer's decision</em></td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>The basis <em>Reviewer's decision</em></td>
+</tr>
+</tbody>
+</table>
+<p>Not reproducing a finding does not establish <em>not affected</em> or <em>fixed</em>, so those two statuses cannot be based on evidence. Record them as your own decision; they are exported with the note that the reviewer asserted them. Select a row in the statement list to edit it, or use <strong>Remove</strong>.</p>
+<h2>4. Approve</h2>
+<p>Enter the approver's name and choose <strong>Approve</strong>. The workspace re-reads the evidence and rejects the approval if a result changed or was removed. An approved draft cannot be edited.</p>
+<h2>5. Export</h2>
+<p>Choose <strong>Export</strong> to show the OpenVEX JSON under <strong>OpenVEX</strong>, and <strong>Save JSON</strong> to download it. Each document has a stable ID, a version, the author, a timestamp and one entry per statement.</p>
+<h2>6. Revise</h2>
+<p>To change an approved document, choose <strong>Create revision</strong>. The revision keeps the document ID and raises the version; edit it, approve it again and export.</p>
+<p>A finite verification that finds nothing does not prove a product is safe, which is why it never produces <em>not affected</em> on its own.</p>
+</main></html>

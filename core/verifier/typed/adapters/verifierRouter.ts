@@ -9,6 +9,7 @@ import { HTTP_STATUS, LIMITS, TRANSPORT } from '../domain/config';
 import { createSastSampleRoute } from './sastSampleRoute';
 import { createZapRuntimeRoute } from './zapRuntimeRoute';
 import { createGeneticRoute } from './geneticRoute';
+import { createVexRoute } from './vexRoute';
 import { DATA_ROOT } from '../../../paths';
 export const VERIFIER_API = Object.freeze({ base: '/api/verifier', session: '/session', sastSample: '/sast-sample', jobs: '/jobs', job: '/jobs/:jobId', cancel: '/jobs/:jobId/cancel', html: '/jobs/:jobId/report.html', cookie: 'wsh_verifier', tokenBytes: 32, cookieSuffixBytes: 8, sessions: 32, sessionTtlMs: 1_800_000 });
 const remoteLoopback = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
@@ -43,6 +44,7 @@ export function createVerifierRouter({ applicationVersion, dataRoot }: { applica
   router.use(VERIFIER_API.sastSample, sastSample.router);
   router.use('/zap-runtime', zapRuntime.router);
   router.use('/genetic', genetic.router);
+  router.use('/vex', createVexRoute({ dataRoot: dataRoot ?? DATA_ROOT }).router);
   const owner = (res: express.Response): string => String(res.locals.verifierOwner);
   const jobId = (req: express.Request): string => {
     const value: unknown = req.params.jobId;

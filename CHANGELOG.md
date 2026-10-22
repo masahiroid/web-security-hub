@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- OpenVEX review and export: evidence-derived suggestions, reviewer decisions with justifications, named approval and versioned revisions. No status is derived from the absence of findings. Drafts and exports stay in private local storage. New "VEX" workspace and bilingual illustrated guide.
+
 ## 4.0.0
 
 - Backport the upstream glib VariantStrIter soundness fix (GHSA-wrw7-89jp-8q8g / RUSTSEC-2024-0429) into the Linux-only GTK3 dependency using a documented Cargo path patch. An optimized forward/reverse string-iteration regression test exercises the corrected out-pointer.
