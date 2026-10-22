@@ -127,6 +127,20 @@ The **Test Case Generation** tab uses the same start URL, authentication, and sc
 
 Limit all targets to systems you own or environments for which you have explicit authorization. Passive assessment does not submit forms or attempt intrusion. Test-case execution and ZAP Active Scan do send requests to the target. The product does not include authentication-bypass or denial-of-service testing. Before testing production, validate impact with a small crawl scope and page limit in staging. Findings are leads for review: a run that finds nothing does not prove that a target is safe.
 
+## Related security tools
+
+Other security tools from the same author, published at [TIP](https://tip.co.jp/en/initiatives/):
+
+| Tool | What it does |
+|---|---|
+| [SecuLens](https://github.com/masahiroid/seculens) | Command-line security assessment covering SBOM vulnerabilities, license policy and static analysis. Also for [Python](https://github.com/masahiroid/seculens-python) and [PHP](https://github.com/masahiroid/seculens-php). |
+| [SBOM Vulnerability Scanner](https://marketplace.visualstudio.com/items?itemName=masahirocom.sbom-vulnerability-scanner) | VS Code extension that generates an SBOM and checks it for known vulnerabilities. |
+| [Codes Doctor](https://marketplace.visualstudio.com/items?itemName=masahirocom.codes-doctor) | VS Code extension that diagnoses code health locally, including security issues, technical debt and dependencies. |
+| [LLM Security Scanner](https://marketplace.visualstudio.com/items?itemName=masahirocom.llm-security-scan) | Local static analyzer that finds paths from external input or LLM output to dangerous sinks such as SQL, shell or HTML. |
+| [Model Audit Lite](https://github.com/masahiroid/model-audit-lite) | Lightweight CLI that checks Hugging Face models for arbitrary-code-execution risks such as pickle weights. |
+| [AgentDojo (Japanese)](https://github.com/masahiroid/agentdojo-ja) | Japanese benchmark for the prompt-injection resistance of LLM agents. |
+| [Agent Defense Radar](https://huggingface.co/spaces/masahiroid/agent-defense-radar) | Visualization for understanding and defending against indirect prompt injection, with model comparison and live guard testing. |
+
 ## License and copyright
 
 Copyright 2024–2026 Masahiro NAKATSUGAWA.

@@ -123,6 +123,20 @@ docker compose -f docker-compose.zap.yml up -d
 
 診断対象は必ず自組織または明示的に許可を得た環境に限定してください。パッシブ診断はフォーム送信や侵入試行を行いませんが、テストケース実行と ZAP Active Scan は対象へリクエストを送信します。認証回避や DoS を目的とした検査は含みません。本番環境で実行する前に、ステージング環境で巡回範囲とページ数を小さく設定して影響を確認してください。 検出結果はレビューの手がかりです。何も検出されなくても、対象が安全であることの証明にはなりません。
 
+## 関連するセキュリティーツール
+
+同じ作者による、そのほかのセキュリティーツールです。[TIP](https://tip.co.jp/initiatives/)で公開しています。
+
+| ツール | 内容 |
+|---|---|
+| [SecuLens](https://github.com/masahiroid/seculens) | SBOMの脆弱性、ライセンスポリシー、静的解析を確認するコマンドラインのセキュリティー診断。[Python版](https://github.com/masahiroid/seculens-python)と[PHP版](https://github.com/masahiroid/seculens-php)もあります。 |
+| [SBOM Vulnerability Scanner](https://marketplace.visualstudio.com/items?itemName=masahirocom.sbom-vulnerability-scanner) | SBOMを生成し、既知の脆弱性を確認するVS Code拡張機能。 |
+| [Codes Doctor](https://marketplace.visualstudio.com/items?itemName=masahirocom.codes-doctor) | セキュリティー、技術的負債、依存関係を含むコードの健全性をローカルで診断するVS Code拡張機能。 |
+| [LLM Security Scanner](https://marketplace.visualstudio.com/items?itemName=masahirocom.llm-security-scan) | 外部入力やLLMの出力から、SQL・シェル・HTMLなどの危険な処理へ至る経路を見つけるローカルの静的解析ツール。 |
+| [Model Audit Lite](https://github.com/masahiroid/model-audit-lite) | pickle形式の重みなど、Hugging Faceのモデルに含まれる任意コード実行のリスクを確認する軽量なCLI。 |
+| [AgentDojo（日本語版）](https://github.com/masahiroid/agentdojo-ja) | LLMエージェントのプロンプトインジェクション耐性を調べる日本語のベンチマーク。 |
+| [Agent Defense Radar](https://huggingface.co/spaces/masahiroid/agent-defense-radar) | 間接プロンプトインジェクションを理解し防御するための可視化ツール。モデルの比較とガード機能の実地テストができます。 |
+
 ## ライセンスと著作権
 
 Copyright 2024–2026 Masahiro NAKATSUGAWA.
