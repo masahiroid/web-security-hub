@@ -139,7 +139,7 @@ test('real reports: evidence observations come from stored reports and the priva
     await vex.approve(draft.draftId, 'Reviewer');
     const { document, file } = await vex.exportDocument(draft.draftId);
     assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).statements[0].status, 'affected');
-    assert.equal(fs.statSync(file).mode & 0o077, 0);
+    if (process.platform !== 'win32') assert.equal(fs.statSync(file).mode & 0o077, 0);
     assert.ok(!JSON.stringify(document).includes(changed.report.reportId));
     assert.equal((await vex.list()).length, 1);
     assert.equal((await vex.get(draft.draftId)).review.state, 'approved');
