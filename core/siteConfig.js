@@ -56,16 +56,16 @@ function withoutUnsafeKeys(value) {
  */
 function mergeSiteConfig(base, incoming) {
   if (incoming === null || typeof incoming !== 'object' || Array.isArray(incoming)) return incoming;
-  const out = { ...base };
-  for (const [key, value] of Object.entries(incoming)) {
+  const merged = Object.entries(incoming)
     // Keys that would rewrite an object's prototype are never merged.
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-    const baseValue = base?.[key];
-    const bothPlainObjects =
-      value && typeof value === 'object' && !Array.isArray(value) && baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue);
-    out[key] = bothPlainObjects ? mergeSiteConfig(baseValue, value) : withoutUnsafeKeys(value);
-  }
-  return out;
+    .filter(([key]) => !UNSAFE_KEYS.has(key))
+    .map(([key, value]) => {
+      const baseValue = base?.[key];
+      const bothPlainObjects =
+        value && typeof value === 'object' && !Array.isArray(value) && baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue);
+      return [key, bothPlainObjects ? mergeSiteConfig(baseValue, value) : withoutUnsafeKeys(value)];
+    });
+  return { ...base, ...Object.fromEntries(merged) };
 }
 
 function writeSiteConfig(siteId, config) {
