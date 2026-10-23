@@ -68,7 +68,7 @@
     "@tauri-apps/cli": "^2.12.3",
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",
-    "appium-xcuitest-driver": "^12.19.1",
+    "appium-xcuitest-driver": "^12.13.1",
     "eslint": "10.13.0",
     "eslint-plugin-security": "4.2.0",
     "globals": "17.13.0",
