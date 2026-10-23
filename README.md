@@ -38,8 +38,10 @@ Start with the [illustrated bilingual course](docs/training/README.md). Includes
 ## Documentation
 
 - [User manual](docs/USER_MANUAL.md)
+- [Specification](docs/SPECIFICATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
-- [Functional specification](docs/SPECIFICATION.md)
+- [Detailed design](docs/DETAILED_DESIGN.md)
+- [Screen design](docs/SCREEN_DESIGN.md)
 - [Operations and security procedure](docs/OPERATIONS.md)
 - [Localization guide](docs/LOCALIZATION.md)
 

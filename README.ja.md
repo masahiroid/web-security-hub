@@ -38,8 +38,10 @@ OWASP のリスク分類を基準にした、ローカル実行の Web セキュ
 ## ドキュメント
 
 - [利用マニュアル](docs/ja/USER_MANUAL.md)
+- [仕様書](docs/ja/SPECIFICATION.md)
 - [設計書](docs/ja/ARCHITECTURE.md)
-- [機能仕様書](docs/ja/SPECIFICATION.md)
+- [詳細設計書](docs/ja/DETAILED_DESIGN.md)
+- [画面設計書](docs/ja/SCREEN_DESIGN.md)
 - [運用・安全管理手順](docs/ja/OPERATIONS.md)
 - [多言語対応ガイド](docs/ja/LOCALIZATION.md)
 
