@@ -3,7 +3,7 @@ import globals from 'globals';
 import security from 'eslint-plugin-security';
 
 export default [
-  { ignores: ['node_modules/**', '.desktop/**', '.runtime/**', 'artifacts/**', 'sites/**', 'src-tauri/**', 'core/verifier/generated/**', 'public/generated/**', 'docs/internal/**', 'training/sast/**'] },
+  { ignores: ['node_modules/**', '.desktop/**', '.runtime/**', 'artifacts/**', 'sites/**', 'src-tauri/**', 'core/verifier/generated/**', 'server/generated/**', 'public/generated/**', 'docs/internal/**', 'training/sast/**'] },
   {
     files: ['**/*.js', '**/*.mjs'],
     ...js.configs.recommended,

@@ -12,7 +12,7 @@ test('UI replay passes site credentials to child environment without logging the
   const id = `test-replay-${process.pid}`;
   const dir = siteDir(id);
   const originalSpawn = childProcess.spawn;
-  const servicePath = require.resolve('../server/services/replayService');
+  const servicePath = require.resolve('../server/generated/services/replayService');
   let child, invocation;
   try {
     writeSiteConfig(id, { baseUrl: 'http://127.0.0.1:4180/en/apply', outputDir: '.golden-master' });

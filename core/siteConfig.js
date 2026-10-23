@@ -39,6 +39,15 @@ function readSiteConfig(siteId) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/** A deep copy of submitted data without keys that would rewrite a prototype, at any depth. */
+function withoutUnsafeKeys(value) {
+  if (Array.isArray(value)) return value.map(withoutUnsafeKeys);
+  if (value === null || typeof value !== 'object') return value;
+  return Object.fromEntries(Object.entries(value).filter(([key]) => !UNSAFE_KEYS.has(key)).map(([key, entry]) => [key, withoutUnsafeKeys(entry)]));
+}
+
 /**
  * Recursively merges `incoming` onto `base`, keyed field by field, so that a
  * partial update (e.g. from a UI form that only knows about a subset of
@@ -47,14 +56,16 @@ function readSiteConfig(siteId) {
  */
 function mergeSiteConfig(base, incoming) {
   if (incoming === null || typeof incoming !== 'object' || Array.isArray(incoming)) return incoming;
-  const out = { ...base };
-  for (const [key, value] of Object.entries(incoming)) {
-    const baseValue = base?.[key];
-    const bothPlainObjects =
-      value && typeof value === 'object' && !Array.isArray(value) && baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue);
-    out[key] = bothPlainObjects ? mergeSiteConfig(baseValue, value) : value;
-  }
-  return out;
+  const merged = Object.entries(incoming)
+    // Keys that would rewrite an object's prototype are never merged.
+    .filter(([key]) => !UNSAFE_KEYS.has(key))
+    .map(([key, value]) => {
+      const baseValue = base?.[key];
+      const bothPlainObjects =
+        value && typeof value === 'object' && !Array.isArray(value) && baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue);
+      return [key, bothPlainObjects ? mergeSiteConfig(baseValue, value) : withoutUnsafeKeys(value)];
+    });
+  return { ...base, ...Object.fromEntries(merged) };
 }
 
 function writeSiteConfig(siteId, config) {

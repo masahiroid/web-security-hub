@@ -1,6 +1,3 @@
 'use strict';
-
-// Per-client limits for local file-backed report and welcome endpoints.
-// A separate store is created for each route to keep ordinary UI polling independent.
-const FILE_SERVING_LIMITS = Object.freeze({ windowMs: 60_000, limit: 240, standardHeaders: 'draft-8', legacyHeaders: false });
-module.exports = { FILE_SERVING_LIMITS };
+// Compatibility entry point for the file-serving limits defined in server/typed/config.ts.
+module.exports = { FILE_SERVING_LIMITS: require('../generated/config').FILE_SERVING_LIMITS };
