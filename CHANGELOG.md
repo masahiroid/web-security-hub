@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## 5.0.0
+
 - OpenVEX review and export: evidence-derived suggestions, reviewer decisions with justifications, named approval and versioned revisions. No status is derived from the absence of findings. Drafts and exports stay in private local storage. New "VEX" workspace and bilingual illustrated guide.
+- Require Node.js 24 or later. The desktop installers bundle Node.js 24.22.1; the source launcher installs the same pinned runtime when no suitable one is found.
+- New specification, architecture, detailed design and screen design documents in English and Japanese. Related security tools are introduced in the READMEs.
 
 ## 4.0.0
 

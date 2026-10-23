@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
-const MINIMUM_NODE_MAJOR = 22;
-const MINIMUM_NODE_MINOR = 19;
+const MINIMUM_NODE_MAJOR = 24;
+const MINIMUM_NODE_MINOR = 0;
 function isSupportedNode(version) {
   const [major, minor] = String(version).replace(/^v/, '').split('.').map(Number);
   return Number.isInteger(major) && Number.isInteger(minor) && (major > MINIMUM_NODE_MAJOR || major === MINIMUM_NODE_MAJOR && minor >= MINIMUM_NODE_MINOR);

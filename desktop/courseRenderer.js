@@ -13,7 +13,7 @@ function renderDesktopCourse(html, { lang, origin, port }) {
     ? '<h2>T01 アプリから研修を始める</h2><p>このアプリには実行環境が同梱されています。ホームで診断ブラウザーの準備が完了したら、下のボタンを押してください。サンプルサイトを起動し、日英の研修設定を用意します。ターミナル操作は不要です。</p><p><button type="button" data-start-training>ハンズオン環境を開始</button> · <a href="/welcome">環境チェックに戻る</a></p><p>設定を初期化する場合は、ホームの確認欄と「研修設定も初期化」を使います。過去の実行結果は残ります。</p>'
     : '<h2>T01 Start training from the app</h2><p>The app includes its runtime. Once the automation browser is ready on Home, use the button below to start the sample and prepare both training configurations. No terminal commands are needed.</p><p><button type="button" data-start-training>Start hands-on environment</button> · <a href="/welcome">Return to environment check</a></p><p>To reset training configuration, use the confirmation and Reset training configuration on Home. Previous results remain.</p>';
   html = html.replace(/<h2>T01\b[\s\S]*?(?=<h2>T02\b)/, start);
-  html = html.replace('Node.js 22 以上と npm を準備してください。','').replace('コマンドはすべてリポジトリのルートで実行します。','').replace('Requirements: Node.js 22 or later and npm. ','').replace('Run all commands from the repository root.','');
+  html = html.replace('Node.js 24 以上と npm を準備してください。','').replace('コマンドはすべてリポジトリのルートで実行します。','').replace('Requirements: Node.js 24 or later and npm. ','').replace('Run all commands from the repository root.','');
   for (const mode of ['baseline','changed','fixed','reset']) {
     const command = `npm run training:mode -- ${mode}`;
     html = html.split(`<pre><code class="language-sh">${command}\n</code></pre>`).join(`<p>${button(mode)}</p>`);
