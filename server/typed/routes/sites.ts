@@ -7,7 +7,10 @@ import { listDataSets, readDataSet, writeDataSet } from '../../../core/scenario/
 import { listSharedSteps, writeSharedSteps } from '../../../core/scenario/sharedSteps';
 import { normalizeStoredScenario } from '../../../core/scenario/siteScenario';
 import { listSecretVariableNames, secretEnvKey } from '../../../core/scenario/variables';
-import { DEFAULTS, HTTP_STATUS, PATTERNS } from '../config';
+import { DEFAULTS, HTTP_STATUS } from '../config';
+import { apiRateLimit } from '../lib/rateLimit';
+
+const RULE_SPEC_FILE = /\.(ya?ml|json)$/i;
 import { bodyOf, isRecord, messageOf, param } from '../lib/http';
 
 function existingConfig(siteId: string): SiteConfig {
@@ -20,6 +23,7 @@ function requireObject(value: unknown, message: string): Record<string, unknown>
 /** Site settings, credentials, variables, shared steps and data sets. Secrets are written but never read back. */
 export function createSitesRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   router.get('/sites', (_request, response) => {
     const sites = listSites().map(id => {
       const config = readSiteConfig(id);
@@ -59,7 +63,7 @@ export function createSitesRoutes(): express.Router {
       const siteId = param(request, 'id');
       const config = readSiteConfig(siteId);
       const directory = path.resolve(siteDir(siteId), typeof config.ruleSpecDir === 'string' && config.ruleSpecDir ? config.ruleSpecDir : DEFAULTS.ruleSpecDirectory);
-      const files = fs.existsSync(directory) ? fs.readdirSync(directory).filter(name => PATTERNS.ruleSpecFile.test(name)) : [];
+      const files = fs.existsSync(directory) ? fs.readdirSync(directory).filter(name => RULE_SPEC_FILE.test(name)) : [];
       response.json({ dir: directory, files });
     } catch (error: unknown) { response.status(HTTP_STATUS.badRequest).json({ error: messageOf(error) }); }
   });

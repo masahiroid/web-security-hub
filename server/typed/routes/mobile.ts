@@ -1,11 +1,13 @@
 import express from 'express';
 import { messageOf, param } from '../lib/http';
 import { openSse } from '../lib/sse';
+import { apiRateLimit } from '../lib/rateLimit';
 
 const PACKAGED_MESSAGE = 'This desktop distribution includes web automation only. Use the source/CLI distribution for mobile automation.';
 /** Mobile run (source edition only); the packaged desktop app does not bundle the mobile toolkit. */
 export function createMobileRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   router.get('/sites/:id/mobile/run', async (request, response) => {
     const stream = openSse(response);
     try {

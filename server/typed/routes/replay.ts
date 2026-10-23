@@ -1,15 +1,19 @@
 import express from 'express';
-import { DEFAULTS, PATTERNS } from '../config';
+import { DEFAULTS } from '../config';
+import { apiRateLimit } from '../lib/rateLimit';
+
+const TRUTHY = /^(1|true|yes)$/i;
 import { messageOf, param, queryText } from '../lib/http';
 import { openSse } from '../lib/sse';
 import { startReplay } from '../services/replayService';
 import type { ReplayOptions, ReplayRun } from '../services/replayService';
 
-const flag = (request: express.Request, name: string): boolean => PATTERNS.truthy.test(queryText(request, name) ?? '');
+const flag = (request: express.Request, name: string): boolean => TRUTHY.test(queryText(request, name) ?? '');
 const trimmed = (request: express.Request, name: string, fallback: string): string => queryText(request, name)?.trim() ?? fallback;
 /** Replays a session's generated test, streaming its output; closing the connection cancels the run. */
 export function createReplayRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   router.get('/sites/:id/sessions/:sessionId/replay', async (request, response) => {
     const stream = openSse(response);
     const options: ReplayOptions = {

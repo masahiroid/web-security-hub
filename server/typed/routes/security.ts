@@ -2,6 +2,7 @@ import express from 'express';
 import { scanDynamic } from '../../../core/security/dynamicScanner';
 import { ZapClient } from '../../../core/security/zapClient';
 import { buildSiteScenario } from '../../../core/scenario/siteScenario';
+import { apiRateLimit } from '../lib/rateLimit';
 import { HTTP_STATUS } from '../config';
 import { bodyOf, isRecord, messageOf } from '../lib/http';
 import { runStaticScan } from '../services/staticScanService';
@@ -10,6 +11,7 @@ const AUTHORIZATION_REQUIRED = '対象システムの診断許可を確認して
 /** Dynamic assessment, ZAP reachability and static analysis. Nothing starts without the caller's confirmed authorization. */
 export function createSecurityRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   router.post('/security/dynamic-scan', async (request, response) => {
     const { targetUrl, maxPages, maxDepth, allowActiveScan, authorizationConfirmed, scenario, zap, siteId, useSiteScenario } = bodyOf(request);
     if (!authorizationConfirmed) return void response.status(HTTP_STATUS.badRequest).json({ error: AUTHORIZATION_REQUIRED });

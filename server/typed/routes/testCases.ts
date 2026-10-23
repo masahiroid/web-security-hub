@@ -6,6 +6,7 @@ import { regenerateFromYaml, writeTestCasesYaml } from '../../../core/codegen/te
 import { DEFAULTS, HTTP_STATUS } from '../config';
 import { bodyOf, isRecord, messageOf, param } from '../lib/http';
 import { sessionDirFor } from '../lib/sessionPaths';
+import { apiRateLimit } from '../lib/rateLimit';
 
 function readYamlDocument(directory: string): { yamlPath: string; document: Record<string, unknown> } {
   const yamlPath = path.join(directory, DEFAULTS.testCasesYaml);
@@ -16,6 +17,7 @@ function readYamlDocument(directory: string): { yamlPath: string; document: Reco
 /** The table editor's data source and the YAML export and regeneration it relies on. */
 export function createTestCasesRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   const session = (request: express.Request) => ({ siteId: param(request, 'id'), sessionId: param(request, 'sessionId') });
   // Writes test-cases.yaml from the session's current forms and cases.
   router.post('/sites/:id/sessions/:sessionId/yaml/export', (request, response) => {

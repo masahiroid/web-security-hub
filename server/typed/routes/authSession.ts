@@ -1,12 +1,14 @@
 import express from 'express';
 import { AuthSessionCapture, hasStorageState } from '../../../core/scenario/authSession';
 import { readSiteConfig } from '../../../core/siteConfig';
+import { apiRateLimit } from '../lib/rateLimit';
 import { HTTP_STATUS } from '../config';
 import { bodyOf, messageOf, param } from '../lib/http';
 
 /** Saves the result of a manual sign-in so later crawls start signed in. Authorization is required to start. */
 export function createAuthSessionRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   const capture = new AuthSessionCapture();
   router.get('/auth-session/status', (_request, response) => { response.json(capture.status()); });
   router.get('/sites/:id/auth-session/saved', (request, response) => {

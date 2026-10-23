@@ -1,11 +1,13 @@
 import express from 'express';
 import { PlaywrightScenarioRecorder } from '../../../core/scenario/playwrightRecorder';
+import { apiRateLimit } from '../lib/rateLimit';
 import { HTTP_STATUS } from '../config';
 import { bodyOf, messageOf } from '../lib/http';
 
 /** Records a person's actions in one visible browser as a reviewable scenario. Authorization is required to start. */
 export function createScenarioRecorderRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   const recorder = new PlaywrightScenarioRecorder();
   router.get('/scenario-recorder/status', (_request, response) => { response.json(recorder.status()); });
   router.post('/scenario-recorder/start', async (request, response) => {

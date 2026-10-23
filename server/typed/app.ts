@@ -1,6 +1,7 @@
 import express from 'express';
 import { createVerifierRouter } from '../../core/verifier/generated/adapters/verifierRouter';
-import { SERVER } from './config';
+import { rateLimit } from 'express-rate-limit';
+import { FILE_SERVING_LIMITS, SERVER } from './config';
 import { PACKAGE_INFO } from './packageInfo';
 import { PUBLIC_DIRECTORY, TRAINING_DIRECTORY } from './paths';
 import { createAiReviewRoutes } from './routes/aiReview';
@@ -31,7 +32,7 @@ export function createServerApp(): express.Express {
     createMobileRoutes, createSystemInfoRoutes, createControlRoutes]) app.use('/api', routes());
   app.use('/training', express.static(TRAINING_DIRECTORY));
   app.use(express.static(PUBLIC_DIRECTORY));
-  app.get('/', (_request, response) => { response.sendFile('index.html', { root: PUBLIC_DIRECTORY }); });
+  app.get('/', rateLimit(FILE_SERVING_LIMITS), (_request, response) => { response.sendFile('index.html', { root: PUBLIC_DIRECTORY }); });
   return app;
 }
 /** The port from PORT when it is a valid port number, otherwise the default. */

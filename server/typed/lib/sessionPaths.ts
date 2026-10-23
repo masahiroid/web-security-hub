@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readSiteConfig, siteDir } from '../../../core/siteConfig';
-import { DEFAULTS, PATTERNS } from '../config';
+import { DEFAULTS } from '../config';
+
+const SESSION_ID = /^[a-zA-Z0-9_-]+$/;
 
 /** A site's `.golden-master` output directory, shared by every route that reads or writes sessions. */
 export function sessionsDir(siteId: string): string {
@@ -14,7 +16,7 @@ export function exploreSessionsDir(siteId: string): string {
 }
 /** Resolves and validates one session's directory, requiring the generated test code to exist there. */
 export function sessionDirFor(siteId: string, sessionId: string): string {
-  if (!PATTERNS.sessionId.test(sessionId)) throw new Error(`invalid session id: ${sessionId}`);
+  if (!SESSION_ID.test(sessionId)) throw new Error(`invalid session id: ${sessionId}`);
   const directory = path.join(sessionsDir(siteId), sessionId);
   if (!fs.existsSync(path.join(directory, DEFAULTS.generatedSpec))) throw new Error(`no ${DEFAULTS.generatedSpec} in session: ${sessionId}`);
   return directory;

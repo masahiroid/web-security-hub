@@ -4,6 +4,7 @@ import os from 'node:os';
 import { DEFAULTS, SERVER } from '../config';
 import { PACKAGE_INFO } from '../packageInfo';
 import { PROJECT_ROOT } from '../paths';
+import { apiRateLimit } from '../lib/rateLimit';
 
 const BYTES_PER_GIB = 1024 ** 3;
 const field = (source: unknown, name: string): unknown => source && typeof source === 'object' ? Reflect.get(source, name) : undefined;
@@ -18,6 +19,7 @@ const gib = (bytes: number) => Math.round((bytes / BYTES_PER_GIB) * 10) / 10;
 /** What the running environment looks like; shown in the "System information" dialog. */
 export function createSystemInfoRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   router.get('/system-info', (_request, response) => {
     response.json({
       app: { name: PACKAGE_INFO.name, version: PACKAGE_INFO.version, root: PROJECT_ROOT },

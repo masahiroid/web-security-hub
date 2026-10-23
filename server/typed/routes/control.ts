@@ -1,6 +1,7 @@
 import express from 'express';
 import { spawn } from 'node:child_process';
 import type { Server } from 'node:http';
+import { apiRateLimit } from '../lib/rateLimit';
 import { HTTP_STATUS } from '../config';
 import { PROJECT_ROOT, SERVER_ENTRY } from '../paths';
 
@@ -28,6 +29,7 @@ const listenerOf = (request: express.Request): Server | undefined => {
 /** Stop and restart controls for the standalone server; a managed runtime is closed from its own window instead. */
 export function createControlRoutes(): express.Router {
   const router = express.Router();
+  router.use(apiRateLimit());
   // Stops the process entirely; it cannot be started again from inside, so the user relaunches it.
   router.post('/control/stop', (request, response) => {
     if (managed()) return void response.status(HTTP_STATUS.conflict).json({ error: MANAGED.stop });
