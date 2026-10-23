@@ -9,7 +9,11 @@ function dataDir(siteId) {
 
 function dataFile(siteId, name) {
   if (!/^[a-zA-Z0-9_-]+$/.test(name)) throw new Error(`invalid data set name: ${name}`);
-  return path.join(dataDir(siteId), `${name}.csv`);
+  // The file must stay inside the site's data directory, whatever the name contains.
+  const directory = path.resolve(dataDir(siteId));
+  const file = path.resolve(directory, `${name}.csv`);
+  if (!file.startsWith(`${directory}${path.sep}`)) throw new Error(`invalid data set name: ${name}`);
+  return file;
 }
 
 /** Lists available data-set names (CSV files, extension stripped) for a site. */

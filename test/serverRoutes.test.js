@@ -239,3 +239,16 @@ test('the server entry point listens on loopback and stops on request', async ()
     assert.deepEqual(await exit, { code: 0, signal: null });
   } finally { child.kill(); }
 });
+
+test('site settings never merge keys that would rewrite a prototype', async () => {
+  const hostile = '{"displayName":"Hostile","__proto__":{"polluted":true},"constructor":{"prototype":{"polluted":true}},"crawl":{"__proto__":{"polluted":true},"maxDepth":4}}';
+  const response = await fetch(`${origin}/api/sites/hostile`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: hostile });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(fs.readFileSync(path.join(DATA, 'sites', 'hostile', 'site.config.json'), 'utf8'));
+  assert.deepEqual([stored.displayName, stored.crawl.maxDepth], ['Hostile', 4]);
+  assert.equal(Object.hasOwn(stored, '__proto__'), false);
+  assert.equal(Object.hasOwn(stored, 'constructor'), false);
+  assert.equal(Object.hasOwn(stored.crawl, '__proto__'), false);
+  assert.equal(({}).polluted, undefined);
+  assert.equal(stored.polluted, undefined);
+});
