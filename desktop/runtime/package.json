@@ -1,11 +1,11 @@
 {
   "name": "web-security-hub",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
   "license": "Apache-2.0",
   "description": "Web Security Hub — OWASP-aligned dynamic web scanning and local static analysis.",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "dependencies": {
     "acorn": "8.19.0",

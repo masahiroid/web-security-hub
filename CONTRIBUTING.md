@@ -40,7 +40,7 @@ npm audit --audit-level=moderate --prefix desktop/runtime
 npm run release:check
 ```
 
-Use Node.js 22.19.0 or later and npm. `npm run build:verifier` builds the strict TypeScript verifier and UI; it uses the FLOSS TypeScript compiler. The source application can be built and tested with FLOSS tools; optional native installer packaging additionally needs the platform prerequisites in `docs/desktop/README.md`. Signing/notarization are distribution steps, not required to build the source application.
+Use Node.js 24 or later and npm. `npm run build:verifier` builds the strict TypeScript verifier and UI; it uses the FLOSS TypeScript compiler. The source application can be built and tested with FLOSS tools; optional native installer packaging additionally needs the platform prerequisites in `docs/desktop/README.md`. Signing/notarization are distribution steps, not required to build the source application.
 
 `npm test` uses the FLOSS Node.js test runner and `node:assert/strict`. Assertions remain enabled during tests. Add tests for major features, boundary/invalid inputs, authorization and cancellation; add a regression test when fixing a bug. Existing tests exercise scenarios, mobile command dispatch, replay credentials, verifier scope/capabilities, HTTP transport, evidence correlation and installer privacy. Most-branch coverage has not been measured; passing tests do not claim full coverage or real-device acceptance. The WebdriverIO loopback protocol test does not replace Appium device testing.
 

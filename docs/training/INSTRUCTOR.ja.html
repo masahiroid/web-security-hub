@@ -1,7 +1,7 @@
 <!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>講師用ガイド</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>講師用ガイド</h1>
 <p><a href="INSTRUCTOR.html">English</a> · <a href="README.ja.html">受講者用</a></p>
 <h2>開始前</h2>
-<p>Node.js 22 以上、npm、Chromium が使用できることを確認します。全員が別々のローカル環境を使います。サンプルの状態切替はサーバー単位です。会場で一つのサーバーを共有すると、誰かの変更操作が他の受講者へ影響します。</p>
+<p>Node.js 24 以上、npm、Chromium が使用できることを確認します。全員が別々のローカル環境を使います。サンプルの状態切替はサーバー単位です。会場で一つのサーバーを共有すると、誰かの変更操作が他の受講者へ影響します。</p>
 <p>講師は事前に <code>npm test</code>、<code>npm run training:verify</code>、<code>npm run training:capture</code> を通します。後二つは自分でサーバーを起動するため、手動の Hub / サンプルを終了しておきます。撮影は既存の研修サイトに新しい生成セッションを追加し、そのセッションのケースを編集します。既存セッションは更新しません。ポート競合時は既存プロセスを自動停止しません。</p>
 <p>受講者は <code>training:setup</code> と二つのサーバー起動から開始します。手動で新規登録した場合は、そのサイトを以降の操作で一貫して選びます。英語コースでは URL の <code>/ja/</code> を <code>/en/</code>、サイト ID を <code>training-en</code> にします。</p>
 <h2>進行例</h2>

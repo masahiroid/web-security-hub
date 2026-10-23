@@ -9,7 +9,7 @@ $nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
 $npmCommand = Get-Command npm.cmd -ErrorAction SilentlyContinue
 $useSystem = $false
 if ($nodeCommand -and $npmCommand -and $env:WSH_FORCE_PRIVATE_NODE -ne '1') {
-    & $nodeCommand.Source -e 'const [major,minor]=process.versions.node.split(".").map(Number);process.exit(major>22||(major===22&&minor>=19)?0:1)'
+    & $nodeCommand.Source -e 'const [major,minor]=process.versions.node.split(".").map(Number);process.exit(major>24||(major===24&&minor>=0)?0:1)'
     $useSystem = $LASTEXITCODE -eq 0
 }
 if (-not $useSystem) {

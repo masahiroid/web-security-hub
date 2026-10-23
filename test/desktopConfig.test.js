@@ -11,8 +11,8 @@ test('first-run desktop config uses anonymous templates and preserves private lo
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('source environment rejects Node 22 versions below the mobile toolkit minimum', () => {
+test('source environment requires Node 24 or later', () => {
  const {isSupportedNode}=require('../desktop/environment');
- for(const version of ['20.19.0','22.0.0','22.18.9','invalid'])assert.equal(isSupportedNode(version),false,version);
- for(const version of ['22.19.0','22.23.3','24.0.0','v24.21.0'])assert.equal(isSupportedNode(version),true,version);
+ for(const version of ['20.19.0','22.19.0','22.23.4','23.11.0','invalid'])assert.equal(isSupportedNode(version),false,version);
+ for(const version of ['24.0.0','24.22.1','v24.21.0','25.0.0'])assert.equal(isSupportedNode(version),true,version);
 });

@@ -4,7 +4,7 @@
 
 Use a fictional workshop application site to practice the full workflow: register a target, generate tests, edit a case, detect a change, and inspect security findings. **Hub runs on port 4173; the target site runs on port 4180.**
 
-Requirements: Node.js 22 or later and npm. The core course does not require Docker, ZAP. Allow approximately 60–90 minutes, excluding initial downloads. Run all commands from the repository root.
+Requirements: Node.js 24 or later and npm. The core course does not require Docker, ZAP. Allow approximately 60–90 minutes, excluding initial downloads. Run all commands from the repository root.
 
 Use the left navigation to switch workspaces. Sites has General, Login, Basic auth, Scenario and Recorder tabs. Replay has Run settings and Case editor tabs. Select the saved scenario under Dynamic Scan → Authentication. Results and logs appear on the right; long content scrolls within its own pane.
 

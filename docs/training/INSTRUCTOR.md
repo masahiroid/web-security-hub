@@ -4,7 +4,7 @@
 
 ## Preparation
 
-Verify Node.js 22+, npm and Chromium. Each learner needs an independent local sample server: mode changes affect all browsers connected to the same server.
+Verify Node.js 24+, npm and Chromium. Each learner needs an independent local sample server: mode changes affect all browsers connected to the same server.
 
 Before delivery, run `npm test`, `npm run training:verify` and `npm run training:capture`. Stop manually started Hub/sample servers first: the latter commands start their own servers. Capture creates a new generation session for each training site and edits only that new session. It preserves previous sessions and does not automatically terminate processes occupying its ports.
 
