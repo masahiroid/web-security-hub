@@ -59,7 +59,7 @@ function mergeSiteConfig(base, incoming) {
   const out = { ...base };
   for (const [key, value] of Object.entries(incoming)) {
     // Keys that would rewrite an object's prototype are never merged.
-    if (UNSAFE_KEYS.has(key)) continue;
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     const baseValue = base?.[key];
     const bothPlainObjects =
       value && typeof value === 'object' && !Array.isArray(value) && baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue);

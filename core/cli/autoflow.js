@@ -11,7 +11,7 @@ if (!site || site === '--site') { console.error('Usage: npm run autoflow -- --si
 (async () => {
   const { runnerConfig, outputBaseDir, sessionId } = buildRunnerConfig(site);
   const store = new JsonStore(outputBaseDir, sessionId);
-  const result = await runFormGeneration(runnerConfig, store, (line) => console.log(`[runner] ${String(line).replace(/[\r\n]+/g, ' ')}`));
+  const result = await runFormGeneration(runnerConfig, store, (line) => console.log(`[runner] ${String(line).replace(/\n|\r/g, '')}`));
   writeTestCasesYaml(store.location); writeHtmlReport(store.location); writeMarkdownReport(store.location);
   console.log(JSON.stringify({ sessionId, ...result }, null, 2));
 })().catch((e) => { console.error(e.message); process.exit(1); });
