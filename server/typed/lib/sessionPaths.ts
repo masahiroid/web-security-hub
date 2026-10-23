@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { readSiteConfig, siteDir } from '../../../core/siteConfig';
 import { DEFAULTS } from '../config';
+import { resolveInside } from './fileScope';
 
 const SESSION_ID = /^[a-zA-Z0-9_-]+$/;
 
@@ -17,8 +18,9 @@ export function exploreSessionsDir(siteId: string): string {
 /** Resolves and validates one session's directory, requiring the generated test code to exist there. */
 export function sessionDirFor(siteId: string, sessionId: string): string {
   if (!SESSION_ID.test(sessionId)) throw new Error(`invalid session id: ${sessionId}`);
-  const directory = path.join(sessionsDir(siteId), sessionId);
-  if (!fs.existsSync(path.join(directory, DEFAULTS.generatedSpec))) throw new Error(`no ${DEFAULTS.generatedSpec} in session: ${sessionId}`);
+  // The directory must stay inside the site's output directory, whatever the identifier contains.
+  const directory = resolveInside(sessionsDir(siteId), sessionId);
+  if (!directory || !fs.existsSync(path.join(directory, DEFAULTS.generatedSpec))) throw new Error(`no ${DEFAULTS.generatedSpec} in session: ${sessionId}`);
   return directory;
 }
 /** Sub-directory names of a directory, newest name first; empty when it does not exist. */
