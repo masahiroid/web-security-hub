@@ -1,5 +1,4 @@
 import express from 'express';
-import { createVerifierRouter } from '../../core/verifier/generated/adapters/verifierRouter';
 import { rateLimit } from 'express-rate-limit';
 import { FILE_SERVING_LIMITS, SERVER } from './config';
 import { PACKAGE_INFO } from './packageInfo';
@@ -20,10 +19,19 @@ import { createSystemInfoRoutes } from './routes/systemInfo';
 import { createTestCasesRoutes } from './routes/testCases';
 import { createTestGenerationRoutes } from './routes/testGeneration';
 
+interface VerifierRouter { readonly router: express.Router; close(): Promise<void> }
+type VerifierRouterFactory = (options: { applicationVersion: string }) => VerifierRouter;
+/** The verification API is built separately from this server; it is loaded at run time and checked at this boundary. */
+function loadVerifierRouterFactory(): VerifierRouterFactory {
+  const loaded: unknown = require('../../core/verifier/generated/adapters/verifierRouter');
+  const factory: unknown = loaded && typeof loaded === 'object' ? Reflect.get(loaded, 'createVerifierRouter') : undefined;
+  if (typeof factory !== 'function') throw new Error('The verification API has not been built');
+  return factory as VerifierRouterFactory;
+}
 /** Builds the application: the verification API, every assessment API under /api, and the screens. */
 export function createServerApp(): express.Express {
   const app = express();
-  const verifier = createVerifierRouter({ applicationVersion: PACKAGE_INFO.version });
+  const verifier = loadVerifierRouterFactory()({ applicationVersion: PACKAGE_INFO.version });
   app.use('/api/verifier', verifier.router);
   app.set('closeVerifier', verifier.close);
   app.use(express.json({ limit: SERVER.jsonLimit }));

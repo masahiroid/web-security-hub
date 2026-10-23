@@ -15,7 +15,6 @@
     "rootDir": "core/verifier/typed",
     "outDir": "core/verifier/generated",
     "types": ["node"],
-    "declaration": true,
     "skipLibCheck": false
   },
   "include": ["core/verifier/typed/**/*.ts"]
