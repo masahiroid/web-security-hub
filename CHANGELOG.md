@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.0.0
+
+- MCP server (source edition): AI assistants that support the Model Context Protocol can read verification reports, start sample verifications and genetic searches, and prepare OpenVEX drafts over standard input and output. Permissions (run, code snippets, VEX) are chosen when the server starts and tools that are not allowed are not offered. One job runs at a time with per-minute limits, results are aggregate by default, and approving a VEX draft stays with a person. Illustrated bilingual guide included.
+
 ## 5.0.0
 
 - OpenVEX review and export: evidence-derived suggestions, reviewer decisions with justifications, named approval and versioned revisions. No status is derived from the absence of findings. Drafts and exports stay in private local storage. New "VEX" workspace and bilingual illustrated guide.
