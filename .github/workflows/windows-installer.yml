@@ -20,7 +20,8 @@ jobs:
       - run: npm audit --omit=dev --prefix desktop/runtime
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm audit --audit-level=moderate
+      - run: npm audit --omit=dev
+      - run: node scripts/audit-gate.js
       - run: npm test
       - name: Verify real owned ZAP runtime
         run: npm run verifier:verify-zap -- --install

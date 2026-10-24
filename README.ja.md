@@ -82,6 +82,15 @@ npm run dynamic-scan -- https://staging.example.com/
 
 いずれも、内蔵サンプルまたは明示的に許可したローカル対象に対して実行し、結果は非公開のJSONとHTMLとしてこの端末に保存します。日英の画像付きガイドがあります。
 
+### MCPサーバー
+
+MCPに対応したAIアシスタントが、標準入出力を通じて、検証結果の参照、検証の開始、OpenVEXドラフトの準備を行えます。この端末の中で動き、起動時に許可したことだけを提供します。VEXドラフトの承認は、常に人が行います。[ガイド](docs/training/MCP.ja.md)を参照してください。
+
+```sh
+npm run build:verifier
+node core/verifier/generated/cli/mcp.js --allow-run
+```
+
 ### OpenVEX
 
 検証の結果を[OpenVEX](https://openvex.dev/) v0.2.0の文書にします。証拠が状態を提案し、名前のあるレビュー担当者が決め、承認したドラフトだけを書き出します。何も見つからなかった検証だけで「影響なし」が作られることはなく、「影響なし」と「修正済み」は、理由を添えたレビュー担当者の判断として記録します。ドラフトと出力はこの端末に保存されます。[画像付きガイド](docs/training/VEX.ja.md)を参照してください。

@@ -33,11 +33,15 @@ export function summarizeReport(kind: EvidenceKind, input: unknown): EvidenceRef
   }
   return Object.freeze({ kind, reportId, observation, sourceDigest: digest, createdAt });
 }
+/** The stored report of one kind, or null when it does not exist or is unreadable. Identifiers are checked before any path is built. */
+export async function readStoredReport(dataRoot: string, kind: EvidenceKind, reportId: string): Promise<unknown> {
+  if (!new RegExp(VEX_STORAGE.uuidPattern).test(reportId)) return null;
+  const base = await privateDirectory(dataRoot, LOCATIONS[kind]);
+  try { return await readPrivateJson(join(base, reportId), 'report.json', VEX_LIMITS.maximumBytes * 4); } catch { return null; }
+}
 export function createVexEvidenceCatalog(dataRoot: string): EvidenceCatalog {
   async function read(kind: EvidenceKind, reportId: string): Promise<EvidenceRef | null> {
-    if (!new RegExp(VEX_STORAGE.uuidPattern).test(reportId)) return null;
-    const base = await privateDirectory(dataRoot, LOCATIONS[kind]);
-    try { return summarizeReport(kind, await readPrivateJson(join(base, reportId), 'report.json', VEX_LIMITS.maximumBytes * 4)); } catch { return null; }
+    return summarizeReport(kind, await readStoredReport(dataRoot, kind, reportId));
   }
   return {
     async list() {

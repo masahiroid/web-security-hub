@@ -118,6 +118,17 @@ A common foundation for "send trials only inside the authorized scope, with a no
 | Revision | Creates a new draft with the same document ID and a higher version |
 | Export | Only an approved draft becomes an OpenVEX document |
 
+### 3.7 MCP server (source edition)
+
+| Component | Role |
+|---|---|
+| Permissions | Chosen by the person starting the server (summaries only by default; run, code snippets and VEX are separate opt-ins). Tools the permissions do not allow are not offered |
+| Tool layer | Checks the permission, then a per-minute rate limit, then validates values; runs jobs through the same services as the app, one at a time, and returns aggregate results |
+| Protocol adapter | Describes tools and schemas, rejects malformed arguments before any tool runs, and turns refusals into tool errors with stable codes |
+| Standard output guard | Keeps standard output for protocol messages only; console output goes to standard error |
+
+Approval of VEX drafts is deliberately absent: a named person approves in the app.
+
 ## 4. Desktop edition
 
 - A native shell starts the local server with a bundled runtime and shows its screens. Node.js does not need to be installed.

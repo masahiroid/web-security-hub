@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Use verification from an AI assistant (MCP)</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>Use verification from an AI assistant (MCP)</h1>
+<p><a href="MCP.ja.html">日本語</a> · <a href="GENETIC.html">Genetic search</a> · <a href="VEX.html">OpenVEX</a> · <a href="README.html">Basic course</a></p>
+<p>Web Security Hub can act as an <a href="https://modelcontextprotocol.io/">MCP</a> server over standard input and output, so an AI assistant that supports MCP can read verification results, start verifications and prepare OpenVEX drafts. It runs on your machine, is not exposed over the network, and offers only what you allow when you start it.
+Available in the source edition (Node.js 24 or later).</p>
+<h2>1. Start the server</h2>
+<p>Build once, then let your MCP client start the server:</p>
+<pre><code class="language-sh">npm run build:verifier
+node core/verifier/generated/cli/mcp.js [--allow-run] [--allow-code-snippets] [--allow-vex]
+</code></pre>
+<p>An example client configuration (use the absolute path of your checkout):</p>
+<pre><code class="language-json">{ &quot;mcpServers&quot;: { &quot;web-security-hub&quot;: { &quot;command&quot;: &quot;node&quot;, &quot;args&quot;: [&quot;/path/to/web-security-hub/core/verifier/generated/cli/mcp.js&quot;, &quot;--allow-run&quot;] } } }
+</code></pre>
+<p>Launch it with <code>node</code>, not through <code>npm run</code>: npm prints its own lines to standard output, which would corrupt the protocol. The server writes only protocol messages to standard output and its log to standard error.</p>
+<h2>2. Permissions</h2>
+<p>Permissions are chosen by you when the server starts. The assistant cannot change them, and tools it is not allowed to use are not offered at all.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it allows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(none)</td>
+<td>Reading report summaries and job status, listing VEX drafts and asking for a suggested VEX status</td>
+</tr>
+<tr>
+<td><code>--allow-run</code></td>
+<td>Starting a sample verification or a genetic search on the built-in sample</td>
+</tr>
+<tr>
+<td><code>--allow-code-snippets</code></td>
+<td>Reading the exact synthetic candidate values and per-candidate results of a report</td>
+</tr>
+<tr>
+<td><code>--allow-vex</code></td>
+<td>Creating VEX drafts, saving statements, and exporting documents a person has approved</td>
+</tr>
+</tbody>
+</table>
+<p>Reports and drafts are stored privately on this machine, exactly as when you use the app.</p>
+<h2>3. Tools</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Needs</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_reports</code></td>
+<td>—</td>
+<td>Saved reports with kind, observation and time</td>
+</tr>
+<tr>
+<td><code>get_report_summary</code></td>
+<td>—</td>
+<td>Aggregate facts of one report (no inputs or values)</td>
+</tr>
+<tr>
+<td><code>get_report_details</code></td>
+<td>code snippets</td>
+<td>Exact candidate values and results</td>
+</tr>
+<tr>
+<td><code>start_sample_verification</code></td>
+<td>run</td>
+<td>Runs the sample verification; returns a job handle</td>
+</tr>
+<tr>
+<td><code>start_genetic_search</code></td>
+<td>run</td>
+<td>Runs the genetic search or the fixed-rule baseline; language models are never used</td>
+</tr>
+<tr>
+<td><code>get_job_status</code> / <code>cancel_job</code></td>
+<td>—</td>
+<td>Progress, aggregate result, cancellation of a job this server started</td>
+</tr>
+<tr>
+<td><code>vex_suggest_status</code></td>
+<td>—</td>
+<td>Suggests <em>affected</em> only when a selected report reproduced a violation</td>
+</tr>
+<tr>
+<td><code>vex_create_draft</code>, <code>vex_save_statement</code></td>
+<td>VEX</td>
+<td>Prepare an unapproved OpenVEX draft</td>
+</tr>
+<tr>
+<td><code>vex_list_drafts</code></td>
+<td>—</td>
+<td>Drafts with version, state and statement count</td>
+</tr>
+<tr>
+<td><code>vex_export_document</code></td>
+<td>VEX</td>
+<td>Returns the document of an approved draft</td>
+</tr>
+</tbody>
+</table>
+<h2>4. Limits and safeguards</h2>
+<ul>
+<li><strong>Approval stays with a person.</strong> There is no tool to approve a VEX draft. Open the VEX workspace in the app, review the statements, and approve them there; only then can an assistant export the document.</li>
+<li><strong>One job at a time</strong>, with bounded trials. A job handle works only for the job this server started; unknown or malformed handles are refused.</li>
+<li><strong>Rate limits</strong> per minute: 60 reads, 30 writes and 6 job starts.</li>
+<li><strong>Aggregate by default.</strong> Summaries and job results contain counts and states, not inputs or values.</li>
+<li><strong>Nothing is derived from absence.</strong> A verification that finds nothing never produces <em>not affected</em>; the VEX rules are the same as in the app.</li>
+<li><strong>Finite trials do not prove safety.</strong> Results describe the trials that were run.</li>
+</ul>
+</main></html>
