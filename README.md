@@ -82,6 +82,15 @@ npm run dynamic-scan -- https://staging.example.com/
 
 Each workspace runs against a built-in sample or an explicitly authorized local target, keeps results as private JSON and HTML on your machine, and has an illustrated guide in English and Japanese.
 
+### MCP server
+
+Let an MCP-capable AI assistant read verification results, start verifications and prepare OpenVEX drafts over standard input and output. It runs on your machine and offers only what you allow when you start it; approving a VEX draft always stays with a person. See the [illustrated guide](docs/training/MCP.md).
+
+```sh
+npm run build:verifier
+node core/verifier/generated/cli/mcp.js --allow-run
+```
+
 ### OpenVEX
 
 Turn verification results into an [OpenVEX](https://openvex.dev/) v0.2.0 document. Evidence suggests a status, a named reviewer decides, and only an approved draft is exported. A verification that finds nothing never produces "not affected" on its own; that status and "fixed" are recorded as the reviewer's decision with a justification. Drafts and exports stay on your machine. See the [illustrated guide](docs/training/VEX.md).

@@ -367,6 +367,26 @@ The observation is decided by re-reading the stored report. A reviewer cannot sp
 - Export: only approved drafts. It outputs the document ID (a UUID-form identifier), author, role, approval time, version, tooling name and statements. Each statement outputs vulnerability, time, product (identifier and hash), status, justification, impact statement, action and its time, and notes. A "not affected" or "fixed" asserted by the reviewer gets a note to that effect added to the notes.
 - The same approved draft always exports the same content.
 
+## 14A. MCP server
+
+### Permissions and tools
+
+| Permission | Tools |
+|---|---|
+| None | List reports, summarize a report, job status, cancel a job, suggest a VEX status, list VEX drafts |
+| Run | Start a sample verification, start a genetic search |
+| Code snippets | Report details (exact candidate values, per-candidate results) |
+| VEX | Create a draft, save a statement, export an approved document |
+
+### Rules
+
+- Order of checks for every call: permission, then the per-minute allowance of the tool's class (read 60, write 30, start 6), then value validation, then the operation. Refusals carry a stable code (permission required, rate limited, unknown job, busy, not found, invalid input, not approved, failed) and never internal detail.
+- Start tools accept only bounded values (mode, scenario or method, trial limit up to 1,000, seed). Language models are never configured.
+- One job at a time; a handle is an identifier issued by this server for a job it started. Well-formed identifiers it did not issue, and malformed ones, are refused. A finished job returns an aggregate summary of its report, never inputs or values.
+- Summaries contain counts and states only. Exact candidate values appear only through the code-snippet tool.
+- VEX statements go through the same checks as in the app, including the rule that not affected and fixed need the reviewer's basis. There is no approval tool; export is refused until a person has approved the draft.
+- Standard output carries only protocol messages: console output is redirected to standard error, and the server ends when the client disconnects, cancelling any running job.
+
 ## 15. Stop reasons and errors
 
 | Category | Reason | Handling |

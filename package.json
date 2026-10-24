@@ -40,6 +40,7 @@
     "preverifier:test": "npm run build:verifier",
     "preverifier:fixture": "npm run build:verifier",
     "verifier:run": "node core/verifier/generated/cli/verifier.js",
+    "verifier:mcp": "node core/verifier/generated/cli/mcp.js",
     "preverifier:run": "npm run build:verifier",
     "prestart": "npm run build:verifier",
     "prelaunch": "npm run build:verifier",
@@ -54,6 +55,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
     "acorn": "8.19.0",
     "ajv": "8.20.0",
     "appium": "^3.7.0",
@@ -61,7 +63,8 @@
     "express-rate-limit": "^8.7.1",
     "playwright": "^1.64.1",
     "webdriverio": "10.1.0",
-    "yaml": "^2.5.0"
+    "yaml": "^2.5.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -76,6 +79,7 @@
   },
   "overrides": {
     "shell-quote": "1.12.0",
-    "basic-ftp": "6.2.3"
+    "basic-ftp": "6.2.3",
+    "body-parser": "2.4.0"
   }
 }

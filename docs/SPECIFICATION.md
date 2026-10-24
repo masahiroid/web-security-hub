@@ -52,6 +52,7 @@ Web Security Hub is a web-security assessment, form-regression and verification 
 | F-15 | Mobile assessment (source edition) | Device settings, mobile scenario | Run results |
 | F-16 | Optional AI integration | Explicit permission, settings | Assertion results, review results |
 | F-17 | Desktop start screen and training | Storage, automation browser | Environment check, installation, practice sites, illustrated guides |
+| F-18 | MCP server (source edition) | Permissions chosen at start-up | Tools for reports, jobs and VEX drafts over standard input and output |
 
 ## 4. Functional specification
 
@@ -186,6 +187,13 @@ Verification that ties a static-analysis result to a running local target.
 - Illustrated hands-on guides open from the screen you are working in; opening a guide keeps inputs and results.
 - The interface language can be Japanese, English or French.
 
+### 4.18 F-18 MCP server (source edition)
+
+- A Model Context Protocol server over standard input and output, for AI assistants. It is not exposed over the network, and standard output carries only protocol messages (logs go to standard error).
+- Permissions are chosen by the person who starts the server: none (report summaries, job status, VEX draft list and status suggestion), run (start sample verifications and genetic searches), code snippets (exact candidate values) and VEX (create drafts, save statements, export approved documents). A tool the permissions do not allow is not offered.
+- Jobs use the same services as the app. One job runs at a time, trials are bounded, and a job handle works only for a job this server started. Language models are never used. Calls are rate limited per minute (60 reads, 30 writes, 6 job starts).
+- Summaries and job results are aggregate. Approval of a VEX draft is not available: a named person approves in the app, and only an approved document can be exported.
+
 ## 5. External interfaces
 
 The application runs as a local HTTP server that also serves the screens. It is not exposed externally.
@@ -235,6 +243,7 @@ Verification APIs are protected by a session issued at start-up and accept only 
 | Sample verification | `npm run verifier:run -- --mode baseline|changed|fixed` |
 | Genetic search | `npm run verifier:run -- --genetic-fixture` (`--method rules|ga`, `--llm` and others) |
 | Three-method comparison | `npm run verifier:run -- --genetic-compare` |
+| MCP server | `node core/verifier/generated/cli/mcp.js [--allow-run] [--allow-code-snippets] [--allow-vex]` |
 | Environment check and setup | `npm run doctor`, `npm run setup` |
 
 ## 6. Data
@@ -282,6 +291,7 @@ Trial limits include normal-control trials.
 - File serving validates site and session identifiers, is limited to the intended scope, and is rate limited.
 - What is given to a language model is limited to typed candidate values and aggregates; URLs, credentials, files and evidence are not. A model cannot change scope, authentication or trial limits.
 - The desktop screens reject requests that lack the secret token issued at each start.
+- The MCP server offers only the tools its start-up permissions allow, never lets a client approve a VEX draft, never starts a language model, limits calls per minute, and keeps standard output free of anything but protocol messages.
 - Sending to an external language model requires explicit permission, the name of an environment variable holding the API key, and a cost ceiling. The key itself is not stored or reported. The desktop screens offer only models on this machine.
 
 ## 9. Non-functional requirements
