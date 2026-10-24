@@ -22,10 +22,10 @@ Web Security Hub is a locally run web-security assessment and form-regression te
 
 | Platform | Installer | Status |
 |---|---|---|
-| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v5.0.0/Web-Security-Hub_5.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
-| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v5.0.0/Web-Security-Hub_5.0.0_windows_x64_setup.exe) | Unsigned |
+| macOS / Apple Silicon | [Download DMG](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v6.0.0/Web-Security-Hub_6.0.0_macos_arm64.dmg) | Developer ID signed and Apple notarized |
+| Windows / x64 | [Download setup](https://github.com/masahiroid/web-security-hub/releases/download/desktop-v6.0.0/Web-Security-Hub_6.0.0_windows_x64_setup.exe) | Unsigned |
 
-[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v5.0.0). Use the source edition on Intel Macs or Linux.
+[Release files and SHA-256 checksums](https://github.com/masahiroid/web-security-hub/releases/tag/desktop-v6.0.0). Use the source edition on Intel Macs or Linux.
 
 ## Desktop and double-click startup
 
