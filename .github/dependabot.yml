@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -9,20 +10,23 @@ updates:
     ignore:
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
-      # 12.19.x bundles a vulnerable shell-quote that dependency overrides cannot replace.
+      # 12.18.2 and later bundle a vulnerable shell-quote that dependency overrides cannot replace.
       - dependency-name: 'appium-xcuitest-driver'
-        versions: ['12.19.x']
+        versions: ['>=12.18.2']
   - package-ecosystem: npm
     directory: /desktop/runtime
+    target-branch: develop
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
   - package-ecosystem: cargo
     directory: /src-tauri
+    target-branch: develop
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

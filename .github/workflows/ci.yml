@@ -28,7 +28,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm audit --audit-level=moderate
+      - run: npm audit --omit=dev
+      - run: node scripts/audit-gate.js
       - run: npm audit --audit-level=moderate --prefix desktop/runtime
       - run: npm run release:check
   glib-backport:

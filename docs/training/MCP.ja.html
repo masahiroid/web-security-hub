@@ -1,0 +1,114 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIアシスタントから検証を使う（MCP）</title><style>body{margin:0;background:#f5f6f8;color:#192c3e;font:17px/1.8 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 28px 80px;background:white}h1{font-size:30px}h2{margin-top:52px;padding-bottom:8px;border-bottom:2px solid #cddce5}a{color:#075985}img{display:block;max-width:100%;height:auto;border:1px solid #cddce5;margin:24px auto}pre{padding:20px;background:#102e47;color:#f0f8ff;overflow:auto;border-radius:8px}code{font-family:ui-monospace,monospace;font-size:.9em}table{border-collapse:collapse;width:100%;display:block;overflow:auto}th,td{border:1px solid #ccd7e0;padding:10px 14px;text-align:left}th{background:#edf3f8}strong{color:#133c57}@media print{main{max-width:none;padding:0}h2{break-after:avoid}img,tr,pre{break-inside:avoid}a{color:inherit}}</style><main><h1>AIアシスタントから検証を使う（MCP）</h1>
+<p><a href="MCP.html">English</a> · <a href="GENETIC.ja.html">遺伝的探索</a> · <a href="VEX.ja.html">OpenVEX</a> · <a href="README.ja.html">基本ハンズオン</a></p>
+<p>Web Security Hub は、標準入出力で動く <a href="https://modelcontextprotocol.io/">MCP</a> サーバーとして使えます。MCP に対応したAIアシスタントが、検証結果の参照、検証の開始、OpenVEXドラフトの準備を行えます。この端末の中で動き、ネットワークには公開されず、起動時に許可したことだけを提供します。
+ソース版（Node.js 24以上）で利用できます。</p>
+<h2>1. サーバーを起動する</h2>
+<p>先に一度ビルドし、MCPクライアントからサーバーを起動します。</p>
+<pre><code class="language-sh">npm run build:verifier
+node core/verifier/generated/cli/mcp.js [--allow-run] [--allow-code-snippets] [--allow-vex]
+</code></pre>
+<p>クライアントの設定例です（チェックアウトの絶対パスを指定します）。</p>
+<pre><code class="language-json">{ &quot;mcpServers&quot;: { &quot;web-security-hub&quot;: { &quot;command&quot;: &quot;node&quot;, &quot;args&quot;: [&quot;/path/to/web-security-hub/core/verifier/generated/cli/mcp.js&quot;, &quot;--allow-run&quot;] } } }
+</code></pre>
+<p><code>npm run</code> ではなく <code>node</code> で起動してください。npm は独自の行を標準出力に出し、プロトコルを壊します。サーバーは標準出力にプロトコルのメッセージだけを書き、ログは標準エラーに出します。</p>
+<h2>2. 許可</h2>
+<p>許可は、サーバーを起動するときにあなたが決めます。アシスタントは変更できず、許可されていないツールは、そもそも提示されません。</p>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>許可する内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>（なし）</td>
+<td>レポートの要約とジョブの状態の参照、VEXドラフトの一覧、VEXの状態の提案</td>
+</tr>
+<tr>
+<td><code>--allow-run</code></td>
+<td>内蔵サンプルでの、サンプル検証と遺伝的探索の開始</td>
+</tr>
+<tr>
+<td><code>--allow-code-snippets</code></td>
+<td>レポートの具体的な候補値と、候補ごとの結果の参照</td>
+</tr>
+<tr>
+<td><code>--allow-vex</code></td>
+<td>VEXドラフトの作成、ステートメントの保存、人が承認した文書の取得</td>
+</tr>
+</tbody>
+</table>
+<p>レポートとドラフトは、アプリを使うときと同じく、この端末の非公開領域に保存されます。</p>
+<h2>3. ツール</h2>
+<table>
+<thead>
+<tr>
+<th>ツール</th>
+<th>必要な許可</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_reports</code></td>
+<td>なし</td>
+<td>保存済みのレポートの種別・観測・時刻</td>
+</tr>
+<tr>
+<td><code>get_report_summary</code></td>
+<td>なし</td>
+<td>1件のレポートの集計（入力や値は含まない）</td>
+</tr>
+<tr>
+<td><code>get_report_details</code></td>
+<td>候補値</td>
+<td>具体的な候補値と結果</td>
+</tr>
+<tr>
+<td><code>start_sample_verification</code></td>
+<td>実行</td>
+<td>サンプル検証を実行し、ジョブのハンドルを返す</td>
+</tr>
+<tr>
+<td><code>start_genetic_search</code></td>
+<td>実行</td>
+<td>遺伝的探索または固定ルールの基線を実行。言語モデルは使わない</td>
+</tr>
+<tr>
+<td><code>get_job_status</code> / <code>cancel_job</code></td>
+<td>なし</td>
+<td>このサーバーが開始したジョブの進捗、集計結果、取消</td>
+</tr>
+<tr>
+<td><code>vex_suggest_status</code></td>
+<td>なし</td>
+<td>選んだレポートに違反の再現があるときだけ <em>affected</em> を提案</td>
+</tr>
+<tr>
+<td><code>vex_create_draft</code>、<code>vex_save_statement</code></td>
+<td>VEX</td>
+<td>未承認のOpenVEXドラフトを準備</td>
+</tr>
+<tr>
+<td><code>vex_list_drafts</code></td>
+<td>なし</td>
+<td>版・状態・ステートメント数つきのドラフト一覧</td>
+</tr>
+<tr>
+<td><code>vex_export_document</code></td>
+<td>VEX</td>
+<td>承認済みドラフトの文書を返す</td>
+</tr>
+</tbody>
+</table>
+<h2>4. 制限と安全策</h2>
+<ul>
+<li><strong>承認は人が行います。</strong> VEXドラフトを承認するツールはありません。アプリのVEX画面でステートメントを確認して承認すると、はじめてアシスタントが文書を取得できます。</li>
+<li><strong>ジョブは同時に1つ</strong>で、試行数に上限があります。ハンドルは、このサーバーが開始したジョブにだけ使えます。未知の値や不正な形式は拒否します。</li>
+<li><strong>回数の制限</strong>（1分あたり）: 参照60回、書き込み30回、ジョブの開始6回。</li>
+<li><strong>既定では集計だけ。</strong> 要約とジョブの結果には、件数と状態が入り、入力や値は入りません。</li>
+<li><strong>「見つからない」からは何も導きません。</strong> 検証で何も見つからなくても「影響なし」は作られません。VEXの規則はアプリと同じです。</li>
+<li><strong>有限の試行は安全の証明ではありません。</strong> 結果は、実施した試行についての記述です。</li>
+</ul>
+</main></html>
