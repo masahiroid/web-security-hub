@@ -44,16 +44,19 @@ function cloneJson(value, depth = 0, seen = new Set()) {
   if (typeof value !== 'object' || seen.has(value)) throw Error('Expected finite acyclic JSON');
   if (!Array.isArray(value) && ![Object.prototype, null].includes(Object.getPrototypeOf(value))) throw Error('Expected plain JSON object');
   seen.add(value);
-  const output = Array.isArray(value) ? [] : Object.create(null);
+  const entries = [];
   for (const key of Reflect.ownKeys(value)) {
     if (Array.isArray(value) && key === 'length') continue;
     if (typeof key !== 'string' || ['__proto__', 'prototype', 'constructor'].includes(key)) throw Error('Forbidden JSON key');
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor.enumerable || !('value' in descriptor)) throw Error('Expected JSON data property');
-    Object.defineProperty(output, key, { value: cloneJson(descriptor.value, depth + 1, seen), enumerable: true, writable: true, configurable: true });
+    entries.push([key, cloneJson(descriptor.value, depth + 1, seen)]);
   }
-  if (Array.isArray(value) && (Object.keys(output).length !== value.length || Object.keys(output).some((key, i) => key !== String(i)))) throw Error('Expected dense array');
+  if (Array.isArray(value) && (entries.length !== value.length || entries.some(([key], i) => key !== String(i)))) throw Error('Expected dense array');
   seen.delete(value);
+  const output = Array.isArray(value)
+    ? entries.map(([, item]) => item)
+    : Object.create(null, Object.fromEntries(entries.map(([key, item]) => [key, { value: item, enumerable: true, writable: true, configurable: true }])));
   return Object.freeze(output);
 }
 function validate(name, input) {
