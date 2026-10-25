@@ -26,7 +26,7 @@ jobs:
       - name: Verify real owned ZAP runtime
         run: npm run verifier:verify-zap -- --install
       - run: npm run release:check
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
       - run: npm run desktop:build -- --bundles nsis -- --locked
       - name: Verify installed native application
         run: node scripts/verify-windows-installed.js
