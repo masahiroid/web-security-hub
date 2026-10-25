@@ -24,7 +24,7 @@ app.post('/__training/mode', (req, res) => {
 });
 app.get('/', (req, res) => res.redirect('/ja/login'));
 app.use('/:lang', (req, res, next) => {
-  if (!words[req.params.lang]) return res.sendStatus(404);
+  if (!Object.hasOwn(words, req.params.lang)) return res.sendStatus(404);
   res.locals.lang = req.params.lang; next();
 });
 app.get('/:lang/login', (req, res) => {

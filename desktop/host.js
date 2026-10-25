@@ -67,18 +67,20 @@ async function createHost({ port = 0 } = {}) {
     } catch (e) { res.status(400).json({ error: e.message }); }
   });
   app.get('/api/desktop/paths', (req, res) => res.json({ sourceBefore: path.resolve(__dirname, '../training/sast/before'), sourceAfter: path.resolve(__dirname, '../training/sast/after'), dataDir: process.env.WEB_SECURITY_HUB_DATA_DIR }));
-  app.get('/training/:file', (req, res, next) => {
+  app.get('/training/:file', rateLimit(FILE_SERVING_LIMITS), (req, res, next) => {
     if (!/^[A-Za-z0-9_.-]+\.html$/.test(req.params.file)) return next();
-    const file = path.join(__dirname, '../docs/training', req.params.file);
-    if (!fs.existsSync(file)) return next();
+    const trainingRoot = path.resolve(__dirname, '../docs/training');
+    const file = path.resolve(trainingRoot, req.params.file);
+    if (!file.startsWith(trainingRoot + path.sep)) return next();
     const lang = req.params.file.includes('.ja.') ? 'ja' : 'en';
-    let html = fs.readFileSync(file, 'utf8');
+    let html;
+    try { html = fs.readFileSync(file, 'utf8'); } catch { return next(); }
     if (/^README(?:\.ja)?\.html$/.test(req.params.file)) html = require('./courseRenderer').renderDesktopCourse(html, { lang, origin, port: server.address().port });
     else html = html.replace('<main>', '<main><p><a href="/welcome">← ホーム / Home</a></p>');
     html += '<link rel="stylesheet" href="/desktop/reader.css"><script src="/desktop/reader.js"></script>';
     res.type('html').send(html);
   });
-  app.get('/', (req, res) => {
+  app.get('/', rateLimit(FILE_SERVING_LIMITS), (req, res) => {
     const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
     res.type('html').send(html.replace('</body>', '<script src="/desktop/bridge.js"></script></body>'));
   });

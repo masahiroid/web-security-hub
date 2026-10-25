@@ -33,7 +33,7 @@ function ciDebugPolicy(executable, port) {
   await new Promise(resolve=>target.listen(0,'127.0.0.1',resolve));
   const targetOrigin=`http://127.0.0.1:${target.address().port}`;
   const installer=spawnSync(path.join(bundle,name),['/S',`/D=${install}`],{windowsVerbatimArguments:true,timeout:SETTINGS.startupMs}); if(installer.status!==0)throw Error('Installer failed');
-  const executables=fs.readdirSync(install).filter(file=>file.endsWith('.exe')&&!/^uninstall|web-security-node/i.test(file)); if(executables.length!==1)throw Error('Installed application not found');
+  const executables=fs.readdirSync(install).filter(file=>file.endsWith('.exe')&&!/^(?:uninstall|web-security-node)/i.test(file)); if(executables.length!==1)throw Error('Installed application not found');
   checks.push('NSIS installation completed'); console.log(checks.at(-1));
   const executable=path.join(install,executables[0]); const port=await freePort();
   removePolicy=ciDebugPolicy(executable,port);

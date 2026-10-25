@@ -53,7 +53,7 @@ export function unavailableMapping(reason: MappingReason): RouteMapping {
   return { schemaVersion: SAST_MAPPING.schemaVersion, analysis: 'file-local-express', status: 'unavailable', reason, executable: false, routes: [] };
 }
 export function staticPath(value: string): boolean {
-  return value.length <= SAST_MAPPING.maximumPathLength && /^\/(?:[\p{L}\p{N}_~.:-]+\/?)*$/u.test(value) &&
+  return value.length <= SAST_MAPPING.maximumPathLength && /^\/(?:[\p{L}\p{N}_~.:-]+(?:\/[\p{L}\p{N}_~.:-]+)*\/?)?$/u.test(value) &&
     !value.split('/').some(part => part === '.' || part === '..' || part.includes(':') && !/^:[A-Za-z_]\w*$/.test(part));
 }
 function joinRoute(prefix: string, path: string): string { return `${prefix.replace(/\/$/, '')}/${path.replace(/^\//, '')}`.replace(/\/$/, '') || '/'; }
