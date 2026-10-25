@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { assertNotLinked } from './linkGuard';
 import { constants, createReadStream } from 'node:fs';
 import { chmod, lstat, mkdtemp, open, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
@@ -29,6 +30,7 @@ export async function readZapInstallation(dataRoot: string): Promise<ZapInstalla
     const receiptHandle = await open(receiptFile, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
     let raw: unknown;
     try {
+      await assertNotLinked(receiptFile, 'Unsafe ZAP receipt');
       const receiptInfo = await receiptHandle.stat();
       if (!receiptInfo.isFile() || receiptInfo.size > ZAP.apiBytes) return null;
       raw = JSON.parse(await receiptHandle.readFile('utf8'));
