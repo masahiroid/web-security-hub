@@ -11,8 +11,7 @@ for(const file of files){
  if(/^src-tauri\/(?:tauri\.conf\.json|(?:node-)?entitlements\.plist)$/.test(file))issues.push({file,reason:'local desktop configuration; publish the example instead'});
  if(forbidden.test(file)&&!file.endsWith('.env.example'))issues.push({file,reason:'private credential file'});
  if(/^(?:artifacts|\.desktop|\.runtime|src-tauri\/(?:target|binaries))\//.test(file))issues.push({file,reason:'local build or run output'});
- if(!fs.existsSync(file)||!fs.statSync(file).isFile())continue;
- const buffer=fs.readFileSync(file);if(buffer.includes(0)||/\.(?:png|jpe?g|gif|ico|icns|pdf|woff2?)$/i.test(file))continue;
+ let buffer;try{buffer=fs.readFileSync(file);}catch{continue;}if(buffer.includes(0)||/\.(?:png|jpe?g|gif|ico|icns|pdf|woff2?)$/i.test(file))continue;
  checked++;const text=buffer.toString('utf8');for(const [reason,pattern]of sensitive)if(pattern.test(text))issues.push({file,reason});
 }
 if(process.argv.includes('--history')) {

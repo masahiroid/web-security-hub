@@ -43,9 +43,7 @@ export function createPrivateReportStore(dataRoot: string, contracts: ContractsP
       const stat = await lstat(folder);
       if (stat.isSymbolicLink() || !stat.isDirectory()) throw Error('Unsafe report directory');
       const jsonPath = join(folder, REPORT_STORAGE.jsonName);
-      const fileInfo = await lstat(jsonPath);
-      if (fileInfo.isSymbolicLink() || !fileInfo.isFile()) throw Error('Unsafe report file');
-      const file = await open(jsonPath, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+      const file = await open(jsonPath, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0)).catch((cause: unknown) => { throw new Error('Unsafe report file', { cause }); });
       try {
         const info = await file.stat();
         if (!info.isFile() || info.size > REPORT_STORAGE.maximumBytes) throw Error('Invalid report file');

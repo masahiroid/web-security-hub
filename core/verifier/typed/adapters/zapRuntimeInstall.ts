@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { createReadStream } from 'node:fs';
-import { chmod, lstat, mkdtemp, open, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { constants, createReadStream } from 'node:fs';
+import { chmod, lstat, mkdtemp, open, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -25,9 +25,14 @@ export async function readZapInstallation(dataRoot: string): Promise<ZapInstalla
   const home = zapRuntimeRoot(dataRoot);
   try {
     for (const directory of [join(dataRoot, '.runtime'), home]) { const stat = await lstat(directory); if (!stat.isDirectory() || stat.isSymbolicLink()) return null; }
-    const receiptFile = join(home, 'installed.json'); const receiptInfo = await lstat(receiptFile);
-    if (!receiptInfo.isFile() || receiptInfo.isSymbolicLink() || receiptInfo.size > ZAP.apiBytes) return null;
-    const raw: unknown = JSON.parse(await readFile(receiptFile, 'utf8'));
+    const receiptFile = join(home, 'installed.json');
+    const receiptHandle = await open(receiptFile, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+    let raw: unknown;
+    try {
+      const receiptInfo = await receiptHandle.stat();
+      if (!receiptInfo.isFile() || receiptInfo.size > ZAP.apiBytes) return null;
+      raw = JSON.parse(await receiptHandle.readFile('utf8'));
+    } finally { await receiptHandle.close(); }
     if (!raw || typeof raw !== 'object' || !('version' in raw) || raw.version !== ZAP_RUNTIME_VERSION) return null;
     const receipt = raw as Receipt;
     if (receipt.platform !== process.platform || receipt.arch !== process.arch) return null;
