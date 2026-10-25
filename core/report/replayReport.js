@@ -40,7 +40,7 @@ function esc(s) {
 }
 
 function mdEscape(s) {
-  return String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+  return String(s ?? '').replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 }
 
 /** Renders replay-report.html + replay-report.md into sessionDir. Returns both paths. */

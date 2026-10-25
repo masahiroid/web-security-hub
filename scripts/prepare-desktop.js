@@ -47,7 +47,9 @@ async function main() {
     console.log(`Downloading pinned Node.js ${runtime.version}`);
     const response = await fetch(`https://nodejs.org/dist/v${runtime.version}/${basename}${suffix}`);
     if (!response.ok) throw new Error(`Node download failed: ${response.status}`);
-    const partial = archive + '.partial'; fs.writeFileSync(partial,Buffer.from(await response.arrayBuffer())); fs.renameSync(partial,archive);
+    const body = Buffer.from(await response.arrayBuffer());
+    if (crypto.createHash('sha256').update(body).digest('hex') !== expected) throw new Error('Node checksum mismatch; nothing was saved. Retry the download.');
+    const partial = archive + '.partial'; fs.writeFileSync(partial,body); fs.renameSync(partial,archive);
   }
   if (crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex') !== expected) {
     fs.unlinkSync(archive); throw new Error('Node checksum mismatch; archive removed. Retry the download.');
@@ -77,7 +79,9 @@ async function main() {
   // Keep a locked production dependency tree separate from developer dependencies.
   const stamp = crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'desktop/runtime/package-lock.json'))).digest('hex');
   const stampPath = path.join(stage,'.dependencies-sha256');
-  if (!fs.existsSync(stampPath) || fs.readFileSync(stampPath,'utf8') !== stamp) {
+  let currentStamp = null;
+  try { currentStamp = fs.readFileSync(stampPath,'utf8'); } catch { /* first run */ }
+  if (currentStamp !== stamp) {
     const npmCli = process.platform === 'win32' ? path.join(cache,basename,'node_modules/npm/bin/npm-cli.js') : path.join(cache,basename,'lib/node_modules/npm/bin/npm-cli.js');
     run(node,[npmCli,'ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],{cwd:stage});
     fs.writeFileSync(stampPath,stamp);

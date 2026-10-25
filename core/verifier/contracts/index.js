@@ -50,7 +50,7 @@ function cloneJson(value, depth = 0, seen = new Set()) {
     if (typeof key !== 'string' || ['__proto__', 'prototype', 'constructor'].includes(key)) throw Error('Forbidden JSON key');
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor.enumerable || !('value' in descriptor)) throw Error('Expected JSON data property');
-    output[key] = cloneJson(descriptor.value, depth + 1, seen);
+    Object.defineProperty(output, key, { value: cloneJson(descriptor.value, depth + 1, seen), enumerable: true, writable: true, configurable: true });
   }
   if (Array.isArray(value) && (Object.keys(output).length !== value.length || Object.keys(output).some((key, i) => key !== String(i)))) throw Error('Expected dense array');
   seen.delete(value);

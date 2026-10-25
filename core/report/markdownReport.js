@@ -50,7 +50,7 @@ function kindOfCase(name) {
 }
 
 function mdEscape(s) {
-  return String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+  return String(s ?? '').replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 }
 
 /** Renders report.md from a session directory and writes it there. Returns the output path. */

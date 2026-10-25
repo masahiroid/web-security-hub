@@ -8,11 +8,12 @@ let timer; let lastState;
 const $ = id => document.getElementById(id);
 const t = key => text[lang][key] || key;
 function applyLanguage() {
+  const pageLang = lang === 'ja' ? 'ja' : 'en';
   document.documentElement.lang = lang; $('language').value = lang; localStorage.setItem('web-security-hub.locale', lang);
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-  $('manual').href = `/training/README${lang === 'ja' ? '.ja' : ''}.html`;
-  $('desktopManual').href = `/desktop/guide${lang === 'ja' ? '.ja' : ''}.html`;
-  $('sample').href = `http://127.0.0.1:4180/${lang}/login`;
+  $('manual').href = `/training/README${pageLang === 'ja' ? '.ja' : ''}.html`;
+  $('desktopManual').href = `/desktop/guide${pageLang === 'ja' ? '.ja' : ''}.html`;
+  $('sample').href = `http://127.0.0.1:4180/${pageLang}/login`;
   if (lastState) render(lastState);
 }
 async function api(endpoint, body) {

@@ -35,7 +35,7 @@ async function describeHandle(handle) {
 function candidatesFromDescriptor(descriptor) {
   if (!descriptor || !descriptor.tag) return [];
   const out = [];
-  const esc = (v) => String(v).replace(/"/g, '\\"');
+  const esc = (v) => String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   if (descriptor.id) out.push(`#${cssEscapeId(descriptor.id)}`);
   if (descriptor.dataTestId) out.push(`[data-testid="${esc(descriptor.dataTestId)}"], [data-test="${esc(descriptor.dataTestId)}"]`);
   if (descriptor.name) out.push(`${descriptor.tag}[name="${esc(descriptor.name)}"]`);

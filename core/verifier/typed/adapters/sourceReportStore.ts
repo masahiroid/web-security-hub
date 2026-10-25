@@ -26,9 +26,8 @@ export function createSourceReportStore(dataRoot: string) {
     async read(id: string) {
       validId(id); const folder = join(await directory(), id);
       const stat = await lstat(folder); if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('Invalid report directory');
-      const jsonFile = join(folder, REPORT_STORAGE.jsonName); const info = await lstat(jsonFile);
-      if (info.isSymbolicLink() || !info.isFile()) throw Error('Unsafe source report file');
-      const file = await open(jsonFile, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+      const jsonFile = join(folder, REPORT_STORAGE.jsonName);
+      const file = await open(jsonFile, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0)).catch((cause: unknown) => { throw new Error('Unsafe source report file', { cause }); });
       try {
         const info = await file.stat(); if (!info.isFile() || info.size > REPORT_STORAGE.maximumBytes) throw Error('Invalid report file');
         const report = validate('sourceReport', await file.readFile('utf8')); if (report.reportId !== id) throw Error('Report ID mismatch'); return report;
