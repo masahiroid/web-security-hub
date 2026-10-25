@@ -4,6 +4,7 @@ import { validateGeneticFixtureOptions } from '../adapters/geneticFixtureOptions
 import type { ComparisonOptions } from '../domain/geneticComparisonTypes';
 import { validateComparisonOptions } from '../adapters/geneticComparisonOptions';
 import type { GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
+import { assertNotLinkedSync } from '../adapters/linkGuard';
 import { parseArgs } from 'node:util';
 import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
 import { LIMITS } from '../domain/config';
@@ -81,6 +82,7 @@ export function parseCommand(argv: readonly string[]): Command {
     const file = values['source-plan']; if (!file) throw Error('Missing plan');
     const descriptor = openSync(file, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
     try {
+      assertNotLinkedSync(file, 'Invalid plan file');
       const stat = fstatSync(descriptor);
       if (!stat.isFile() || stat.size > LIMITS.jsonPayloadBytes) throw Error('Invalid plan file');
       return { kind: 'source', input: validate('sourceTrialOptions', readFileSync(descriptor, 'utf8')) };

@@ -1,3 +1,4 @@
+import { assertNotLinked } from './linkGuard';
 import { constants } from 'node:fs';
 import { lstat, mkdtemp, open, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -29,6 +30,7 @@ export function createSourceReportStore(dataRoot: string) {
       const jsonFile = join(folder, REPORT_STORAGE.jsonName);
       const file = await open(jsonFile, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0)).catch((cause: unknown) => { throw new Error('Unsafe source report file', { cause }); });
       try {
+        await assertNotLinked(jsonFile, 'Unsafe source report file');
         const info = await file.stat(); if (!info.isFile() || info.size > REPORT_STORAGE.maximumBytes) throw Error('Invalid report file');
         const report = validate('sourceReport', await file.readFile('utf8')); if (report.reportId !== id) throw Error('Report ID mismatch'); return report;
       } finally { await file.close(); }
