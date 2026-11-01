@@ -45,7 +45,7 @@ function writeSession(directory) {
   const inside = path.join(directory, 'screenshots', 'one.png');
   fs.writeFileSync(path.join(directory, 'runs.jsonl'), [
     JSON.stringify({ testCaseId: 'case-001', ok: true, screenshotPath: inside }),
-    JSON.stringify({ testCaseId: 'case-002', ok: false, error: 'boom | <pipe>\nsecond line', screenshotPath: '/elsewhere/shots/two.png' }),
+    JSON.stringify({ testCaseId: 'case-002', ok: false, error: 'boom | <pipe>\nsecond line', screenshotPath: path.join(os.tmpdir(), 'wsh-elsewhere', 'shots', 'two.png') }),
     JSON.stringify({ testCaseId: 'case-003', ok: true }),
     '',
     JSON.stringify({ note: 'no case id' }),
