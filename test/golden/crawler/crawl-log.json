@@ -1,0 +1,11 @@
+[
+  "  [state] landed url=http://SITE/crawl title=Crawl",
+  "  [1/6] depth0 http://SITE/crawl -> form:0 link:5 clickable:1",
+  "  [click-probe] open source=http://SITE/crawl current=http://SITE/crawl selector=body:nth-of-type(1) > main:nth-of-type(1) > button:nth-of-type(1)",
+  "  [click-probe] clicked selector=body:nth-of-type(1) > main:nth-of-type(1) > button:nth-of-type(1) before=http://SITE/crawl after=http://SITE/signup inputForm=true",
+  "  [click-probe] discovered forms=2 after click",
+  "  [state] landed url=http://SITE/about title=About",
+  "  [2/6] depth1 http://SITE/about -> form:0 link:3 clickable:1",
+  "  [state] landed url=http://SITE/signup title=Sign up",
+  "  [3/6] depth1 http://SITE/signup -> form:2 link:1 clickable:2"
+]

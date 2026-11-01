@@ -1,0 +1,11 @@
+{
+  "visited": [
+    "http://SITE/gate",
+    "http://SITE/about",
+    "http://SITE/signup"
+  ],
+  "formCount": 3,
+  "log": [
+    "  [state] agreement-gate detected: policy links filtered 3 -> 2"
+  ]
+}

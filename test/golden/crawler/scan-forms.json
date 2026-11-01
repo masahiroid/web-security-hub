@@ -1,0 +1,82 @@
+[
+  {
+    "url": "http://SITE/signup",
+    "formSelector": "#signup",
+    "submitSelector": "body:nth-of-type(1) > main:nth-of-type(1) > form:nth-of-type(1) > input:nth-of-type(5)",
+    "fields": [
+      {
+        "selector": "#email",
+        "tag": "input",
+        "type": "email",
+        "name": "email",
+        "id": "email",
+        "label": "Mail address",
+        "constraints": {
+          "source": "html",
+          "required": true,
+          "maxLength": 40
+        }
+      },
+      {
+        "selector": "input[name=\"age\"]",
+        "tag": "input",
+        "type": "number",
+        "name": "age",
+        "constraints": {
+          "source": "html",
+          "min": 18,
+          "max": 99,
+          "step": 1
+        }
+      },
+      {
+        "selector": "select[name=\"plan\"]",
+        "tag": "select",
+        "type": "select",
+        "name": "plan",
+        "constraints": {
+          "source": "html"
+        },
+        "options": [
+          "a",
+          "b"
+        ],
+        "optionLabels": [
+          "A plan",
+          "B plan"
+        ]
+      },
+      {
+        "selector": "#agree",
+        "tag": "input",
+        "type": "checkbox",
+        "name": "agree_terms",
+        "id": "agree",
+        "label": "I agree to the terms",
+        "constraints": {
+          "source": "html"
+        },
+        "options": [
+          "on"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "http://SITE/signup",
+    "formSelector": "body:nth-of-type(1) > main:nth-of-type(1)",
+    "submitSelector": "body:nth-of-type(1) > main:nth-of-type(1) > form:nth-of-type(1) > input:nth-of-type(5)",
+    "fields": [
+      {
+        "selector": "input[name=\"search\"]",
+        "tag": "input",
+        "type": "text",
+        "name": "search",
+        "placeholder": "Search",
+        "constraints": {
+          "source": "html"
+        }
+      }
+    ]
+  }
+]
