@@ -12,6 +12,7 @@ function publicResource(file) {
   if (file === verifierUiSourceDirectory || file.startsWith(verifierUiSourceDirectory + path.sep)) return false;
   if (file.endsWith('.d.ts')) return false;
   if (file === verifierSourceDirectory || file.startsWith(verifierSourceDirectory + path.sep)) return false;
+  if (/[\\/]core[\\/][^\\/]+[\\/]typed(?:[\\/]|$)/.test(file) && file.startsWith(path.join(root, 'core') + path.sep)) return false;
   if (file === serverSourceDirectory || file.startsWith(serverSourceDirectory + path.sep)) return false;
   const name=path.basename(file);
   if(/(?:^|[\\/])(?:internal|\.internal)(?:[\\/]|$)/.test(file)||/\.internal\.(?:md|html)$/.test(name))return false;
@@ -29,6 +30,7 @@ async function main() {
   require('./desktop-config').ensureDesktopConfig();
   // Compile the incremental TypeScript modules before copying production resources.
   run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.verifier.json')]);
+  run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.core.json')]);
   run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.server.json')]);
   run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.verifier-ui.json')]);
   const host = spawnSync('rustc', ['--print','host-tuple'], { encoding:'utf8' });
