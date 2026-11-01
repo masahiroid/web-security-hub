@@ -23,8 +23,9 @@
 
 ## Progress and publication
 
-- Read `docs/internal/hybrid-verifier/README.md`, `TASKS.md` and the latest
-  `WORKLOG.md` before continuing verifier work, if present locally. Update task
+- Read `docs/internal/hybrid-verifier/README.md` (its "current position" table
+  first), `ROADMAP.md`, `TASKS.md`, `RUNBOOK.md` and the latest `WORKLOG.md`
+  before continuing work, if present locally. Update task
   states and evidence after each completed unit; use roadmap gates for releases.
 - Internal documents, credentials, real signing settings and raw evidence stay
   local and must not be staged, uploaded or bundled. Never force-add ignored

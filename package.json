@@ -3,7 +3,7 @@
   "version": "6.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Web Security Hub — OWASP-aligned dynamic web scanning and local static analysis.",
+  "description": "Web Security Hub \u2014 OWASP-aligned dynamic web scanning and local static analysis.",
   "engines": {
     "node": ">=24.0.0"
   },
@@ -34,8 +34,8 @@
     "desktop:sign:macos": "node scripts/sign-macos.js",
     "verifier:fixture": "node training/verifier-site/server.js",
     "verifier:test": "node --test test/verifier.test.js test/verifierHttpRunner.test.js test/verifierCampaign.test.js",
-    "build:verifier": "tsc -p tsconfig.verifier.json && tsc -p tsconfig.server.json && tsc -p tsconfig.verifier-ui.json",
-    "typecheck": "tsc -p tsconfig.verifier.json --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.verifier-ui.json --noEmit",
+    "build:verifier": "tsc -p tsconfig.verifier.json && tsc -p tsconfig.core.json && tsc -p tsconfig.server.json && tsc -p tsconfig.verifier-ui.json",
+    "typecheck": "tsc -p tsconfig.verifier.json --noEmit && tsc -p tsconfig.core.json --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.verifier-ui.json --noEmit",
     "pretest": "npm run build:verifier",
     "preverifier:test": "npm run build:verifier",
     "preverifier:fixture": "npm run build:verifier",
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@tauri-apps/cli": "^2.12.3",
+    "@tauri-apps/cli": "^2.12.4",
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",
     "appium-xcuitest-driver": "^12.13.1",
@@ -80,6 +80,9 @@
   "overrides": {
     "shell-quote": "1.12.0",
     "basic-ftp": "6.2.3",
-    "body-parser": "2.4.0"
+    "body-parser": "2.4.0",
+    "glob": "14.0.2",
+    "minimatch": "11.0.1",
+    "follow-redirects": "1.16.2"
   }
 }
