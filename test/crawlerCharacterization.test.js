@@ -75,10 +75,11 @@ test('crawler modules behave as recorded in a real browser', async (t) => {
   const site = await startSite();
   const origin = `http://127.0.0.1:${site.address().port}`;
   const session = new BrowserSession({ headful: false });
+  // Registered before the browser starts so a failed launch cannot leave the server open.
+  t.after(async () => { await session.stop(); site.close(); });
   const page = await session.start();
   const lines = [];
   const log = line => lines.push(line.split(origin).join('http://SITE'));
-  t.after(async () => { await session.stop(); site.close(); });
 
   await t.test('forms and navigation are scanned', async () => {
     await page.goto(`${origin}/signup`);
