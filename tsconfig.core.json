@@ -14,8 +14,13 @@
     "forceConsistentCasingInFileNames": true,
     "rootDir": "core",
     "outDir": "core/generated",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "skipLibCheck": true
   },
-  "include": ["core/report/typed/**/*.ts"]
+  "include": [
+    "core/report/typed/**/*.ts",
+    "core/crawler/typed/**/*.ts"
+  ]
 }

@@ -1,0 +1,8 @@
+[
+  "[explore] (1/3) depth=0 http://SITE/",
+  "[explore]   clicked \"Menu\" -> (same page, state change)",
+  "[explore] (2/3) depth=1 http://SITE/signup",
+  "[explore]   clicked \"Find\" -> (same page, state change)",
+  "[explore] (3/3) depth=1 http://SITE/about",
+  "[explore]   clicked \"My page\" -> http://SITE/mypage"
+]

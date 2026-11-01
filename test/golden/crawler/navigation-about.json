@@ -1,0 +1,11 @@
+{
+  "links": [
+    "http://SITE/",
+    "http://SITE/terms",
+    "http://SITE/mypage"
+  ],
+  "clickableCount": 1,
+  "clickSelectors": [
+    "body:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(1)"
+  ]
+}
