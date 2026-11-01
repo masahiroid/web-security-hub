@@ -1,0 +1,118 @@
+{
+  "forms": [
+    {
+      "url": "http://SITE/signup",
+      "formSelector": "#signup",
+      "submitSelector": "body:nth-of-type(1) > main:nth-of-type(1) > form:nth-of-type(1) > input:nth-of-type(5)",
+      "fields": [
+        {
+          "selector": "#email",
+          "tag": "input",
+          "type": "email",
+          "name": "email",
+          "id": "email",
+          "label": "Mail address",
+          "constraints": {
+            "source": "html",
+            "required": true,
+            "maxLength": 40
+          }
+        },
+        {
+          "selector": "input[name=\"age\"]",
+          "tag": "input",
+          "type": "number",
+          "name": "age",
+          "constraints": {
+            "source": "html",
+            "min": 18,
+            "max": 99,
+            "step": 1
+          }
+        },
+        {
+          "selector": "select[name=\"plan\"]",
+          "tag": "select",
+          "type": "select",
+          "name": "plan",
+          "constraints": {
+            "source": "html"
+          },
+          "options": [
+            "a",
+            "b"
+          ],
+          "optionLabels": [
+            "A plan",
+            "B plan"
+          ]
+        },
+        {
+          "selector": "#agree",
+          "tag": "input",
+          "type": "checkbox",
+          "name": "agree_terms",
+          "id": "agree",
+          "label": "I agree to the terms",
+          "constraints": {
+            "source": "html"
+          },
+          "options": [
+            "on"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "http://SITE/signup",
+      "formSelector": "body:nth-of-type(1) > main:nth-of-type(1)",
+      "submitSelector": "body:nth-of-type(1) > main:nth-of-type(1) > form:nth-of-type(1) > input:nth-of-type(5)",
+      "fields": [
+        {
+          "selector": "input[name=\"search\"]",
+          "tag": "input",
+          "type": "text",
+          "name": "search",
+          "placeholder": "Search",
+          "constraints": {
+            "source": "html"
+          }
+        }
+      ]
+    }
+  ],
+  "visited": [
+    "http://SITE/crawl",
+    "http://SITE/about",
+    "http://SITE/signup"
+  ],
+  "pageSnapshots": [
+    {
+      "url": "http://SITE/crawl",
+      "title": "Crawl",
+      "markers": [
+        "Crawl",
+        "Go"
+      ],
+      "textHash": "a27c9dbe9037a220f096e1ad4f2b714fc19086cb"
+    },
+    {
+      "url": "http://SITE/about",
+      "title": "About",
+      "markers": [
+        "About"
+      ],
+      "textHash": "543f5614c1969d67a05aad8b94ed47d6ed69f546"
+    },
+    {
+      "url": "http://SITE/signup",
+      "title": "Sign up",
+      "markers": [
+        "Mail address",
+        "I agree to the terms",
+        "Find"
+      ],
+      "textHash": "ffcb66b34865d1394ee5762a475fa9462cdab2f0"
+    }
+  ]
+}

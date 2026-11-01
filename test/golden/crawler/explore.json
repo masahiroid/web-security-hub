@@ -1,0 +1,55 @@
+{
+  "startUrl": "http://SITE/",
+  "pages": [
+    {
+      "url": "http://SITE/",
+      "title": "Home",
+      "screenshot": "page-001-SITE.png",
+      "linkCount": 3,
+      "states": [
+        {
+          "trigger": "Menu",
+          "resultingUrl": "http://SITE/",
+          "screenshot": "page-001-click-0.png"
+        }
+      ],
+      "skipped": 1
+    },
+    {
+      "url": "http://SITE/signup",
+      "title": "Sign up",
+      "screenshot": "page-002-SITE-signup.png",
+      "linkCount": 1,
+      "states": [
+        {
+          "trigger": "Find",
+          "resultingUrl": "http://SITE/signup",
+          "screenshot": "page-002-click-0.png"
+        }
+      ],
+      "skipped": 0
+    },
+    {
+      "url": "http://SITE/about",
+      "title": "About",
+      "screenshot": "page-003-SITE-about.png",
+      "linkCount": 2,
+      "states": [
+        {
+          "trigger": "My page",
+          "resultingUrl": "http://SITE/mypage",
+          "screenshot": "page-003-click-0.png"
+        }
+      ],
+      "skipped": 0
+    }
+  ],
+  "skipped": [
+    {
+      "pageUrl": "http://SITE/",
+      "label": "Delete account",
+      "reason": "破壊的操作の可能性がある文言を検出"
+    }
+  ],
+  "pageCount": 3
+}

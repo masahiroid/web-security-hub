@@ -1,0 +1,12 @@
+{
+  "links": [
+    "http://SITE/signup",
+    "http://SITE/about#team",
+    "http://SITE/files/manual.pdf",
+    "https://elsewhere.invalid/x"
+  ],
+  "clickableCount": 2,
+  "clickSelectors": [
+    "#menu"
+  ]
+}
