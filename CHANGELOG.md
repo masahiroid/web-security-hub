@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.1.0
+
+- Search (GA) shows live progress while a search runs: current generation, candidates evaluated, HTTP trials used and best score so far, followed by the independent re-execution step.
+
 ## 6.0.1
 
 - Read local report and evidence files in a way that cannot be redirected between the check and the read, including on platforms without no-follow file opens.
