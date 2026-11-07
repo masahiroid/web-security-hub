@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 6.0.1
+
+- Read local report and evidence files in a way that cannot be redirected between the check and the read, including on platforms without no-follow file opens.
+- Stricter validation of file paths and command-line plan files, fuller escaping of displayed text, rate limits on more local requests, and linear-time patterns for path and email checks.
+- Update Express rate limiting, Appium, Tauri and production dependencies with published security fixes.
+
 ## 6.0.0
 
 - MCP server (source edition): AI assistants that support the Model Context Protocol can read verification reports, start sample verifications and genetic searches, and prepare OpenVEX drafts over standard input and output. Permissions (run, code snippets, VEX) are chosen when the server starts and tools that are not allowed are not offered. One job runs at a time with per-minute limits, results are aggregate by default, and approving a VEX draft stays with a person. Illustrated bilingual guide included.
