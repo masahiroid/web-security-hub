@@ -21,6 +21,7 @@
   },
   "include": [
     "core/report/typed/**/*.ts",
-    "core/crawler/typed/**/*.ts"
+    "core/crawler/typed/**/*.ts",
+    "core/codegen/typed/**/*.ts"
   ]
 }

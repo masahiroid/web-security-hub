@@ -24,7 +24,7 @@ const CASE_SUFFIX = /\/\s*((?:case|page)-\d+)\s*$/;
  * Parses Playwright's default "list" reporter output (what `playwright test`
  * prints to stdout with no reporter configured) into per-test pass/fail
  * results, keyed back to our own case-XXX / page-XXX ids where the test
- * title ends in "/ case-XXX" or "/ page-XXX" (see core/codegen/playwright.js
+ * title ends in "/ case-XXX" or "/ page-XXX" (see core/codegen/typed/playwright.ts
  * — every generated test's title is suffixed with its case id for exactly
  * this purpose).
  */
