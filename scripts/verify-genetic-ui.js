@@ -15,8 +15,13 @@ const settled = () => !document.getElementById('geneticRun').disabled && documen
       await page.selectOption('#languageSelect', lang); await page.waitForFunction(language => document.documentElement.lang === language, lang);
       await page.selectOption('#geneticKind', 'run');
       for (const mode of ['baseline', 'changed', 'fixed']) {
-        await page.selectOption('#geneticMode', mode); await page.selectOption('#geneticLlm', 'disabled'); await page.fill('#geneticTrials', '400'); await page.click('#geneticRun');
+        await page.selectOption('#geneticMode', mode); await page.selectOption('#geneticLlm', 'disabled'); await page.fill('#geneticTrials', '400');
+        await page.evaluate(() => { window.__statuses = []; window.__statusWatch?.disconnect(); window.__statusWatch = new MutationObserver(() => window.__statuses.push(document.getElementById('geneticStatus').textContent)); window.__statusWatch.observe(document.getElementById('geneticStatus'), { childList: true, characterData: true, subtree: true }); });
+        await page.click('#geneticRun');
         await page.waitForFunction(settled);
+        const statuses = await page.evaluate(() => window.__statuses);
+        if (statuses.some(text => /undefined|null|NaN/.test(text))) throw Error(`Malformed progress ${lang}/${mode}: ${statuses.join(' | ')}`);
+        const generationLine = statuses.find(text => /(世代|Generation) \d+ \/ \d+/.test(text)); if (generationLine) checks.push(`${lang}/${mode} progress: ${generationLine}`);
         const generations = await page.locator('#geneticRows tr').count(); const summary = await page.textContent('#geneticSummary');
         const reproduced = /独立再現|Independently reproduced/.test(summary || '');
         if (generations < 1 || reproduced !== (mode === 'changed')) throw Error(`Incorrect GUI verdict ${lang}/${mode}: ${summary}`);

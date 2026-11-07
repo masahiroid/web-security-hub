@@ -1,4 +1,4 @@
-import { GENETIC_API, geneticText, stopLabel, type GeneticLabel } from './config.js';
+import { GENETIC_API, geneticProgress, geneticText, stopLabel, type GeneticLabel } from './config.js';
 import { ensureSession, object, request } from '../verifier/client.js';
 import { field, get } from '../verifier/view.js';
 import { renderGenetic } from './view.js';
@@ -34,7 +34,7 @@ async function poll() {
     const view = await request(jobUrl(activeId));
     if (view.state !== 'running') { finished(view); return; }
     const progress = view.progress ? object(view.progress) : null;
-    status(`${progress ? geneticText('progress') : geneticText('running')}${progress ? ` ${String(progress.done)} / ${String(progress.planned)}` : ''}`);
+    status(progress ? geneticProgress(progress) : geneticText('running'));
     timer = setTimeout(() => { void poll(); }, GENETIC_API.intervalMs);
   } catch { controls(false); status(geneticText('failed')); }
 }

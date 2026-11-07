@@ -5,7 +5,7 @@ import { individual } from '../domain/geneticEvolution';
 import { genomeKey, makeGenome } from '../domain/geneticGenome';
 import { awaitGeneticEvaluation, evaluationStop } from './geneticEvaluation';
 import type { GenomeSpace } from '../domain/geneticGenome';
-import type { EvaluatedIndividual, Generation, GeneticEvaluationPort, GeneticSearchReport, GeneticSettings, GeneticStop } from '../domain/geneticTypes';
+import type { EvaluatedIndividual, Generation, GeneticEvaluationPort, GeneticSearchProgress, GeneticSearchReport, GeneticSettings, GeneticStop } from '../domain/geneticTypes';
 import type { EvidencePoint, Scalar } from '../domain/types';
 
 /** Deterministic Cartesian enumeration of fixed rule values; the non-adaptive baseline for comparison. */
@@ -15,7 +15,7 @@ export function ruleCandidates(space: GenomeSpace, values: readonly Scalar[]): r
 }
 /** Same port, budget, deadline, stop rules and report shape as the genetic search, with no adaptation. */
 export function createRulesSearch(port: GeneticEvaluationPort, now: () => number, measuredPoints: readonly EvidencePoint[], values: readonly Scalar[]) {
-  return async (request: { settings: GeneticSettings; space: GenomeSpace; signal: AbortSignal }): Promise<GeneticSearchReport> => {
+  return async (request: { settings: GeneticSettings; space: GenomeSpace; signal: AbortSignal; onProgress?: ((progress: GeneticSearchProgress) => void) | undefined }): Promise<GeneticSearchReport> => {
     const { settings, space } = request;
     const deadline = now() + settings.ttlMs;
     const expiry = new AbortController();
@@ -27,6 +27,10 @@ export function createRulesSearch(port: GeneticEvaluationPort, now: () => number
     let reservedTrials = 0;
     let stop: GeneticStop = 'generation_limit';
     let entries: EvaluatedIndividual[] = [];
+    const candidates = ruleCandidates(space, values);
+    let best: number | null = null;
+    const progress = () => request.onProgress?.(Object.freeze({ generation: generations.length + 1, generations: Math.max(1, Math.ceil(candidates.length / settings.population)), evaluated: entries.length,
+      population: settings.population, trials: reservedTrials, maxTrials: settings.maxTrials, bestScore: best }));
     const flush = () => {
       if (!entries.length) return;
       const eligible = entries.filter(entry => entry.fitness.eligible);
@@ -35,7 +39,8 @@ export function createRulesSearch(port: GeneticEvaluationPort, now: () => number
       entries = [];
     };
     try {
-      for (const [index, choices] of ruleCandidates(space, values).entries()) {
+      progress();
+      for (const [index, choices] of candidates.entries()) {
         const candidate = individual(`rule-${index}`, generations.length, makeGenome(`rule-${index}`, choices, space), 'initial', [], space);
         const early = interrupted();
         if (early) { stop = early; break; }
@@ -47,6 +52,8 @@ export function createRulesSearch(port: GeneticEvaluationPort, now: () => number
           const after = interrupted();
           if (after) { stop = after; break; }
           entries.push(Object.freeze({ individual: candidate, fitness }));
+          if (fitness.eligible) best = best === null ? fitness.score : Math.max(best, fitness.score);
+          progress();
           fitness.noveltyKeys.forEach(key => seen.add(key));
           const ended = evaluationStop(result, fitness);
           if (ended) { stop = ended; break; }

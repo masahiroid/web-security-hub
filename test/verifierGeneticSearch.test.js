@@ -167,3 +167,16 @@ test('evaluated genomes are never proposed again and elites are carried with the
   assert.equal(report.generations.length, 4);
   assert(report.generations.slice(1).every(generation => generation.carriedIds.length === 2));
 });
+
+test('progress reports each generation position without changing the search', async () => {
+  const evaluate = async candidate => response(candidate);
+  const seen = [];
+  const plain = await createGeneticSearch({ evaluate })(request());
+  const observed = await createGeneticSearch({ evaluate })(request({ onProgress: progress => seen.push(progress) }));
+  assert.deepEqual(observed, plain);
+  assert.deepEqual({ ...seen[0] }, { generation: 1, generations: 4, evaluated: 0, population: 4, trials: 0, maxTrials: settings().maxTrials, bestScore: null });
+  assert.equal(seen[1].evaluated, 1); assert.equal(seen[1].trials, 2); assert.equal(typeof seen[1].bestScore, 'number');
+  assert.equal(seen.at(-1).generation, observed.generations.length);
+  for (const entry of seen) assert.ok(entry.evaluated <= entry.population && entry.generation <= entry.generations && entry.trials <= entry.maxTrials);
+  for (const [index, entry] of seen.entries()) if (index && seen[index - 1].bestScore !== null) assert.ok(entry.bestScore >= seen[index - 1].bestScore);
+});

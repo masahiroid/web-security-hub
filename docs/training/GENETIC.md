@@ -55,7 +55,9 @@ Results depend on the seeds and the trial limit; raise the limit to compare unde
 - The model cannot change the scope, profiles or HTTP trial limit. Candidates that replace part of the GA's slots do not consume extra trials.
 - Sending to a remote service is intentionally not offered in this window. The command line needs an explicit permission flag, an environment variable name for the key and a cost ceiling.
 
-## 6. Cancel and storage
+## 6. Progress, cancel and storage
+
+While a search runs, the status line shows the current generation, candidates evaluated in it, HTTP trials used and the best score so far. The generation count is the upper limit; a search can stop earlier, for example when scores stop improving. After a violation is found, the line shows that the independent re-execution is running.
 
 **Cancel** stops the current search or comparison; a cancelled comparison is marked incomplete. Results are stored as JSON and HTML in the application's private data directory. The stored report contains the exact synthetic inputs, so do not publish it.
 
