@@ -73,7 +73,7 @@
     "@types/node": "24.19.2",
     "appium-xcuitest-driver": "^12.13.1",
     "eslint": "10.13.0",
-    "eslint-plugin-security": "4.2.0",
+    "eslint-plugin-security": "4.2.1",
     "globals": "17.13.0",
     "typescript": "7.0.2"
   },
