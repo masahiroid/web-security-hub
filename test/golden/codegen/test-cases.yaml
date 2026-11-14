@@ -1,0 +1,97 @@
+forms:
+  - url: https://site.example/signup?step=1
+    submitSelector: "#items[0]"
+    preSteps:
+      - action: click
+        selector: "#open"
+    fields:
+      - selector: "#email"
+        tag: input
+        type: email
+        name: email
+      - selector: "#items[0]"
+        tag: input
+        type: text
+        name: item"\
+      - selector: "#plan"
+        tag: select
+        type: select-one
+        name: plan
+      - selector: "#plan2"
+        tag: select
+        type: select-one
+        name: plan2
+      - selector: "#agree"
+        tag: input
+        type: checkbox
+        name: agree
+      - selector: "#news"
+        tag: input
+        type: checkbox
+        name: news
+      - selector: "#r1"
+        tag: input
+        type: radio
+        name: color
+      - selector: "#r2"
+        tag: input
+        type: radio
+        name: color
+      - selector: "#r3"
+        tag: input
+        type: radio
+        name: ""
+testCaseGroups:
+  - url: https://site.example/signup?step=1
+    cases:
+      - id: case-001
+        name: all kinds
+        assignments:
+          "#email":
+            value: a@example.test
+            kind: normal
+            rationale: typical
+          "#items[0]":
+            value: x"y
+            kind: abnormal
+            rationale: quote
+          "#plan":
+            value: b
+            kind: normal
+            rationale: typical
+          "#plan2":
+            value: __not_in_options__
+            kind: abnormal
+            rationale: missing
+          "#agree":
+            value: on
+            kind: normal
+            rationale: typical
+          "#news":
+            value: off
+            kind: normal
+            rationale: typical
+          "#r1":
+            value: red
+            kind: normal
+            rationale: typical
+          "#r2":
+            value: blue
+            kind: normal
+            rationale: typical
+          "#r3":
+            value: off
+            kind: normal
+            rationale: typical
+          "#gone":
+            value: skipped
+            kind: normal
+            rationale: typical
+      - id: case-002
+        name: normal only
+        assignments:
+          "#email":
+            value: b@example.test
+            kind: normal
+            rationale: typical
+  - url: https://other.example/

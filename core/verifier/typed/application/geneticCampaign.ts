@@ -7,7 +7,7 @@ import { individual } from '../domain/geneticEvolution';
 import { POINTS } from '../domain/config';
 import type { GeneticCampaignPorts, GeneticCampaignReport, GeneticExecution, GeneticFixtureOptions, GeneticReproduction, GeneticSession } from '../domain/geneticCampaignTypes';
 import type { GeneticSearchReport } from './geneticSearch';
-import type { GeneticStop, Individual } from '../domain/geneticTypes';
+import type { GeneticSearchProgress, GeneticStop, Individual } from '../domain/geneticTypes';
 
 const completedSearch = new Set<GeneticStop>(['generation_limit', 'stagnation', 'trial_budget', 'diversity_exhausted']);
 function winner(search: GeneticSearchReport, executions: readonly GeneticExecution[]): Individual | undefined {
@@ -38,10 +38,12 @@ export async function runGeneticCampaign(ports: GeneticCampaignPorts, options: G
     if (remaining <= 0) { state = interrupted() ?? 'deadline'; }
     else {
       const settings = { ...options.settings, maxTrials: searchBudget, ttlMs: remaining };
+      // The limit shown is the one the person chose; part of it stays reserved for the re-execution.
+      const onProgress = (progress: GeneticSearchProgress) => ports.progress?.(Object.freeze({ ...progress, phase: 'search', maxTrials: options.settings.maxTrials }));
       search = options.method === 'rules'
-        ? await createRulesSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, GENETIC_FIXTURE.ruleValues)({ settings, space: compoundSpace, signal: combined })
+        ? await createRulesSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, GENETIC_FIXTURE.ruleValues)({ settings, space: compoundSpace, signal: combined, onProgress })
         : await createGeneticSearch(session, ports.now, GENETIC_FIXTURE.coveragePoints, ports.proposer)({
-          settings, space: compoundSpace, initial: compoundInitial(options.settings.population), signal: combined });
+          settings, space: compoundSpace, initial: compoundInitial(options.settings.population), signal: combined, onProgress });
       state = search.stop;
     }
     await session.close();
@@ -49,6 +51,7 @@ export async function runGeneticCampaign(ports: GeneticCampaignPorts, options: G
     session = undefined;
     const discovered = search && completedSearch.has(state) ? winner(search, executions) : undefined;
     if (discovered && !interrupted() && options.settings.maxTrials - trials >= GENETIC_FIXTURE.reproductionTrials) {
+      ports.progress?.(Object.freeze({ phase: 'reproduction', maxTrials: options.settings.maxTrials }));
       const replay = individual(`replay-${discovered.id}`, discovered.generation, discovered.seed, 'elite', [discovered.id], compoundSpace);
       reproduction = Object.freeze({ state: 'inconclusive', seed: replay.seed, sourceDigest: null, execution: null });
       session = await ports.start(options.mode, combined, deadline, GENETIC_FIXTURE.reproductionTrials);

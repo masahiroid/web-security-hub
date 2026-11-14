@@ -1,4 +1,4 @@
-import type { GeneticSettings, GeneticStop, GeneticSearchReport, GeneticEvaluationPort, GeneticProposer } from './geneticTypes';
+import type { GeneticSettings, GeneticStop, GeneticSearchProgress, GeneticSearchReport, GeneticEvaluationPort, GeneticProposer } from './geneticTypes';
 import type { LlmSettings } from './llmTypes';
 import type { Pair, Mode } from './campaignTypes';
 import type { Seed } from './types';
@@ -26,6 +26,8 @@ export interface GeneticCampaignReport {
   readonly reproduction: GeneticReproduction; readonly trials: number;
   readonly draft: true; readonly vexStatus: 'under_investigation';
 }
+/** Search position, or the independent re-execution that follows a discovered violation. */
+export type GeneticCampaignProgress = (GeneticSearchProgress & { readonly phase: 'search' }) | { readonly phase: 'reproduction'; readonly maxTrials: number };
 export interface GeneticCampaignPorts {
   now(): number;
   reportId(): string;
@@ -33,6 +35,7 @@ export interface GeneticCampaignPorts {
   /** Optional model-assisted candidate supply; absent means GA only. */
   readonly proposer?: GeneticProposer;
   start(mode: Mode, signal: AbortSignal, deadline: number, maxTrials: number): Promise<GeneticSession>;
+  progress?(progress: GeneticCampaignProgress): void;
 }
 export class GeneticEvaluationError extends Error {
   constructor(readonly stop: GeneticStop) { super('Genetic evaluation stopped'); }

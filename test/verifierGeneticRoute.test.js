@@ -46,6 +46,21 @@ test('genetic jobs are session-owned, validated and return a presentation view w
   for (const leaked of ['jsonFile', 'htmlFile', 'sourceDigest', 'evidence', 'observation']) assert.ok(!text.includes(leaked), leaked);
 });
 
+test('a single run reports generation progress and finishes with the reproduction step', async t => {
+  const { request, cookie, finish } = await server(t);
+  const job = await (await request('/jobs', { body: run({ maxTrials: 400 }), cookie })).json();
+  const view = await finish(job.jobId, cookie);
+  assert.equal(view.report.reproduction, 'reproduced');
+  assert.deepEqual({ phase: view.progress.phase, maxTrials: view.progress.maxTrials }, { phase: 'reproduction', maxTrials: 400 });
+});
+test('rules runs report search progress against the chosen trial limit', async t => {
+  const { request, cookie, finish } = await server(t);
+  const job = await (await request('/jobs', { body: run({ mode: 'baseline', method: 'rules', maxTrials: 40 }), cookie })).json();
+  const { progress } = await finish(job.jobId, cookie);
+  assert.equal(progress.phase, 'search'); assert.equal(progress.maxTrials, 40);
+  assert.ok(progress.generation >= 1 && progress.generation <= progress.generations && progress.evaluated <= progress.population);
+});
+
 test('a running genetic job can be cancelled and a comparison reports progress', async t => {
   const { request, cookie, finish } = await server(t);
   const compare = await (await request('/jobs', { body: { kind: 'compare', maxTrials: 60, llm: llm() }, cookie })).json();
@@ -54,5 +69,5 @@ test('a running genetic job can be cancelled and a comparison reports progress',
   await request(`/jobs/${compare.jobId}/cancel`, { body: {}, cookie });
   const view = await finish(compare.jobId, cookie);
   assert.equal(view.state, 'finished'); assert.equal(view.report.kind, 'compare'); assert.equal(view.report.completed, false);
-  assert.ok(view.progress === null || view.progress.planned > 0);
+  assert.ok(view.progress === null || (view.progress.phase === 'compare' && view.progress.planned > 0));
 });

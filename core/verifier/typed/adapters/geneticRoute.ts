@@ -9,11 +9,11 @@ import { validateGeneticFixtureOptions } from './geneticFixtureOptions';
 import { validateComparisonOptions } from './geneticComparisonOptions';
 import { compareView, runView } from './geneticView';
 import type { GeneticJobReport } from './geneticView';
-import type { GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
+import type { GeneticCampaignProgress, GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
 import type { ComparisonOptions } from '../domain/geneticComparisonTypes';
 
 type Request = { readonly kind: 'run'; readonly options: GeneticFixtureOptions } | { readonly kind: 'compare'; readonly options: ComparisonOptions };
-export interface GeneticProgress { readonly done: number; readonly planned: number }
+export type GeneticProgress = { readonly phase: 'compare'; readonly done: number; readonly planned: number } | GeneticCampaignProgress;
 /** The GUI may choose only disabled, mock or loopback-local models; remote sending stays an explicit CLI decision. */
 const GUI_LLM_MODES = ['disabled', 'mock', 'local'] as const;
 const KEYS = ['kind', 'mode', 'method', 'randomSeed', 'maxTrials', 'llm'];
@@ -35,8 +35,8 @@ export function createGeneticRoute({ dataRoot, applicationVersion }: { dataRoot:
   const service = createGeneticFixtureService({ applicationVersion, dataRoot });
   const jobs = createVerificationJobs<Request, GeneticJobReport, GeneticProgress>({
     async run(request, { signal, onProgress }) {
-      if (request.kind === 'run') { const { report, saved } = await service.run(request.options, { signal }); return { report: runView(report), saved }; }
-      const { report, saved } = await service.compare(request.options, { signal, progress: (done, planned) => { onProgress({ done, planned }); } });
+      if (request.kind === 'run') { const { report, saved } = await service.run(request.options, { signal, progress: progress => { onProgress(progress); } }); return { report: runView(report), saved }; }
+      const { report, saved } = await service.compare(request.options, { signal, progress: (done, planned) => { onProgress({ phase: 'compare', done, planned }); } });
       return { report: compareView(report), saved };
     },
   }, randomUUID);
