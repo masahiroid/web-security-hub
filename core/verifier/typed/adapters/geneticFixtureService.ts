@@ -9,7 +9,7 @@ import { compoundSpace } from '../domain/geneticFixtureConfig';
 import { createLocalProvider, createMockProvider, createRemoteProvider } from './llmProviders';
 import { runGeneticComparison } from '../application/geneticComparison';
 import { validateComparisonOptions } from './geneticComparisonOptions';
-import type { GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
+import type { GeneticCampaignProgress, GeneticFixtureOptions } from '../domain/geneticCampaignTypes';
 import type { Mode } from '../domain/campaignTypes';
 import type { FixtureFactory } from './fixtureRuntime';
 import type { LlmProvider, LlmSettings } from '../domain/llmTypes';
@@ -48,9 +48,9 @@ export function createGeneticFixtureService({ applicationVersion, dataRoot = DAT
         run: (campaign, nextSignal) => runGeneticCampaign(campaignPorts(campaign), campaign, nextSignal) }, options, signal);
       return Object.freeze({ report, saved: await store.saveComparison(report) });
     },
-    async run(input: unknown, { signal = new AbortController().signal }: { signal?: AbortSignal } = {}) {
+    async run(input: unknown, { signal = new AbortController().signal, progress }: { signal?: AbortSignal; progress?: (progress: GeneticCampaignProgress) => void } = {}) {
       const options = validateGeneticFixtureOptions(input);
-      const report = await runGeneticCampaign(campaignPorts(options), options, signal);
+      const report = await runGeneticCampaign({ ...campaignPorts(options), ...(progress ? { progress } : {}) }, options, signal);
       return Object.freeze({ report, saved: await store.save(report) });
     },
   };

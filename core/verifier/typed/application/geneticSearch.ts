@@ -7,7 +7,7 @@ import { geneticRandom, individual, nextPopulation } from '../domain/geneticEvol
 import { evaluateGeneticFitness } from '../domain/geneticFitness';
 import { genomeKey, validateGenome, validateGenomeSpace } from '../domain/geneticGenome';
 import type { GenomeSpace } from '../domain/geneticGenome';
-import type { EvaluatedIndividual, Generation, GeneticStop, GeneticEvaluationPort, GeneticProposer, GeneticSearchReport, LlmProposalRecord } from '../domain/geneticTypes';
+import type { EvaluatedIndividual, Generation, GeneticStop, GeneticEvaluationPort, GeneticProposer, GeneticSearchProgress, GeneticSearchReport, LlmProposalRecord } from '../domain/geneticTypes';
 import type { EvidencePoint, Result, Seed } from '../domain/types';
 
 export type { GeneticEvaluationPort, GeneticSearchReport } from '../domain/geneticTypes';
@@ -16,6 +16,11 @@ export interface GeneticSearchRequest {
   readonly space: GenomeSpace;
   readonly initial: readonly Seed[];
   readonly signal: AbortSignal;
+  readonly onProgress?: ((progress: GeneticSearchProgress) => void) | undefined;
+}
+function bestSoFar(best: number, entries: readonly EvaluatedIndividual[]): number | null {
+  const top = Math.max(best, ...entries.filter(entry => entry.fitness.eligible).map(entry => entry.fitness.score));
+  return top === -Infinity ? null : top;
 }
 export function createGeneticSearch(port: GeneticEvaluationPort, now: () => number = Date.now, measuredPoints: readonly EvidencePoint[] = [], proposer?: GeneticProposer) {
   return async (request: GeneticSearchRequest): Promise<GeneticSearchReport> => {
@@ -47,6 +52,9 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
       for (let index = 0; index < settings.generations; index++) {
         const entries: Generation['individuals'][number][] = [];
         let stop: GeneticStop | null = null;
+        const progress = () => request.onProgress?.(Object.freeze({ generation: index + 1, generations: settings.generations, evaluated: entries.length, population: population.length,
+          trials: reservedTrials, maxTrials: settings.maxTrials, bestScore: bestSoFar(best, entries) }));
+        progress();
         for (const candidate of population) {
           stop = interrupted();
           if (stop) break;
@@ -60,6 +68,7 @@ export function createGeneticSearch(port: GeneticEvaluationPort, now: () => numb
           if (result.feedback.controlPassed && result.observation.seedId !== candidate.seed.seedId) { stop = 'error'; break; }
           const fitness = evaluateGeneticFitness(result, seen, settings.weights, coveragePoints);
           entries.push(Object.freeze({ individual: candidate, fitness }));
+          progress();
           evaluatedKeys.add(genomeKey(candidate.seed, space));
           stop = evaluationStop(result, fitness);
           if (stop) break;

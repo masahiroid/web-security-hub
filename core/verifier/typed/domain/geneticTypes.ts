@@ -68,6 +68,18 @@ export interface GeneticProposer {
   propose(context: Readonly<{ generation: number; capacity: number; evaluated: readonly EvaluatedIndividual[]; signal: AbortSignal }>):
     Promise<Readonly<{ seeds: readonly Seed[]; record: LlmProposalRecord }>>;
 }
+/** Position of a running search; reporting it never influences the search itself. */
+export interface GeneticSearchProgress {
+  /** One-based generation being evaluated. */
+  readonly generation: number;
+  readonly generations: number;
+  readonly evaluated: number;
+  readonly population: number;
+  readonly trials: number;
+  readonly maxTrials: number;
+  /** Best eligible score so far; null until a candidate is eligible. */
+  readonly bestScore: number | null;
+}
 /** Exact private inputs and immutable search decisions. */
 export interface GeneticSearchReport {
   readonly genomeSpace: GenomeSpace;
