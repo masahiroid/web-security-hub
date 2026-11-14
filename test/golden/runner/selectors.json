@@ -1,0 +1,79 @@
+{
+  "selectors": [
+    [
+      "",
+      ""
+    ],
+    [
+      "#plain",
+      "#plain"
+    ],
+    [
+      "#a[b]",
+      "[id=\"a[b]\"]"
+    ],
+    [
+      "#q\"[x]",
+      "[id=\"q\\\"[x]\"]"
+    ],
+    [
+      ".cls",
+      ".cls"
+    ],
+    [
+      "input[name=\"x\"]",
+      "input[name=\"x\"]"
+    ]
+  ],
+  "nullSelector": null,
+  "paths": [
+    [
+      "http://h/a/b?x=1#f",
+      "/a/b?x=1"
+    ],
+    [
+      "not a url",
+      "not a url"
+    ],
+    [
+      "http://h",
+      "/"
+    ]
+  ],
+  "errors": [
+    "Bad",
+    "Warn"
+  ],
+  "hints": [
+    [
+      "",
+      []
+    ],
+    [
+      "エラーがあります",
+      [
+        "error-text:error"
+      ]
+    ],
+    [
+      "Please enter a value; is required",
+      [
+        "error-text:required-input",
+        "error-text:required-missing"
+      ]
+    ],
+    [
+      "不正 選択してください 未入力",
+      [
+        "error-text:invalid",
+        "error-text:required-select",
+        "error-text:required-missing"
+      ]
+    ],
+    [
+      "all good",
+      []
+    ]
+  ],
+  "sha1": "a9993e364706816aba3e25717850c26c9cd0d89d"
+}

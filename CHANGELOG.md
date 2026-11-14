@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.2.0
+
+- Form test generation reports a manual forms file with the wrong shape (not a list, or a form or field without its URL, fields, selector or type) with a clear message instead of failing later.
+
 ## 6.1.0
 
 - Search (GA) shows live progress while a search runs: current generation, candidates evaluated, HTTP trials used and best score so far, followed by the independent re-execution step.

@@ -3746,7 +3746,7 @@ dependencies = [
 
 [[package]]
 name = "web-security-hub-desktop"
-version = "6.1.0"
+version = "6.2.0"
 dependencies = [
  "dunce",
  "libc",
