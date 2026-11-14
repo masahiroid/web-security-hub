@@ -6,7 +6,7 @@
 
 - Read local report and evidence files in a way that cannot be redirected between the check and the read, including on platforms without no-follow file opens.
 - Stricter validation of file paths and command-line plan files, fuller escaping of displayed text, rate limits on more local requests, and linear-time patterns for path and email checks.
-- Update Express rate limiting, Appium, Tauri and production dependencies with published security fixes.
+- Update Express rate limiting, Appium, Tauri, the MCP server's HTTP libraries (Hono) and production dependencies with published security fixes.
 
 ## 6.0.0
 
