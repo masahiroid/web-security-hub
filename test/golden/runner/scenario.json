@@ -1,0 +1,70 @@
+{
+  "none": [
+    "case-001",
+    "case-002"
+  ],
+  "expanded": [
+    {
+      "id": "case-scenario-001",
+      "name": "kind b",
+      "assignments": {
+        "#name": {
+          "fieldSelector": "#name",
+          "kind": "normal",
+          "value": "Ann",
+          "rationale": "test"
+        },
+        "#kind": {
+          "fieldSelector": "#kind",
+          "kind": "normal",
+          "value": "b",
+          "rationale": "scenarioExpansion: kind b"
+        }
+      }
+    },
+    {
+      "id": "case-scenario-002",
+      "name": "same",
+      "assignments": {
+        "#name": {
+          "fieldSelector": "#name",
+          "kind": "normal",
+          "value": "Ann",
+          "rationale": "test"
+        },
+        "#kind": {
+          "fieldSelector": "#kind",
+          "kind": "normal",
+          "value": "a",
+          "rationale": "scenarioExpansion: same"
+        }
+      }
+    },
+    {
+      "id": "case-001",
+      "name": "abnormal",
+      "assignments": {
+        "#name": {
+          "fieldSelector": "#name",
+          "kind": "abnormal",
+          "value": "",
+          "rationale": "test"
+        }
+      }
+    }
+  ],
+  "limited": [
+    "case-scenario-001",
+    "case-scenario-002"
+  ],
+  "noCases": [],
+  "shotNames": [
+    "apply-step1-form-apply-data-x--e292c3c9-case-001",
+    "root-form-da39a3ee-c",
+    "odd---c113a08f-c"
+  ],
+  "abnormal": [
+    true,
+    false
+  ]
+}

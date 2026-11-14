@@ -1,0 +1,125 @@
+{
+  "manualMissing": [
+    "crawled"
+  ],
+  "manualUnset": [
+    "crawled"
+  ],
+  "manualLoaded": [
+    {
+      "url": "http://h/m",
+      "formSelector": "form",
+      "fields": []
+    }
+  ],
+  "logs": [
+    "WARNING: manualFormsPath is configured but the file does not exist: <tmp>/none.json",
+    "Manual forms loaded: 1 (<tmp>/manual.json) — overriding crawler-detected forms (1)"
+  ],
+  "deduped": [
+    "http://h/a#x",
+    "http://h/login",
+    "http://h/b",
+    "http://h/c",
+    "http://h/d"
+  ],
+  "classified": [
+    [
+      "http://h/a#x",
+      {
+        "auth": false,
+        "agreementOnly": false
+      }
+    ],
+    [
+      "http://h/a#x",
+      {
+        "auth": false,
+        "agreementOnly": false
+      }
+    ],
+    [
+      "http://h/login",
+      {
+        "auth": true,
+        "agreementOnly": false
+      }
+    ],
+    [
+      "http://h/b",
+      {
+        "auth": true,
+        "agreementOnly": false
+      }
+    ],
+    [
+      "http://h/c",
+      {
+        "auth": false,
+        "agreementOnly": true
+      }
+    ],
+    [
+      "http://h/d",
+      {
+        "auth": false,
+        "agreementOnly": false
+      }
+    ]
+  ],
+  "primeLogin": [
+    true,
+    true,
+    false,
+    false
+  ],
+  "catalog": {
+    "seedUrl": "http://h/",
+    "generatedAt": "<time>",
+    "visited": [
+      "bad url",
+      "http://h/a",
+      "http://h/z"
+    ],
+    "pages": [
+      {
+        "url": "bad url",
+        "title": "",
+        "markers": [],
+        "textHash": "",
+        "forms": []
+      },
+      {
+        "url": "http://h/a",
+        "title": "A",
+        "markers": [
+          "m"
+        ],
+        "textHash": "h1",
+        "forms": [
+          {
+            "formSelector": "form",
+            "submitSelector": "#s",
+            "fieldCount": 2,
+            "requiredCount": 1
+          },
+          {
+            "formSelector": "form",
+            "submitSelector": "#s",
+            "fieldCount": 2,
+            "requiredCount": 1
+          }
+        ]
+      },
+      {
+        "url": "http://h/z",
+        "title": "",
+        "markers": [],
+        "textHash": "",
+        "forms": []
+      }
+    ]
+  },
+  "uniqueFromSnapshots": 1,
+  "uniqueFromVisited": 3
+}
