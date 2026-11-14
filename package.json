@@ -60,8 +60,8 @@
     "ajv": "8.20.0",
     "appium": "^3.9.0",
     "express": "^5.3.0",
-    "express-rate-limit": "^8.7.2",
-    "playwright": "^1.64.1",
+    "express-rate-limit": "^8.7.4",
+    "playwright": "^1.65.1",
     "webdriverio": "10.1.0",
     "yaml": "^2.5.0",
     "zod": "^4.6.7"
@@ -72,9 +72,9 @@
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",
     "appium-xcuitest-driver": "^12.13.1",
-    "eslint": "10.13.0",
-    "eslint-plugin-security": "4.2.0",
-    "globals": "17.13.0",
+    "eslint": "10.14.0",
+    "eslint-plugin-security": "4.2.1",
+    "globals": "17.14.0",
     "typescript": "7.0.2"
   },
   "overrides": {
