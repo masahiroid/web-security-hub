@@ -11,8 +11,8 @@
     "acorn": "8.19.0",
     "ajv": "8.20.0",
     "express": "^5.3.0",
-    "express-rate-limit": "^8.7.2",
-    "playwright": "^1.65.0",
+    "express-rate-limit": "^8.7.4",
+    "playwright": "^1.65.1",
     "yaml": "^2.5.0"
   }
 }
