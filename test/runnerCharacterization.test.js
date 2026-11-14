@@ -72,6 +72,8 @@ function normalize(value, origin) {
     // Temporary paths differ per platform (Windows: drive letter, short names such as RUNNER~1, backslashes).
     .replace(/[^"\s]*wsh-runner-[\w-]+/g, '<tmp>')
     .replace(/<tmp>((?:\\\\[^"\\]+)+)/g, (_match, rest) => `<tmp>${rest.split('\\\\').join('/')}`)
+    // Playwright colors its call logs when the terminal supports it.
+    .replace(/\\u001b\[\d+m/g, '')
     .replace(/127-0-0-1-\d+/g, 'SITE')
     .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, '<time>') + '\n';
 }
