@@ -1,5 +1,5 @@
 /** Fields of a scanned form that the generated spec depends on. */
-export interface CodegenField { readonly selector: string; readonly tag: string; readonly type: string; readonly name?: string | undefined }
+export interface CodegenField { readonly selector: string; readonly tag?: string | undefined; readonly type: string; readonly name?: string | undefined }
 export interface CodegenForm { readonly url: string; readonly submitSelector?: string | undefined; readonly preSteps?: readonly unknown[] | undefined; readonly fields: readonly CodegenField[] }
 export interface CodegenAssignment { readonly value: string; readonly kind: string; readonly rationale: string }
 export interface CodegenCase { readonly id: string; readonly name: string; readonly assignments: Readonly<Record<string, CodegenAssignment>> }

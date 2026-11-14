@@ -1,0 +1,499 @@
+{
+  "results": {
+    "valid": {
+      "testCaseId": "valid",
+      "resultUrl": "http://SITE/thanks",
+      "domHash": "613ed3650b5344937f8e7749921e25ef0969f6bf",
+      "errorMessages": [],
+      "screenshotPath": "<tmp>/screenshots/form-form-entry-a90b8922-valid.png",
+      "ok": true,
+      "screenshotExists": true
+    },
+    "invalid": {
+      "testCaseId": "invalid",
+      "resultUrl": "http://SITE/invalid",
+      "domHash": "094a01da7348f79d6fcdc68a8930ef1f7260ee22",
+      "errorMessages": [
+        "Name is invalid",
+        "error-text:invalid",
+        "error-text:required-input"
+      ],
+      "screenshotPath": "<tmp>/screenshots/form-form-entry-a90b8922-invalid.png",
+      "ok": false,
+      "error": "Name is invalid; error-text:invalid; error-text:required-input",
+      "screenshotExists": true
+    },
+    "abnormal": {
+      "testCaseId": "abnormal",
+      "resultUrl": "http://SITE/invalid",
+      "domHash": "094a01da7348f79d6fcdc68a8930ef1f7260ee22",
+      "errorMessages": [
+        "Name is invalid",
+        "error-text:invalid",
+        "error-text:required-input"
+      ],
+      "screenshotPath": "<tmp>/screenshots/form-form-entry-a90b8922-abnormal.png",
+      "ok": true,
+      "screenshotExists": true
+    },
+    "missing": {
+      "testCaseId": "missing",
+      "resultUrl": "http://SITE/form",
+      "domHash": "b8e8befb2fa537268f5e3f2ec9b60a9ffa3ab0c9",
+      "errorMessages": [
+        "required-missing:#name",
+        "required-missing:color",
+        "no-transition-after-submit"
+      ],
+      "screenshotPath": "<tmp>/screenshots/form-form-entry-a90b8922-missing.png",
+      "ok": false,
+      "error": "required-missing:#name; required-missing:color; no-transition-after-submit",
+      "screenshotExists": true
+    },
+    "nothingApplied": {
+      "testCaseId": "nothing",
+      "resultUrl": "http://SITE/form",
+      "domHash": "b8e8befb2fa537268f5e3f2ec9b60a9ffa3ab0c9",
+      "errorMessages": [
+        "required-missing:#name",
+        "required-missing:color",
+        "no-transition-after-submit",
+        "no input value was applied"
+      ],
+      "screenshotPath": "<tmp>/screenshots/form-form-entry-a90b8922-nothing.png",
+      "ok": false,
+      "error": "required-missing:#name; required-missing:color; no-transition-after-submit; no input value was applied",
+      "screenshotExists": true
+    },
+    "blocked": {
+      "testCaseId": "blocked",
+      "resultUrl": "http://SITE/blocked",
+      "domHash": "f2b8df33f63b1bb5211b21ec3a3502379e1f6b8c",
+      "errorMessages": [
+        "no-transition-after-submit"
+      ],
+      "screenshotPath": "<tmp>/screenshots/blocked-form-b-b16412e9-blocked.png",
+      "ok": false,
+      "error": "no-transition-after-submit",
+      "screenshotExists": true
+    },
+    "gate": {
+      "testCaseId": "gate",
+      "resultUrl": "http://SITE/form",
+      "domHash": "b8e8befb2fa537268f5e3f2ec9b60a9ffa3ab0c9",
+      "errorMessages": [],
+      "screenshotPath": "<tmp>/screenshots/gate-form-da39a3ee-gate.png",
+      "ok": true,
+      "screenshotExists": true
+    },
+    "wizard": {
+      "testCaseId": "wizard",
+      "resultUrl": "http://SITE/thanks",
+      "domHash": "613ed3650b5344937f8e7749921e25ef0969f6bf",
+      "errorMessages": [],
+      "screenshotPath": "<tmp>/screenshots/wizard-form-w-1a6c1fb3-wizard.png",
+      "ok": true,
+      "screenshotExists": true
+    },
+    "brokenPage": {
+      "testCaseId": "broken",
+      "resultUrl": "about:blank",
+      "domHash": "",
+      "errorMessages": [],
+      "ok": false,
+      "error": "page.goto: net::ERR_UNSAFE_PORT at http://127.0.0.1:1/unreachable\nCall log:\n  - navigating to \"http://127.0.0.1:1/unreachable\", waiting until \"domcontentloaded\"\n",
+      "screenshotExists": false
+    }
+  },
+  "logs": [
+    "      case-start: valid open=http://SITE/form",
+    "      case-fill: valid applied=5/6",
+    "      case-submit: valid selector=#send",
+    "      case-after-submit: valid at=http://SITE/thanks",
+    "      case-start: invalid open=http://SITE/form",
+    "      case-fill: invalid applied=3/3",
+    "      case-submit: invalid selector=#send",
+    "      case-after-submit: invalid at=http://SITE/invalid",
+    "      case-start: abnormal open=http://SITE/form",
+    "      case-fill: abnormal applied=1/2",
+    "      case-submit: abnormal selector=#send",
+    "      case-after-submit: abnormal at=http://SITE/invalid",
+    "      case-start: missing open=http://SITE/form",
+    "      case-fill: missing applied=2/2",
+    "      case-submit: missing selector=#send",
+    "      case-after-submit: missing at=http://SITE/form",
+    "      case-start: nothing open=http://SITE/form",
+    "      ready-advance: nothing from=http://SITE/form to=http://SITE/form",
+    "      ready-stop: nothing unchanged-and-unreachable",
+    "      case-fill: nothing applied=0/1",
+    "      case-submit: nothing selector=#send",
+    "      case-after-submit: nothing at=http://SITE/form",
+    "      case-start: blocked open=http://SITE/blocked",
+    "      case-fill: blocked applied=1/1",
+    "      case-submit: blocked selector=#go",
+    "      case-after-submit: blocked at=http://SITE/blocked",
+    "      case-start: gate open=http://SITE/gate",
+    "      ready-advance: gate from=http://SITE/gate to=http://SITE/form",
+    "      ready-ok: gate step=1 at=http://SITE/form",
+    "      case-fill: gate applied=1/1",
+    "      case-after-submit: gate at=http://SITE/form",
+    "      case-start: wizard open=http://SITE/wizard",
+    "      pre-step failed: check #absent-check (locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('#absent-check').first()\n)",
+    "      case-fill: wizard applied=1/1",
+    "      case-submit: wizard selector=#wgo",
+    "      case-after-submit: wizard at=http://SITE/thanks",
+    "      case-start: broken open=http://127.0.0.1:1/unreachable"
+  ],
+  "dry": {
+    "item": {
+      "form": {
+        "url": "http://SITE/form",
+        "formSelector": "form#entry",
+        "submitSelector": "#send",
+        "fields": [
+          {
+            "selector": "#name",
+            "type": "text",
+            "name": "name",
+            "constraints": {
+              "required": true
+            },
+            "semantic": "person_name"
+          },
+          {
+            "selector": "#age",
+            "type": "number",
+            "name": "age"
+          },
+          {
+            "selector": "#plan",
+            "type": "select",
+            "name": "plan"
+          },
+          {
+            "selector": "#red",
+            "type": "radio",
+            "name": "color",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "selector": "#news",
+            "type": "checkbox",
+            "name": "news"
+          }
+        ]
+      },
+      "cases": [
+        {
+          "id": "case-001",
+          "name": "normal #1",
+          "assignments": {
+            "#name": {
+              "fieldSelector": "#name",
+              "kind": "normal",
+              "value": "山田",
+              "rationale": "contextually valid value"
+            },
+            "#red": {
+              "fieldSelector": "#red",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            }
+          }
+        },
+        {
+          "id": "case-002",
+          "name": "abnormal #2",
+          "assignments": {
+            "#name": {
+              "fieldSelector": "#name",
+              "kind": "abnormal",
+              "value": "",
+              "rationale": "empty required field"
+            },
+            "#age": {
+              "fieldSelector": "#age",
+              "kind": "normal",
+              "value": "50",
+              "rationale": "midpoint of range"
+            },
+            "#plan": {
+              "fieldSelector": "#plan",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            },
+            "#red": {
+              "fieldSelector": "#red",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            },
+            "#news": {
+              "fieldSelector": "#news",
+              "kind": "normal",
+              "value": "on",
+              "rationale": "checked"
+            }
+          }
+        },
+        {
+          "id": "case-003",
+          "name": "boundary #3",
+          "assignments": {
+            "#name": {
+              "fieldSelector": "#name",
+              "kind": "normal",
+              "value": "山田",
+              "rationale": "contextually valid value"
+            },
+            "#age": {
+              "fieldSelector": "#age",
+              "kind": "boundary",
+              "value": "0",
+              "rationale": "minimum (min)"
+            },
+            "#plan": {
+              "fieldSelector": "#plan",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            },
+            "#red": {
+              "fieldSelector": "#red",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            },
+            "#news": {
+              "fieldSelector": "#news",
+              "kind": "normal",
+              "value": "on",
+              "rationale": "checked"
+            }
+          }
+        },
+        {
+          "id": "case-004",
+          "name": "abnormal #4",
+          "assignments": {
+            "#name": {
+              "fieldSelector": "#name",
+              "kind": "normal",
+              "value": "山田",
+              "rationale": "contextually valid value"
+            },
+            "#age": {
+              "fieldSelector": "#age",
+              "kind": "normal",
+              "value": "50",
+              "rationale": "midpoint of range"
+            },
+            "#plan": {
+              "fieldSelector": "#plan",
+              "kind": "abnormal",
+              "value": "'\" OR 1=1 --",
+              "rationale": "injection-style payload"
+            },
+            "#red": {
+              "fieldSelector": "#red",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            },
+            "#news": {
+              "fieldSelector": "#news",
+              "kind": "normal",
+              "value": "on",
+              "rationale": "checked"
+            }
+          }
+        },
+        {
+          "id": "case-005",
+          "name": "abnormal #5",
+          "assignments": {
+            "#name": {
+              "fieldSelector": "#name",
+              "kind": "normal",
+              "value": "山田",
+              "rationale": "contextually valid value"
+            },
+            "#age": {
+              "fieldSelector": "#age",
+              "kind": "normal",
+              "value": "50",
+              "rationale": "midpoint of range"
+            },
+            "#plan": {
+              "fieldSelector": "#plan",
+              "kind": "normal",
+              "value": "sample v",
+              "rationale": "contextually valid value"
+            },
+            "#red": {
+              "fieldSelector": "#red",
+              "kind": "abnormal",
+              "value": "",
+              "rationale": "empty required field"
+            },
+            "#news": {
+              "fieldSelector": "#news",
+              "kind": "normal",
+              "value": "on",
+              "rationale": "checked"
+            }
+          }
+        }
+      ],
+      "expectations": []
+    },
+    "execution": {
+      "executed": 0,
+      "ok": 0,
+      "ng": 0,
+      "summaries": []
+    }
+  },
+  "normalOnly": [
+    {
+      "id": "case-001",
+      "name": "normal #1",
+      "assignments": {
+        "#name": {
+          "fieldSelector": "#name",
+          "kind": "normal",
+          "value": "山田",
+          "rationale": "contextually valid value"
+        },
+        "#red": {
+          "fieldSelector": "#red",
+          "kind": "normal",
+          "value": "sample v",
+          "rationale": "contextually valid value"
+        }
+      }
+    }
+  ],
+  "executed": {
+    "executed": 3,
+    "ok": 1,
+    "ng": 2,
+    "summaries": [
+      {
+        "formUrl": "http://SITE/form",
+        "caseId": "case-001",
+        "caseName": "normal #1",
+        "ok": false,
+        "resultUrl": "http://SITE/invalid",
+        "screenshotPath": "<tmp>/screenshots/form-form-entry-97333a9b-case-001.png",
+        "error": "Name is invalid; error-text:invalid; error-text:required-input",
+        "errorMessages": [
+          "Name is invalid",
+          "error-text:invalid",
+          "error-text:required-input"
+        ],
+        "assignmentHints": [
+          "#name=山田 (normal)"
+        ]
+      },
+      {
+        "formUrl": "http://SITE/form",
+        "caseId": "case-002",
+        "caseName": "abnormal #2",
+        "ok": true,
+        "resultUrl": "http://SITE/form",
+        "screenshotPath": "<tmp>/screenshots/form-form-entry-97333a9b-case-002.png",
+        "errorMessages": [
+          "required-missing:#name"
+        ],
+        "assignmentHints": [
+          "#name= (abnormal)",
+          "#age=50 (normal)"
+        ]
+      },
+      {
+        "formUrl": "http://SITE/form",
+        "caseId": "case-003",
+        "caseName": "boundary #3",
+        "ok": false,
+        "resultUrl": "http://SITE/form",
+        "screenshotPath": "<tmp>/screenshots/form-form-entry-97333a9b-case-003.png",
+        "error": "no-transition-after-submit",
+        "errorMessages": [
+          "no-transition-after-submit"
+        ],
+        "assignmentHints": [
+          "#name=山田 (normal)",
+          "#age=0 (boundary)"
+        ]
+      }
+    ]
+  },
+  "storeCalls": [
+    [
+      "cases",
+      "http://SITE/form",
+      5
+    ],
+    [
+      "cases",
+      "http://SITE/form",
+      1
+    ],
+    [
+      "cases",
+      "http://SITE/form",
+      3
+    ],
+    [
+      "run",
+      "http://SITE/form",
+      "case-001",
+      false
+    ],
+    [
+      "run",
+      "http://SITE/form",
+      "case-002",
+      true
+    ],
+    [
+      "run",
+      "http://SITE/form",
+      "case-003",
+      false
+    ]
+  ],
+  "processLogs": [
+    "  Running AI semantic inference: stub",
+    "  AI semantic inference done: 1 fields",
+    "  5 test cases",
+    "  dryRun=true, skipping execution (values only)",
+    "  Running AI semantic inference: failing",
+    "  WARNING: LLM inference failed (continuing with fallback): offline",
+    "  1 test cases",
+    "  dryRun=true, skipping execution (values only)",
+    "  Running AI semantic inference: stub",
+    "  AI semantic inference done: 1 fields",
+    "  3 test cases",
+    "      case-start: case-001 open=http://SITE/form",
+    "      case-fill: case-001 applied=1/1",
+    "      case-submit: case-001 selector=#send",
+    "      case-after-submit: case-001 at=http://SITE/invalid",
+    "    [1/3] normal #1 -> NG Name is invalid; error-text:invalid; error-text:required-input",
+    "      case-start: case-002 open=http://SITE/form",
+    "      case-fill: case-002 applied=2/2",
+    "      case-submit: case-002 selector=#send",
+    "      case-after-submit: case-002 at=http://SITE/form",
+    "    [2/3] abnormal #2 -> OK ",
+    "      case-start: case-003 open=http://SITE/form",
+    "      case-fill: case-003 applied=2/2",
+    "      case-submit: case-003 selector=#send",
+    "      case-after-submit: case-003 at=http://SITE/form",
+    "    [3/3] boundary #3 -> NG no-transition-after-submit"
+  ]
+}
