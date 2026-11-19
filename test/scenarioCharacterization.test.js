@@ -27,7 +27,7 @@ function checkGolden(name, actual) {
     fs.mkdirSync(GOLDEN_DIR, { recursive: true });
     fs.writeFileSync(file, serialized, 'utf8');
   }
-  assert.equal(serialized, fs.readFileSync(file, 'utf8'));
+  assert.equal(serialized, fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n'));
 }
 
 const STEP_VECTORS = [
