@@ -23,6 +23,7 @@
     "core/report/typed/**/*.ts",
     "core/crawler/typed/**/*.ts",
     "core/codegen/typed/**/*.ts",
-    "core/runner/typed/**/*.ts"
+    "core/runner/typed/**/*.ts",
+    "core/scenario/typed/**/*.ts"
   ]
 }

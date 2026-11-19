@@ -1,0 +1,49 @@
+[
+  {
+    "ok": null
+  },
+  {
+    "ok": null
+  },
+  {
+    "ok": {
+      "action": "fill",
+      "selector": "#q",
+      "value": "hello",
+      "healHint": {
+        "tag": "input"
+      }
+    }
+  },
+  {
+    "ok": null
+  },
+  {
+    "ok": null
+  },
+  {
+    "ok": null
+  },
+  {
+    "ok": {
+      "action": "select",
+      "selector": "#s",
+      "value": ""
+    }
+  },
+  {
+    "ok": {
+      "action": "check",
+      "selector": "#c"
+    }
+  },
+  {
+    "ok": {
+      "action": "click",
+      "selector": ""
+    }
+  },
+  {
+    "ok": null
+  }
+]

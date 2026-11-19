@@ -1,6 +1,6 @@
 {
   "name": "web-security-hub",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "private": true,
   "license": "Apache-2.0",
   "description": "Web Security Hub \u2014 OWASP-aligned dynamic web scanning and local static analysis.",
@@ -62,7 +62,7 @@
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.4",
     "playwright": "^1.65.1",
-    "webdriverio": "10.1.0",
+    "webdriverio": "10.2.0",
     "yaml": "^2.5.0",
     "zod": "^4.6.7"
   },
@@ -71,7 +71,7 @@
     "@tauri-apps/cli": "^2.12.4",
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",
-    "appium-xcuitest-driver": "^12.13.1",
+    "appium-xcuitest-driver": "^12.22.8",
     "eslint": "10.14.0",
     "eslint-plugin-security": "4.2.1",
     "globals": "17.14.0",

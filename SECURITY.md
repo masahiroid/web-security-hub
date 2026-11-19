@@ -4,7 +4,7 @@ Use only targets you own or are explicitly authorized to test. Source analysis n
 
 The desktop runtime manifest is intentionally separate from the source automation toolkit. Appium, its iOS driver and WebdriverIO are not bundled in desktop installers. Optional managed ZAP/Java are downloaded only on request, from pinned official releases with size/SHA-256 verification. Private reports and local signing configuration are excluded from Git and release bundles.
 
-The published 3.0.0 desktop runtime has a separate lockfile and does not include the optional mobile automation toolkit. The 3.0.0 source toolkit used WebdriverIO 9 and inherited high-severity `extract-zip` advisories through its browser downloader. The current source updates WebdriverIO to 10.1.0, removing that dependency path. Run the audits below against the current lockfiles; a clean result describes the advisory database at that time, not a guarantee of absence of vulnerabilities. Previously downloaded 3.0.0 source checkouts must update; this change does not replace existing installer assets. Retain the `shell-quote` and `basic-ftp` overrides until upstream ranges include the fixes.
+The published 3.0.0 desktop runtime has a separate lockfile and does not include the optional mobile automation toolkit. The 3.0.0 source toolkit used WebdriverIO 9 and inherited high-severity `extract-zip` advisories through its browser downloader. The current source uses WebdriverIO 10.2.0, which does not include that dependency path. Run the audits below against the current lockfiles; a clean result describes the advisory database at that time, not a guarantee of absence of vulnerabilities. Previously downloaded 3.0.0 source checkouts must update; this change does not replace existing installer assets. Retain the `shell-quote` and `basic-ftp` overrides until upstream ranges include the fixes.
 
 ```sh
 npm audit --audit-level=moderate
@@ -15,7 +15,7 @@ The Linux GTK3/Tauri graph also requires `glib` 0.18.5, affected by GHSA-wrw7-89
 
 References: [extract-zip symlink traversal](https://github.com/advisories/GHSA-jmr9-qjv8-65gv), [extract-zip directory traversal](https://github.com/advisories/GHSA-7pqw-9j4j-h8q3).
 
-日本語：許可された対象のみで実施してください。ソース版の WebdriverIO を10.1.0へ更新し、既知の extract-zip 脆弱性を含む依存経路を除去しました。既存の3.0.0ソース版は更新が必要です。配布済みインストーラーはこの変更で差し替えていません。監査結果はその時点の既知情報に基づきます。内部資料・秘密情報・実署名設定は公開しません。
+日本語：許可された対象のみで実施してください。ソース版の WebdriverIO は10.2.0で、既知の extract-zip 脆弱性を含む依存経路は含みません。既存の3.0.0ソース版は更新が必要です。配布済みインストーラーはこの変更で差し替えていません。監査結果はその時点の既知情報に基づきます。内部資料・秘密情報・実署名設定は公開しません。
 
 ## Reporting a vulnerability
 
