@@ -11,11 +11,8 @@ const { spawnSync } = require('child_process');
 const BUNDLED_DRIVER = 'node_modules/appium-xcuitest-driver/node_modules/';
 const BUNDLED_REASON = 'Copy bundled inside a development-only iOS driver; not part of any shipped build and not replaceable by overrides.';
 const ACCEPTED = [
-  ['GHSA-27r3-jxmh-p828', 'body-parser'],
-  ['GHSA-mrwp-f3q8-3g9p', 'follow-redirects'],
   ['GHSA-3g3m-2fjr-6pw4', 'glob'],
-  ['GHSA-g3hv-75wg-m249', 'minimatch'],
-  ['GHSA-6pq8-jhm2-2vcw', 'qs']
+  ['GHSA-g3hv-75wg-m249', 'minimatch']
 ].map(([advisory, name]) => ({
   advisory,
   path: `${BUNDLED_DRIVER}${name}`,
