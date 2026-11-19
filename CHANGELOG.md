@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 6.2.1
+
+- Update the source-only iOS automation driver and WebdriverIO (10.2.0). The driver no longer bundles copies of shell-quote (critical command-injection advisory GHSA-pqg4-j6r4-53mv), follow-redirects, qs and body-parser affected by published advisories. Desktop installers do not include these tools.
+
 ## 6.2.0
 
 - Form test generation reports a manual forms file with the wrong shape (not a list, or a form or field without its URL, fields, selector or type) with a clear message instead of failing later.
