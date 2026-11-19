@@ -1,0 +1,24 @@
+{
+  "candidates": [
+    [],
+    [],
+    [
+      "#go\\:1",
+      "[data-testid=\"a\\\"b\"], [data-test=\"a\\\"b\"]",
+      "button[name=\"n\\\\x\"]",
+      "[aria-label=\"Go\"]",
+      "role=button[name=\"Go now\"]",
+      "button[placeholder=\"p\"]",
+      "text=\"Go now\"",
+      "button.btn.btn-primary"
+    ],
+    [],
+    []
+  ],
+  "scores": [
+    12,
+    2,
+    2,
+    0
+  ]
+}

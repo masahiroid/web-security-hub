@@ -1,0 +1,34 @@
+[
+  {
+    "ok": null
+  },
+  {
+    "ok": null
+  },
+  {
+    "error": "scenario must be an object"
+  },
+  {
+    "error": "scenario must be an object"
+  },
+  {
+    "ok": {
+      "steps": []
+    }
+  },
+  {
+    "ok": {
+      "steps": [
+        {
+          "action": "reload"
+        }
+      ],
+      "dataSource": "7"
+    }
+  },
+  {
+    "ok": {
+      "steps": []
+    }
+  }
+]
