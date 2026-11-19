@@ -1,0 +1,34 @@
+{
+  "interpolate": [
+    "one-2-{{C}}-shadow",
+    "{{ 1A }}",
+    5,
+    null
+  ],
+  "deep": {
+    "url": "https://one",
+    "list": [
+      "2",
+      3,
+      null,
+      {
+        "v": "one"
+      }
+    ],
+    "flag": true
+  },
+  "secretKeys": [
+    {
+      "ok": "SECRET_TOKEN"
+    },
+    {
+      "ok": "SECRET__x9"
+    },
+    {
+      "error": "invalid variable name: 9bad"
+    },
+    {
+      "error": "invalid variable name: a-b"
+    }
+  ]
+}

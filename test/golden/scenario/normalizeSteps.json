@@ -1,0 +1,263 @@
+[
+  {
+    "ok": []
+  },
+  {
+    "error": "scenario.steps must be an array"
+  },
+  {
+    "error": "scenario step 1 must be an object"
+  },
+  {
+    "error": "scenario step 1 must be an object"
+  },
+  {
+    "error": "scenario step 1 has an unsupported action"
+  },
+  {
+    "ok": [
+      {
+        "action": "goto",
+        "url": "https://example.test/a"
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1 requires url"
+  },
+  {
+    "ok": [
+      {
+        "action": "wait",
+        "value": 500
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "wait",
+        "value": 10000
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "wait",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "back"
+      },
+      {
+        "action": "forward"
+      },
+      {
+        "action": "reload"
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "aiAssert",
+        "description": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1 requires a description"
+  },
+  {
+    "ok": [
+      {
+        "action": "useSharedStep",
+        "name": "login"
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1 requires a shared step name"
+  },
+  {
+    "ok": [
+      {
+        "action": "setFile",
+        "selector": "#f",
+        "path": "a.pdf",
+        "healHint": {
+          "tag": "input",
+          "classes": [
+            "a",
+            "b",
+            "c"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1 requires path (relative to sites/<id>/fixtures)"
+  },
+  {
+    "ok": [
+      {
+        "action": "download",
+        "selector": "#d",
+        "saveAs": "out.csv"
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "download",
+        "selector": "#d"
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "fill",
+        "selector": "#name",
+        "value": "12"
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "select",
+        "selector": "#s",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "check",
+        "selector": "#c"
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1 requires selector"
+  },
+  {
+    "error": "scenario step 1 healHint must be an object"
+  },
+  {
+    "ok": [
+      {
+        "action": "click",
+        "selector": "#b"
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "click",
+        "selector": "#b"
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1 requires a condition object"
+  },
+  {
+    "error": "scenario step 1 condition requires exists, visible, or equals"
+  },
+  {
+    "ok": [
+      {
+        "action": "branch",
+        "condition": {
+          "selector": "#x",
+          "exists": false
+        },
+        "then": [
+          {
+            "action": "reload"
+          }
+        ],
+        "else": []
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "branch",
+        "condition": {
+          "selector": "#x",
+          "visible": true
+        },
+        "then": [],
+        "else": [
+          {
+            "action": "back"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "branch",
+        "condition": {
+          "selector": "#x",
+          "equals": "5"
+        },
+        "then": [],
+        "else": []
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "loop",
+        "times": 3,
+        "steps": [
+          {
+            "action": "click",
+            "selector": "#n"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "loop",
+        "times": 200,
+        "steps": []
+      }
+    ]
+  },
+  {
+    "ok": [
+      {
+        "action": "loop",
+        "times": 0,
+        "steps": []
+      }
+    ]
+  },
+  {
+    "error": "scenario step 1: branch/loop nesting exceeded max depth"
+  },
+  {
+    "error": "scenario can contain at most 50 steps"
+  }
+]

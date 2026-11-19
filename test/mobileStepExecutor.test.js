@@ -82,6 +82,9 @@ test('WebdriverIO opens and closes a W3C Appium session over loopback', async t 
     res.setHeader('content-type', 'application/json');
     if (req.method === 'POST' && req.url === '/session') {
       res.end(JSON.stringify({ value: { sessionId: 'fixture-session', capabilities } }));
+    } else if (req.method === 'POST' && req.url === '/session/fixture-session/timeouts') {
+      // WebdriverIO 10.2+ applies its session timeouts right after creating the session.
+      res.end(JSON.stringify({ value: null }));
     } else if (req.method === 'DELETE' && req.url === '/session/fixture-session') {
       res.end(JSON.stringify({ value: null }));
     } else {
@@ -100,5 +103,5 @@ test('WebdriverIO opens and closes a W3C Appium session over loopback', async t 
   } finally {
     await driver.deleteSession();
   }
-  assert.deepEqual(requests.map(({ method, url }) => `${method} ${url}`), ['POST /session', 'DELETE /session/fixture-session']);
+  assert.deepEqual(requests.map(({ method, url }) => `${method} ${url}`), ['POST /session', 'POST /session/fixture-session/timeouts', 'DELETE /session/fixture-session']);
 });
